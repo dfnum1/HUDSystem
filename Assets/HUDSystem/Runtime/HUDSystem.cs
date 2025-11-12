@@ -6,69 +6,49 @@
 *********************************************************************/
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 using static UnityEngine.GridBrushBase;
 
 namespace Framework.HUD.Runtime
 {
-    public class HUDSystem
+    public class HudSystem
     {
-        HashSet<HUDGroup> m_vRebuildGroupMesh = null;
-        Dictionary<AGraphic, EOperationType> m_vNeedRebuilds = null;
-        private RenderMeshJob m_RenderMeshJob;
-
-        private GraphicBatch[] m_arrBatchs = null;
-        private BatchData m_BatchData;
-        private float m_fFontUVPadding = 0;
-        private int m_nFontAltasWidth = 0;
-        private int m_nFontAtlasHeight = 0;
-
-        Stack<Mesh> m_vMeshPool = null;
-        public float font_uv_padding { get { return m_fFontUVPadding; } }
-        public int font_altas_width { get { return m_nFontAltasWidth; } }
-        public int font_altas_height { get { return m_nFontAtlasHeight; } }
+        Camera m_pRenderCamera = null;
+        CommandBuffer m_CommandBuffer = null;
+        private Dictionary<int, HudRenderBatch> m_vRenders = new Dictionary<int, HudRenderBatch>(2);
         //--------------------------------------------------------
-        public HUDSystem()
+        public HudSystem()
         {
-            m_BatchData = new BatchData();
-            m_BatchData.BeginRequestSpace();
-            var spriteBatchInfo = m_BatchData.RequestSpace(500, 1);
-            var textBatchInfo = m_BatchData.RequestSpace(500, 16);
-            m_BatchData.EndRequestSpace();
-
-            m_arrBatchs = new GraphicBatch[(int)EGraphicType.Count];
-            for (int i = 0; i < m_arrBatchs.Length; ++i)
+        }
+        //--------------------------------------------------------
+        public void SetRenderCamera(Camera camera)
+        {
+            if (m_pRenderCamera == camera)
+                return;
+            if( m_CommandBuffer!=null)
             {
-                m_arrBatchs[i] = null;
+                if(m_pRenderCamera!=null) m_pRenderCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, m_CommandBuffer);
+                if(camera!=null) m_pRenderCamera.AddCommandBuffer(CameraEvent.AfterForwardAlpha, m_CommandBuffer);
             }
-
-            //text
+            m_pRenderCamera = camera;
+        }
+        //--------------------------------------------------------
+        public HudRenderBatch GetRenderBatch(Material material, Mesh mesh, HudAtlas atlas, TMP_FontAsset fontAsset)
+        {
+            int hashCode = GetHashCode(material, mesh, atlas);
+            if (hashCode == 0) return null;
+            HudRenderBatch renderBatcher;
+            if (!m_vRenders.TryGetValue(hashCode, out renderBatcher))
             {
-                var batch = new GraphicBatch(this);
-                BufferSlice slice = new BufferSlice();
-                slice.Init(m_BatchData, ref textBatchInfo);
-                batch.InitNew(m_BatchData, slice);
-                m_arrBatchs[(int)EGraphicType.Text] = batch;
+                renderBatcher = new HudRenderBatch(this,material, mesh, atlas, fontAsset);
+                m_vRenders[hashCode] = renderBatcher;
             }
-
-            //sprite
-            {
-                var batch = new GraphicBatch(this);
-                BufferSlice slice = new BufferSlice();
-                slice.Init(m_BatchData, ref spriteBatchInfo);
-                batch.InitNew(m_BatchData, slice);
-                m_arrBatchs[(int)EGraphicType.Sprite] = batch;
-            }
-
-        //    m_fFontUVPadding = TMPro.ShaderUtilities.GetPadding(setting.atlas_material, false, false);
-        //    m_nFontAltasWidth = setting.font.atlasWidth;
-       //     m_nFontAtlasHeight = setting.font.atlasHeight;
-
-            m_RenderMeshJob = new RenderMeshJob();
-            m_RenderMeshJob.Init(m_BatchData);
+            return renderBatcher;
         }
         //--------------------------------------------------------
         public void EditorRender()
@@ -78,149 +58,63 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         public void Update()
         {
-            m_RenderMeshJob.FinishUpdateMesh();
-
-            NativeBuffer<JobHandle> handles = new NativeBuffer<JobHandle>(m_arrBatchs.Length, Allocator.Temp);
-            bool has_job = false;
-            for (int i =0; i < m_arrBatchs.Length; ++i)
+        }
+        //--------------------------------------------------------
+        public void Render()
+        {
+            BeginRender();
+            foreach(var db in m_vRenders)
             {
-                var b = m_arrBatchs[i];
-                var handle = b.BuildJob(out has_job);
-                if (has_job)
-                {
-                    handles.Add(handle);
-                }
+                db.Value.Render();
             }
-
-            //if(handles.Length > 0)
-            if(m_vRebuildGroupMesh!=null)
-            {
-                m_RenderMeshJob.BeginCollectionMeshInfo();
-                foreach (var g in m_vRebuildGroupMesh)
-                {
-                    if (g.GetMesh() == null)
-                        continue;
-
-                    m_RenderMeshJob.CollectionMeshfInfo(g);
-                }
-                m_RenderMeshJob.EndCollectionMeshInfo(JobHandle.CombineDependencies(handles));
-                m_vRebuildGroupMesh.Clear();
-            }
-            handles.Dispose();
-        }
-        //--------------------------------------------------------
-        public void RebuildGraphic(AGraphic graphic, EDirtyFlag flag)
-        {
-            if (graphic.Batch == null)
-                return;
-
-            switch (flag)
-            {
-                case EDirtyFlag.ETransform:
-                    graphic.Batch.PushOperation(graphic, EOperationType.TransformChange);
-                    break;
-                case EDirtyFlag.EQuad:
-                    graphic.Batch.PushOperation(graphic, EOperationType.VertexProperty);
-                    break;
-            }
-            RegisterHUDGroupRebuildMesh(graphic.Group);
-        }
-        //--------------------------------------------------------
-        internal void OnAddGraphic(AGraphic graphic)
-        {
-            if (graphic.Batch != null)
-                return;
-
-            graphic.Batch = m_arrBatchs[(int)graphic.GetGraphicType()];
-            graphic.Batch.PushOperation(graphic, EOperationType.Add);
-            RegisterHUDGroupRebuildMesh(graphic.Group);
-        }
-        //--------------------------------------------------------
-        internal void OnRemoveGraphic(AGraphic graphic)
-        {
-            if (graphic.Batch == null)
-                return;
-
-            graphic.Batch.PushOperation(graphic, EOperationType.Remove);
-            RegisterHUDGroupRebuildMesh(graphic.Group);
-        }
-        //--------------------------------------------------------
-        internal void ActiveGraphic(AGraphic graphic)
-        {
-            OnAddGraphic(graphic);
-        }
-        //--------------------------------------------------------
-        internal void DeActiveGraphic(AGraphic graphic)
-        {
-            OnRemoveGraphic(graphic);
-        }
-        //--------------------------------------------------------
-        void RegisterHUDGroupRebuildMesh(HUDGroup group)
-        {
-            if(m_vRebuildGroupMesh != null && m_vRebuildGroupMesh.Contains(group))
-            {
-                return;
-            }
-            if (m_vRebuildGroupMesh == null)
-                m_vRebuildGroupMesh = new HashSet<HUDGroup>(32);
-            m_vRebuildGroupMesh.Add(group);
-        }
-        //--------------------------------------------------------
-        public void ActiveHUDGroup(HUDGroup group)
-        {
-            if (group.GetMesh() == null)
-            {
-                if (m_vMeshPool == null || m_vMeshPool.Count == 0)
-                {
-                    var mesh = new Mesh();
-                    mesh.MarkDynamic();
-                    group.SetMesh(mesh);
-                }
-                else
-                {
-                    group.SetMesh(m_vMeshPool.Pop());
-                }
-            }
-        }
-        //--------------------------------------------------------
-        public void DeActiveHUDGroup(HUDGroup group)
-        {
-            if (group.GetMesh() != null)
-            {
-                if (m_vMeshPool == null) m_vMeshPool = new Stack<Mesh>(32);
-                m_vMeshPool.Push(group.GetMesh());
-                group.SetMesh(null);
-            }
+            EndRender();
         }
         //--------------------------------------------------------
         public void Destroy()
         {
-            for (int i = 0; i < m_arrBatchs.Length; ++i)
+            if (m_pRenderCamera != null && m_CommandBuffer!=null)
+                m_pRenderCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, m_CommandBuffer);
+        }
+        //--------------------------------------------------------
+        public int GetHashCode(Material _material, Mesh _mesh, HudAtlas _atlasMapping)
+        {
+            if (_material == null || _mesh == null) return 0;
+            int hashCode = _material.GetHashCode() ^ _mesh.GetHashCode();
+            if (_atlasMapping != null)
             {
-                var b = m_arrBatchs[i];
-                b.Dispose();
-                m_arrBatchs[i] = null;
+                hashCode = hashCode ^ _atlasMapping.GetHashCode();
             }
-            m_RenderMeshJob.Dispose();
-            m_BatchData.Dispose();
-            if (m_vRebuildGroupMesh != null) m_vRebuildGroupMesh.Clear();
-            if(m_vMeshPool!=null)
+            return hashCode;
+        }
+        //--------------------------------------------------------
+        internal void BeginRender()
+        {
+            if(m_pRenderCamera == null)
             {
-                foreach(var db in m_vMeshPool)
-                {
-                    db.Clear();
+                UnityEngine.Debug.LogError("HudSystem BeginRender Error: Render Camera is null!");
+                return;
+            }
+            if (m_CommandBuffer != null) m_CommandBuffer.Clear();
+            else
+            {
+                m_CommandBuffer = new CommandBuffer();
+                m_CommandBuffer.name = "HudRenderBatch";
+                m_pRenderCamera.AddCommandBuffer(CameraEvent.AfterForwardAlpha, m_CommandBuffer);
+            }
+        }
+        //--------------------------------------------------------
+        internal void DrawMeshInstanced( Mesh mesh, Material material, Matrix4x4[] matrix4x4, int count, MaterialPropertyBlock properties)
+        {
 #if UNITY_EDITOR
-                    if(Application.isPlaying)
-                        UnityEngine.Object.Destroy(db);
-                    else
-                        UnityEngine.Object.DestroyImmediate(db);
+            Graphics.DrawMeshInstanced(mesh, 0, material, matrix4x4, count, properties, ShadowCastingMode.Off, false);
 #else
-                     UnityEngine.Object.Destroy(db);
+            m_CommandBuffer.DrawMeshInstanced(commandBuffer,mesh, 0, material, 0, matrix4x4, count, properties);
 #endif
-
-                }
-                m_vMeshPool.Clear();
-            }
+        }
+        //--------------------------------------------------------
+        internal void EndRender()
+        {
+            if (m_CommandBuffer != null) m_CommandBuffer.Clear();
         }
     }
 }

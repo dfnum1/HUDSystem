@@ -1,19 +1,20 @@
 /********************************************************************
 生成日期:	11:11:2025
-类    名: 	HUDObject
+类    名: 	HudRenderer
 作    者:	HappLI
-描    述:	HUD 数据对象层
+描    述:	
 *********************************************************************/
+using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
+using Unity.Jobs;
+using UnityEditor;
 using UnityEngine;
+using static UnityEngine.GridBrushBase;
 
 namespace Framework.HUD.Runtime
 {
-    [CreateAssetMenu]
-    public class HudSetting : ScriptableObject
+    public class HudRenderer
     {
-        public Material atlas_material;
-
-        public TMPro.TMP_FontAsset font;
     }
 }

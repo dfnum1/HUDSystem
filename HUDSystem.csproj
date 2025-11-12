@@ -9,7 +9,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <ProjectGuid>{002F3BE5-0C55-8346-8E13-535098AB021A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -60,21 +61,32 @@
     <Analyzer Include="D:\Program Files\Unity 2022.3.62f2\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\HUDSystem\Runtime\RenderJob\MeshInfo.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Graphics\HUDGroup.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\HUDSystem.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Graphics\HUDSprite.cs" />
-    <Compile Include="Assets\HUDSystem\EditorRuntime\HUDEditor.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\RenderJob\NativeBuffer.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Data\HUDObject.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Data\HUDSetting.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\RenderJob\RenderBuffers.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Graphics\HUDAtlas.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Graphics\GraphicBatch.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Graphics\HUDText.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\RenderJob\RenderJob.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Utils\HUDSetting.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Graphics\AGraphic.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Data\HudDatas.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Components\HudCanvas.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Render\HudRenderBatch.cs" />
+    <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\AEditorLogic.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Data\HudAtlas.cs" />
+    <Compile Include="Assets\HUDSystem\EditorRuntime\HudEditor.cs" />
+    <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\InspectorLogic.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Utils\HudUtils.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Render\HudGPUInstance.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Utils\HudAttributes.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Render\HudCanvasRender.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Render\HudRenderer.cs" />
+    <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\PreviewLogic.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Components\AComponent.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Job\HudJobBuffer.cs" />
+    <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\HierarchyLogic.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Components\HudImage.cs" />
+    <Compile Include="Assets\HUDSystem\EditorRuntime\Preview\TargetPreview.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Job\HudJobData.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Data\HudSetting.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Data\HudObject.cs" />
+    <Compile Include="Assets\HUDSystem\EditorRuntime\Preview\TreeAssetView.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Utils\ArrayPtr.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Components\HudNumber.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Components\HudText.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\HudSystem.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\HUDSystem\HUDSystem.asmdef" />
@@ -982,6 +994,10 @@
     </Reference>
     <Reference Include="Unity.Burst">
       <HintPath>Library\ScriptAssemblies\Unity.Burst.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Collections">
+      <HintPath>Library\ScriptAssemblies\Unity.Collections.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.UI">

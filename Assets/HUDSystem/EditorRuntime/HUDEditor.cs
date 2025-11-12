@@ -27,11 +27,11 @@ namespace Framework.HUD.Editor
                 ms_pInstance = GetWindow<HUDEditor>("HUD Editor");
             ms_pInstance.Focus();
         }
-        HUDSystem m_pHudSystem = null;
-        HUDObject m_pHudObject = null;
+        HudSystem m_pHudSystem = null;
+        HudObject m_pHudObject = null;
         List<AEditorLogic> m_vLogics = new List<AEditorLogic>(3);
         //--------------------------------------------------------
-        public HUDSystem GetHudSystem()
+        public HudSystem GetHudSystem()
         {
             return m_pHudSystem;
         }
@@ -49,7 +49,7 @@ namespace Framework.HUD.Editor
         {
             EditorApplication.update += OnUpdate;
             this.minSize = new Vector2(1280,600);
-            m_pHudSystem = new HUDSystem();
+            m_pHudSystem = new HudSystem();
             if (m_vLogics.Count<=0)
             {
                 m_vLogics.Add(new HierarchyLogic(this,new Rect(0,0,300,position.height)));
@@ -80,7 +80,7 @@ namespace Framework.HUD.Editor
             }
         }
         //--------------------------------------------------------
-        public HUDObject GetHUDObject()
+        public HudObject GetHUDObject()
         {
             return m_pHudObject;
         }

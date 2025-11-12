@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Framework.HUD.Runtime
 {
-    public class HUDObject : ScriptableObject
+    public class HudObject : ScriptableObject
     {
         [System.Serializable]
         public struct Hierarchy
@@ -18,7 +18,5 @@ namespace Framework.HUD.Runtime
             public List<int> children;
         }
         public List<Hierarchy> vHierarchies;
-        public List<HUDText> vTexts;
-        public List<HUDSprite> vSprites;
     }
 }

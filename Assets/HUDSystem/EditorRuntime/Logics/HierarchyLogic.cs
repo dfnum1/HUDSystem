@@ -18,14 +18,14 @@ namespace Framework.HUD.Editor
     {
         class WidgetItem : TreeAssetView.ItemData
         {
-            public AGraphic graphicItem;
+            public AComponent graphicItem;
             public override Color itemColor()
             {
                 return Color.white;
             }
         }
 
-        List<AGraphic> m_vTopGraphics = new List<AGraphic>();
+        List<AComponent> m_vTopGraphics = new List<AComponent>();
         TreeAssetView m_pTree = null;
         bool m_bItemRightClick = false;
         public HierarchyLogic(HUDEditor editor, Rect viewRect) : base(editor,viewRect)
@@ -58,12 +58,12 @@ namespace Framework.HUD.Editor
             m_pTree.EndTreeData();
         }
         //--------------------------------------------------------
-        void AddGraphicItem(AGraphic grapic, int depth)
+        void AddGraphicItem(AComponent grapic, int depth)
         {
             var item = new WidgetItem();
             item.depth = depth;
-            item.id = grapic.id;
-            item.name = grapic.name;
+            item.id = grapic.GetId();
+            item.name = grapic.GetName();
             item.graphicItem = grapic;
             m_pTree.AddData(item);
             var childs = grapic.GetChilds();
@@ -96,15 +96,15 @@ namespace Framework.HUD.Editor
             GenericMenu menu = new GenericMenu();
             menu.AddItem(new GUIContent("Widget/Node"), false, () =>
             {
-                OnCreateItem(typeof(HUDNode), null);
+                OnCreateItem(typeof(HudCanvas), null);
             });
             menu.AddItem(new GUIContent("Widget/Text"), false, () =>
             {
-                OnCreateItem(typeof(HUDText), null);
+                OnCreateItem(typeof(HudText), null);
             });
-            menu.AddItem(new GUIContent("Widget/Sprite"), false, () =>
+            menu.AddItem(new GUIContent("Widget/Image"), false, () =>
             {
-                OnCreateItem(typeof(HUDSprite), null);
+                OnCreateItem(typeof(HudImage), null);
             });
             menu.ShowAsContext();
             m_bItemRightClick = false;
@@ -117,34 +117,34 @@ namespace Framework.HUD.Editor
             GenericMenu menu = new GenericMenu();
             menu.AddItem(new GUIContent("Widget/Node"), false, () =>
             {
-                OnCreateItem(typeof(HUDNode), widget);
+                OnCreateItem(typeof(HudCanvas), widget);
             });
             menu.AddItem(new GUIContent("Widget/Text"), false, () =>
             {
-                OnCreateItem(typeof(HUDText), widget);
+                OnCreateItem(typeof(HudText), widget);
             });
-            menu.AddItem(new GUIContent("Widget/Sprite"), false, () =>
+            menu.AddItem(new GUIContent("Widget/Image"), false, () =>
             {
-                OnCreateItem(typeof(HUDSprite), widget);
+                OnCreateItem(typeof(HudImage), widget);
             });
             menu.ShowAsContext();
         }
         //--------------------------------------------------------
-        AGraphic OnCreateItem(System.Type type, WidgetItem item)
+        AComponent OnCreateItem(System.Type type, WidgetItem item)
         {
             var grapicItem = Activator.CreateInstance(type);
             if (grapicItem == null)
                 return null;
-            var grapic = grapicItem as AGraphic;
+            var grapic = grapicItem as AComponent;
             if (grapic == null)
                 return null;
 
-            grapic.id = GeneratorID();
-            grapic.name = type.Name;
+            grapic.SetId(GeneratorID());
+            grapic.SetName(type.Name);
 
             if (item!=null)
             {
-                item.graphicItem.Attack(grapic);
+                item.graphicItem.Attach(grapic);
             }
             else
             {
@@ -180,9 +180,9 @@ namespace Framework.HUD.Editor
             return id;
         }
         //--------------------------------------------------------
-        void CollectIds(AGraphic grapic, HashSet<int> vIds)
+        void CollectIds(AComponent grapic, HashSet<int> vIds)
         {
-            vIds.Add(grapic.id);
+            vIds.Add(grapic.GetId());
             if (grapic.GetChilds() == null)
                 return;
             var childs = grapic.GetChilds();
