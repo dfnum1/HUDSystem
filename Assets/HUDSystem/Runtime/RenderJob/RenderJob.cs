@@ -158,7 +158,7 @@ namespace Framework.HUD.Runtime
             float is_text_flag = is_text ? 1 : 0;
             half progress = data.extend.x;
             var gscale = data.gscale;
-            var scale = data.local_scale * HUDUtils.fDefaultUnit / 2 * gscale;
+            var scale = data.local_scale * HUDUtils.default_unit / 2 * gscale;
             float2 sdf_scale = new float2(is_text_flag, scale.y);
 
             float left_x = position.x;

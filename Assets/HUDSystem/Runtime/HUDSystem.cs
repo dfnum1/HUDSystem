@@ -71,6 +71,11 @@ namespace Framework.HUD.Runtime
             m_RenderMeshJob.Init(m_BatchData);
         }
         //--------------------------------------------------------
+        public void EditorRender()
+        {
+
+        }
+        //--------------------------------------------------------
         public void Update()
         {
             m_RenderMeshJob.FinishUpdateMesh();

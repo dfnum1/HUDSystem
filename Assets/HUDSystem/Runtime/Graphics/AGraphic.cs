@@ -12,8 +12,9 @@ namespace Framework.HUD.Runtime
 {
     public enum EGraphicType
     {
-        Text = 0,
-        Sprite = 1,
+        Node,
+        Text = 1,
+        Sprite = 2,
         Count,
     }
     //--------------------------------------------------------
@@ -40,6 +41,8 @@ namespace Framework.HUD.Runtime
     [System.Serializable]
     public abstract class AGraphic
     {
+        public string       name;
+        public int          id;
         public float3       localPosition =float3.zero;
         public float3       localScale = HUDUtils.ONE3;
         public float        spacing = 0;
@@ -54,6 +57,31 @@ namespace Framework.HUD.Runtime
 
         public Color32      color = Color.white;
 
+        //--------------------------------------------------------
+        [System.NonSerialized]
+        private List<AGraphic> m_vChilds = null;
+        public List<AGraphic> GetChilds()
+        {
+            return m_vChilds;
+        }
+        //--------------------------------------------------------
+        public void Attack(AGraphic graphic)
+        {
+            if (graphic == null)
+                return;
+            if (m_vChilds == null)
+                m_vChilds = new List<AGraphic>(2);
+            if (m_vChilds.Contains(graphic))
+                return;
+            m_vChilds.Add(graphic);
+        }
+        //--------------------------------------------------------
+        public void DeAttack(AGraphic graphic)
+        {
+            if (graphic == null || m_vChilds == null) return;
+            m_vChilds.Remove(graphic);
+        }
+        //--------------------------------------------------------
         [System.NonSerialized]
         EOperationType m_OperationType = EOperationType.None;
         //--------------------------------------------------------
