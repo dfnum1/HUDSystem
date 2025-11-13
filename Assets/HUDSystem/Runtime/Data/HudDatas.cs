@@ -25,14 +25,14 @@ namespace Framework.HUD.Runtime
     }
     //--------------------------------------------------------
     [System.Serializable]
-    internal class HudBaseData
+    public class HudBaseData
     {
         public int id;
         public string name;
 
         public Vector2 position;
         public Vector2 sizeDelta = new Vector2(100,100);
-        public Vector3 eulerAngle;
+        public float angle;
         public Color   color;
 
         public List<int> childs;
@@ -83,7 +83,7 @@ namespace Framework.HUD.Runtime
         public Sprite sprite;
         public ImageType imageType;
         public FillMethod fillMethod;
-        public OriginHorizontal fillOrigin = OriginHorizontal.Left;
+        public float fillOrigin = 0;
         public float fillAmount = 1.0f;
     }
 }

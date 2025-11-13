@@ -5,6 +5,7 @@
 描    述:	HUD 数据对象层
 *********************************************************************/
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 namespace Framework.HUD.Runtime
@@ -12,8 +13,5 @@ namespace Framework.HUD.Runtime
     [CreateAssetMenu]
     public class HudSetting : ScriptableObject
     {
-        public Material atlas_material;
-
-        public TMPro.TMP_FontAsset font;
     }
 }

@@ -9,8 +9,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <ProjectGuid>{002F3BE5-0C55-8346-8E13-535098AB021A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -62,17 +61,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\HUDSystem\Runtime\Data\HudDatas.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Components\HudCanvas.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Render\HudRenderBatch.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Render\HudRenderCulling.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Data\HudDataSnippet.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Render\HudGpuRenderData.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\AEditorLogic.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Data\HudAtlas.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\HudEditor.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\InspectorLogic.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Utils\HudUtils.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Render\HudGPUInstance.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Utils\HudAttributes.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Render\HudCanvasRender.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Render\HudRenderer.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Render\HudInstanceCollector.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\PreviewLogic.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\AComponent.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Job\HudJobBuffer.cs" />
@@ -85,11 +84,19 @@
     <Compile Include="Assets\HUDSystem\EditorRuntime\Preview\TreeAssetView.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Utils\ArrayPtr.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudNumber.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Components\HudCanvas.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudText.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\HudSystem.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\HudController.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\HUDSystem\Res\Shader\Hud.cginc" />
+    <None Include="Assets\HUDSystem\Res\Shader\HudNum.shader" />
+    <None Include="Assets\HUDSystem\Res\Shader\HudImage.shader" />
+    <None Include="Assets\HUDSystem\Res\Shader\HudTMP.shader" />
+    <None Include="Assets\HUDSystem\Res\Shader\TMPro_Properties.cginc" />
     <None Include="Assets\HUDSystem\HUDSystem.asmdef" />
+    <None Include="Assets\HUDSystem\Res\Shader\Hud_Image_TMP.shader" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -441,15 +448,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Collections.LowLevel.ILSupport">
-      <HintPath>Library\PackageCache\com.unity.collections@1.2.4\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Analytics.Tracker">
-      <HintPath>Library\PackageCache\com.unity.analytics@3.8.1\Unity.Analytics.Tracker.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Analytics.Editor">
-      <HintPath>Library\PackageCache\com.unity.analytics@3.8.1\Unity.Analytics.Editor.dll</HintPath>
+      <HintPath>Packages\com.unity.collections@1.2.4\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="unityplastic">
@@ -466,14 +465,6 @@
     </Reference>
     <Reference Include="log4netPlastic">
       <HintPath>Library\PackageCache\com.unity.collab-proxy@2.7.1\Lib\Editor\log4netPlastic.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>Library\PackageCache\com.unity.nuget.newtonsoft-json@3.2.1\Runtime\Newtonsoft.Json.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Analytics.StandardEvents">
-      <HintPath>Library\PackageCache\com.unity.analytics@3.8.1\AnalyticsStandardEvents\Unity.Analytics.StandardEvents.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">

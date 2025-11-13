@@ -6,13 +6,16 @@
 *********************************************************************/
 using System;
 using System.Collections.Generic;
-using UnityEditor;
-using UnityEditor.U2D;
 using UnityEngine;
 using UnityEngine.U2D;
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.U2D;
+#endif
 
 namespace Framework.HUD.Runtime
 {
+    [CreateAssetMenu]
     public class HudAtlas : ScriptableObject
     {
         [SerializeField]
@@ -40,7 +43,6 @@ namespace Framework.HUD.Runtime
 
         private bool m_bInied = false;
         private bool m_isGenAtlasMapping = false;
-;
 
         [System.Serializable]
         public class SpriteInfo
@@ -49,6 +51,7 @@ namespace Framework.HUD.Runtime
             public int index;
             public Vector2Int size;
         }
+        [SerializeField]
         private List<SpriteInfo> m_vSprites;
         private Dictionary<string, SpriteInfo> m_vNameToSpriteInfo = new Dictionary<string, SpriteInfo>();
 
@@ -70,6 +73,14 @@ namespace Framework.HUD.Runtime
                 }
                 return null;
             }
+        }
+        //--------------------------------------------------------
+        public SpriteInfo GetSpriteInfo(string name)
+        {
+            Init();
+            SpriteInfo spriteInfo = null;
+            m_vNameToSpriteInfo.TryGetValue(name, out spriteInfo);
+            return spriteInfo;
         }
         //--------------------------------------------------------
         void Init()
@@ -185,7 +196,6 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         private void GenAtlasMappingTextrue()
         {
-            if (!Application.isPlaying) return;
             if (m_SpriteAtlas == null || m_SpriteAtlas.spriteCount == 0 || m_vNameToSpriteInfo == null) return;
             Sprite[] sprits = new Sprite[m_SpriteAtlas.spriteCount];
             m_SpriteAtlas.GetSprites(sprits);
@@ -288,4 +298,22 @@ namespace Framework.HUD.Runtime
         }
 #endif
     }
+#if UNITY_EDITOR
+    [CustomEditor(typeof(HudAtlas))]
+    class HudAtlasEditor : UnityEditor.Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            DrawDefaultInspector();
+            HudAtlas hudAtlas = (HudAtlas)target;
+            if (GUILayout.Button("Gen Atlas Mapping Info"))
+            {
+                hudAtlas.GenAtlasMappingInfo();
+                EditorUtility.SetDirty(hudAtlas);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+            }
+        }
+    }
+#endif
 }

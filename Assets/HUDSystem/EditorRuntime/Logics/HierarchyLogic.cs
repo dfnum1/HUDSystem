@@ -8,6 +8,7 @@
 using Framework.HUD.Runtime;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using static Framework.HUD.Editor.TreeAssetView;
@@ -39,6 +40,8 @@ namespace Framework.HUD.Editor
                 m_pTree = new TreeAssetView(new string[] { "节点列表" });
                 m_pTree.buildMutiColumnDepth = true;
                 m_pTree.DepthIndentWidth = 20;
+                m_pTree.ShowAlternatingRowBackgrounds(false);
+                m_pTree.ShowBorder(true);
                 m_pTree.OnCellDraw += OnItemDraw;
                 m_pTree.OnViewRightClick += OnViewRightClick;
                 m_pTree.OnItemRightClick += OnItemRightClick;
@@ -132,7 +135,11 @@ namespace Framework.HUD.Editor
         //--------------------------------------------------------
         AComponent OnCreateItem(System.Type type, WidgetItem item)
         {
-            var grapicItem = Activator.CreateInstance(type);
+            HudDataAttribute hudAttr = type.GetCustomAttribute<HudDataAttribute>();
+            if (hudAttr == null)
+                return null;
+            var hudData = Activator.CreateInstance(hudAttr.dataType);
+            var grapicItem = Activator.CreateInstance(type,m_pEditor.GetHudSystem(), hudData);
             if (grapicItem == null)
                 return null;
             var grapic = grapicItem as AComponent;

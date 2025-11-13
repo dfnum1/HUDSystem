@@ -1,0 +1,210 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!28 &-766434889744706618
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 8
+  m_Height: 8
+  m_CompleteImageSize: 256
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 1
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 0
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 0
+  m_PlatformBlob: 
+  image data: 256
+  _typelessdata: 000000000048002800000000001c000000000000001c002800000028001c0000001c0000000e0000001c0000000e0028001c0028000e0000002a0000001d0000002a0000001d0028002a0028001d00000000000000480028000000000015000b0000000b001500110000001d0015000a00150000001d000b0015000b001d00110015001d001d000a003300000014000b0033000b001400110033001d0014000a000000000048002800000000004800280000000000480028000000000048002800000000004800280000000000480028000000000048002800000000004800280000000000470028000000000048002800000000004800280000000000000000
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f725c729f5c88440bcb373414d5ac8a, type: 3}
+  m_Name: Head
+  m_EditorClassIdentifier: 
+  m_SpriteAtlas: {fileID: 100100200, guid: b6a0f20e2bddffa4fa1086bd56517060, type: 3}
+  m_AtlasMappingTex: {fileID: 7125139453182121956}
+  m_Width: 87
+  m_Height: 8
+  m_AtlasMappingWidth: 8
+  m_AtlasMappingHeight: 8
+  m_vSprites:
+  - name: 
+    index: 0
+    size: {x: 72, y: 40}
+  - name: bg_build_lvlhud_0
+    index: 1
+    size: {x: 28, y: 0}
+  - name: bg_build_lvlhud_1
+    index: 2
+    size: {x: 28, y: 40}
+  - name: bg_build_lvlhud_2
+    index: 3
+    size: {x: 28, y: 0}
+  - name: bg_build_lvlhud_3
+    index: 4
+    size: {x: 14, y: 0}
+  - name: bg_build_lvlhud_4
+    index: 5
+    size: {x: 14, y: 40}
+  - name: bg_build_lvlhud_5
+    index: 6
+    size: {x: 14, y: 0}
+  - name: bg_build_lvlhud_6
+    index: 7
+    size: {x: 29, y: 0}
+  - name: bg_build_lvlhud_7
+    index: 8
+    size: {x: 29, y: 40}
+  - name: bg_build_lvlhud_8
+    index: 9
+    size: {x: 29, y: 0}
+  - name: 
+    index: 10
+    size: {x: 72, y: 40}
+  - name: bg_icon_sel_0
+    index: 11
+    size: {x: 21, y: 11}
+  - name: bg_icon_sel_1
+    index: 12
+    size: {x: 21, y: 17}
+  - name: bg_icon_sel_2
+    index: 13
+    size: {x: 21, y: 10}
+  - name: bg_icon_sel_3
+    index: 14
+    size: {x: 29, y: 11}
+  - name: bg_icon_sel_4
+    index: 15
+    size: {x: 29, y: 17}
+  - name: bg_icon_sel_5
+    index: 16
+    size: {x: 29, y: 10}
+  - name: bg_icon_sel_6
+    index: 17
+    size: {x: 20, y: 11}
+  - name: bg_icon_sel_7
+    index: 18
+    size: {x: 20, y: 17}
+  - name: bg_icon_sel_8
+    index: 19
+    size: {x: 20, y: 10}
+  - name: com_bg_hud2
+    index: 20
+    size: {x: 72, y: 40}
+  - name: hero_head_circlel_00
+    index: 21
+    size: {x: 72, y: 40}
+  - name: hud_fight_anger_04
+    index: 22
+    size: {x: 72, y: 40}
+  - name: hud_fight_anger_05
+    index: 23
+    size: {x: 72, y: 40}
+  - name: hud_fight_anger_bottom_02
+    index: 24
+    size: {x: 72, y: 40}
+  - name: hud_fight_camp_01
+    index: 25
+    size: {x: 72, y: 40}
+  - name: hud_fight_camp_bottom_01
+    index: 26
+    size: {x: 72, y: 40}
+  - name: hud_fight_Progress_white
+    index: 27
+    size: {x: 72, y: 40}
+  - name: hud_fight_Progress_yellow_bottom
+    index: 28
+    size: {x: 71, y: 40}
+  - name: icon_hud_fight_troops
+    index: 29
+    size: {x: 72, y: 40}
+  - name: icon_pioneer_01
+    index: 30
+    size: {x: 72, y: 40}
+--- !u!28 &7125139453182121956
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 8
+  m_Height: 8
+  m_CompleteImageSize: 256
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 1
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 0
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 0
+  m_PlatformBlob: 
+  image data: 256
+  _typelessdata: 000000000048002800000000001c000000000000001c002800000028001c0000001c0000000e0000001c0000000e0028001c0028000e0000002a0000001d0000002a0000001d0028002a0028001d00000000000000480028000000000015000b0000000b001500110000001d0015000a00150000001d000b0015000b001d00110015001d001d000a003300000014000b0033000b001400110033001d0014000a000000000048002800000000004800280000000000480028000000000048002800000000004800280000000000480028000000000048002800000000004800280000000000470028000000000048002800000000004800280000000000000000
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 

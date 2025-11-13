@@ -4,37 +4,50 @@
 作    者:	HappLI
 描    述:	HUD 系统
 *********************************************************************/
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.Collections;
-using Unity.Jobs;
-using UnityEditor;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
-using static UnityEngine.GridBrushBase;
 
 namespace Framework.HUD.Runtime
 {
     public class HudSystem
     {
-        Camera m_pRenderCamera = null;
-        CommandBuffer m_CommandBuffer = null;
+        Camera                                  m_pRenderCamera = null;
+        Transform                               m_pRenderCameraTransform = null;
+        private List<HudController>             m_vHuds = new List<HudController>(64);
         private Dictionary<int, HudRenderBatch> m_vRenders = new Dictionary<int, HudRenderBatch>(2);
         //--------------------------------------------------------
         public HudSystem()
         {
         }
         //--------------------------------------------------------
+        public float4x4 CameraVP
+        {
+            get
+            {
+                if (m_pRenderCamera == null) return Matrix4x4.identity;
+                float4x4 vp = math.mul(m_pRenderCamera.projectionMatrix, m_pRenderCamera.worldToCameraMatrix);
+                return vp;
+            }
+        }
+        //--------------------------------------------------------
+        public float3 CameraDirection
+        {
+            get
+            {
+                if (m_pRenderCameraTransform == null) return Vector3.forward;
+                return m_pRenderCameraTransform.forward;
+            }
+        }
+        //--------------------------------------------------------
         public void SetRenderCamera(Camera camera)
         {
             if (m_pRenderCamera == camera)
                 return;
-            if( m_CommandBuffer!=null)
-            {
-                if(m_pRenderCamera!=null) m_pRenderCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, m_CommandBuffer);
-                if(camera!=null) m_pRenderCamera.AddCommandBuffer(CameraEvent.AfterForwardAlpha, m_CommandBuffer);
-            }
+            foreach (var db in m_vRenders)
+                db.Value.OnChangeCamera(m_pRenderCamera, camera);
             m_pRenderCamera = camera;
         }
         //--------------------------------------------------------
@@ -51,6 +64,20 @@ namespace Framework.HUD.Runtime
             return renderBatcher;
         }
         //--------------------------------------------------------
+        public HudController CreateHud(HudObject hudObj)
+        {
+            HudController hud = new HudController(this);
+            hud.SetHudObject(hudObj);
+            m_vHuds.Add(hud);
+            return hud;
+        }
+        //--------------------------------------------------------
+        public void DeleteHud(HudController hudController)
+        {
+            hudController.Destroy();
+            m_vHuds.Remove(hudController);
+        }
+        //--------------------------------------------------------
         public void EditorRender()
         {
 
@@ -58,6 +85,14 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         public void Update()
         {
+        }
+        //--------------------------------------------------------
+        public void LateUpdate()
+        {
+            foreach (var db in m_vRenders)
+            {
+                db.Value.LateUpdate();
+            }
         }
         //--------------------------------------------------------
         public void Render()
@@ -72,8 +107,12 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         public void Destroy()
         {
-            if (m_pRenderCamera != null && m_CommandBuffer!=null)
-                m_pRenderCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, m_CommandBuffer);
+            SetRenderCamera(null);
+            foreach (var db in m_vRenders)
+            {
+                db.Value.Destroy();
+            }
+            m_vRenders.Clear();
         }
         //--------------------------------------------------------
         public int GetHashCode(Material _material, Mesh _mesh, HudAtlas _atlasMapping)
@@ -94,27 +133,16 @@ namespace Framework.HUD.Runtime
                 UnityEngine.Debug.LogError("HudSystem BeginRender Error: Render Camera is null!");
                 return;
             }
-            if (m_CommandBuffer != null) m_CommandBuffer.Clear();
-            else
-            {
-                m_CommandBuffer = new CommandBuffer();
-                m_CommandBuffer.name = "HudRenderBatch";
-                m_pRenderCamera.AddCommandBuffer(CameraEvent.AfterForwardAlpha, m_CommandBuffer);
-            }
         }
         //--------------------------------------------------------
-        internal void DrawMeshInstanced( Mesh mesh, Material material, Matrix4x4[] matrix4x4, int count, MaterialPropertyBlock properties)
+        internal void OnCreateComandBuffer(CommandBuffer cmdBuffer)
         {
-#if UNITY_EDITOR
-            Graphics.DrawMeshInstanced(mesh, 0, material, matrix4x4, count, properties, ShadowCastingMode.Off, false);
-#else
-            m_CommandBuffer.DrawMeshInstanced(commandBuffer,mesh, 0, material, 0, matrix4x4, count, properties);
-#endif
+            if (m_pRenderCamera != null)
+                m_pRenderCamera.AddCommandBuffer(CameraEvent.AfterForwardAlpha, cmdBuffer);
         }
         //--------------------------------------------------------
         internal void EndRender()
         {
-            if (m_CommandBuffer != null) m_CommandBuffer.Clear();
         }
     }
 }

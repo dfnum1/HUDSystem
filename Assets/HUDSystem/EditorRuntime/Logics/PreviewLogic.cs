@@ -34,6 +34,8 @@ namespace Framework.HUD.Editor
                 m_pPreview.SetPreviewInstance(roots[0] as GameObject);
                 m_pPreview.bLeftMouseForbidMove = true;
                 m_pPreview.OnDrawAfterCB += OnPreviewDraw;
+
+                m_pEditor.GetHudSystem().SetRenderCamera(m_pPreview.GetCamera());
             }
         }
         //--------------------------------------------------------

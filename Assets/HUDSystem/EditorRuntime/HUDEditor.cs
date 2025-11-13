@@ -20,11 +20,12 @@ namespace Framework.HUD.Editor
     public class HUDEditor : EditorWindow
     {
         static HUDEditor ms_pInstance = null;
-        [MenuItem("Tools/HUD Editor")]
-        public static void ShowWindow()
+        //--------------------------------------------------------
+        public static void EditorHud(HudObject pHudObject)
         {
             if (ms_pInstance == null)
                 ms_pInstance = GetWindow<HUDEditor>("HUD Editor");
+            ms_pInstance.m_pHudObject = pHudObject;
             ms_pInstance.Focus();
         }
         HudSystem m_pHudSystem = null;
@@ -88,7 +89,11 @@ namespace Framework.HUD.Editor
         private void OnUpdate()
         {
             if (m_pHudSystem != null)
+            {
                 m_pHudSystem.Update();
+                m_pHudSystem.Render();
+                m_pHudSystem.LateUpdate();
+            }
         }
         //--------------------------------------------------------
         private void OnGUI()

@@ -8,7 +8,7 @@ namespace Framework.HUD.Runtime
 {
     public class HudNumber : AComponent
     {
-        public HudNumber(HudSystem pSystem) : base(pSystem)
+        public HudNumber(HudSystem pSystem, HudBaseData hudData) : base(pSystem, hudData)
         {
             m_eHudType = EHudType.Number;
         }

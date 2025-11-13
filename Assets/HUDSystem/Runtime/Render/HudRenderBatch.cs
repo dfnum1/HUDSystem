@@ -6,12 +6,17 @@
 *********************************************************************/
 using System.Collections.Generic;
 using TMPro;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
 namespace Framework.HUD.Runtime
 {
-    public class HudRenderBatch
+    public unsafe class HudRenderBatch
     {
         HudSystem m_pSystem;
         private Material m_pMaterial;
@@ -22,7 +27,11 @@ namespace Framework.HUD.Runtime
         int m_nInstanceCount = 0;
         private MaterialPropertyBlock m_MaterialPropertyBlock;
 
-        private HashSet<HudCanvasRender> m_vHudCanvasRenderer;
+        private HudRenderCulling m_Culling;
+        private HudInstanceCollector m_pCollector;
+        private HashSet<HudController> m_vHudControllers;
+        JobHandle m_pJobHandle;
+        CommandBuffer m_CommandBuffer = null;
         public HudRenderBatch(HudSystem pSystem, Material material, Mesh mesh, HudAtlas atlasMapping, TMP_FontAsset fontAsset)
         {
             m_pSystem = pSystem;
@@ -33,6 +42,11 @@ namespace Framework.HUD.Runtime
             m_pFontAsset = fontAsset;
             SetAltas(atlasMapping);
             SetFontAsset(fontAsset);
+
+            m_Culling = new HudRenderCulling(HUDUtils.capacity);
+            m_pCollector = new HudInstanceCollector(HUDUtils.capacity);
+
+            m_pJobHandle = new JobHandle();
         }
         //-----------------------------------------------------
         internal void SetAltas(HudAtlas atlas)
@@ -80,20 +94,150 @@ namespace Framework.HUD.Runtime
         //-----------------------------------------------------
         internal void Render()
         {
-            m_nInstanceCount = m_vHudCanvasRenderer.Count;
-            int renderCount = m_nInstanceCount / HUDUtils.batchMaxCount;
+            if (!m_pJobHandle.IsCompleted)
+            {
+                m_pJobHandle.Complete();
+            }
+
+            int renderCount = m_pCollector.instanceCount / HUDUtils.batchMaxCount;
             int lasterRenderCount = m_nInstanceCount % HUDUtils.batchMaxCount;
 
             int index = 0;
-            for(int i =0;i < renderCount; ++i)
+            if (m_pCollector.expansion)
             {
-                Matrix4x4[] matrixs = ;
+                m_pCollector.expansion = false;
+                m_pCollector.TriggerNotif();
+            }
+
+            m_CommandBuffer?.Clear();
+            for (int i = 0; i < renderCount; i++)
+            {
+                Profiler.BeginSample("DrawMeshInstanced " + i);
+                Matrix4x4[] matrix4x4 = m_pCollector.GetObjectToWorld(index);
+                m_pCollector.FullPropertyBlack(index, m_MaterialPropertyBlock);
+                DrawMeshInstanced(matrix4x4, HUDUtils.batchMaxCount, m_MaterialPropertyBlock);
+                Profiler.EndSample();
+                index++;
+            }
+            {
+                if (lasterRenderCount > 0)
+                {
+                    Matrix4x4[] matrix4x4 = m_pCollector.GetObjectToWorld(index);
+                    Profiler.BeginSample("DrawMeshInstanced Last");
+                    m_pCollector.FullPropertyBlack(index, m_MaterialPropertyBlock);
+                    DrawMeshInstanced(matrix4x4, lasterRenderCount, m_MaterialPropertyBlock);
+                    Profiler.EndSample();
+                }
             }
         }
         //-----------------------------------------------------
-        public void DrawMeshInstanced(Mesh mesh, Material material, Matrix4x4[] matrix4x4, int count, MaterialPropertyBlock properties)
+        internal void LateUpdate()
         {
-            m_pSystem.DrawMeshInstanced(mesh, material, matrix4x4, count, properties);
+            if (!m_pJobHandle.IsCompleted)
+                return;
+            
+            if (m_vHudControllers != null && m_vHudControllers.Count > 0)
+            {
+                foreach (var item in m_vHudControllers)
+                    item.OnReorder();
+                m_vHudControllers.Clear();
+            }
+
+            Profiler.BeginSample("ToJob");
+            JobHandle transformJobHandle = m_Culling.ToJob(m_pSystem.CameraVP, m_pSystem.CameraDirection);
+            m_pJobHandle = m_pCollector.ToJob(m_Culling, transformJobHandle);
+            Profiler.EndSample();
+        }
+        //-----------------------------------------------------
+        public void AddExpansionNotif(System.Action notify)
+        {
+            m_pCollector.AddExpansionNotif(notify);
+        }
+        //-----------------------------------------------------
+        public void RemoveExpansionNotif(System.Action notify)
+        {
+            m_pCollector.RemoveExpansionNotif(notify);
+        }
+        //-----------------------------------------------------
+        public void TriggerReorder(HudController controller)
+        {
+            if (m_vHudControllers.Contains(controller)) return;
+            m_vHudControllers.Add(controller);
+        }
+        //-----------------------------------------------------
+        public int AddHudController(HudController controller, bool bRoot)
+        {
+            return m_Culling.Add(controller, bRoot);
+        }
+        //-----------------------------------------------------
+        public void RemoveHudController(int id)
+        {
+            m_Culling.Remove(id);
+        }
+        //-----------------------------------------------------
+        public void SetControllerEnable(int index)
+        {
+            m_Culling.SetEnable(index);
+        }
+        //-----------------------------------------------------
+        public void SetControllerDisable(int index)
+        {
+            m_Culling.SetDisable(index);
+        }
+        //-----------------------------------------------------
+        public void SetBounds(int index, float2 center, float2 size)
+        {
+            m_Culling.SetBounds(index, center, size);
+        }
+        //-----------------------------------------------------
+        public int AddFloat4x4(string name, int hashcode, RenderDataState<float4x4> value)
+        {
+            return m_pCollector.AddFloat4x4(name, hashcode, value);
+        }
+        //-----------------------------------------------------
+        public void SetFloat4x4(string name, int idx, RenderDataState<float4x4> value)
+        {
+            m_pCollector.SetFloat4x4(name, idx, value);
+        }
+        //-----------------------------------------------------
+        public int AddTransformId(int hashcode, RenderDataState<int> transformId)
+        {
+            return m_pCollector.AddTransformId(hashcode, transformId);
+        }
+        //-----------------------------------------------------
+        public void SetTransformId(int idx, RenderDataState<int> transformId)
+        {
+            m_pCollector.SetTransformId(idx, transformId);
+        }
+        //-----------------------------------------------------
+        public void DrawMeshInstanced(Matrix4x4[] matrix4x4, int count, MaterialPropertyBlock properties)
+        {
+            if(m_CommandBuffer == null)
+            {
+                m_CommandBuffer = new CommandBuffer();
+                m_CommandBuffer.name = "HudRenderBatch";
+                m_pSystem.OnCreateComandBuffer(m_CommandBuffer);
+            }
+#if UNITY_EDITOR
+            Graphics.DrawMeshInstanced(m_pMesh, 0, m_pMaterial, matrix4x4, count, properties, ShadowCastingMode.Off, false);
+#else
+            m_CommandBuffer.DrawMeshInstanced(m_pMesh, 0, m_pMaterial, 0, matrix4x4, count, properties);
+#endif
+        }
+        //-----------------------------------------------------
+        internal void OnChangeCamera(Camera last, Camera cur)
+        {
+            if (m_CommandBuffer == null)
+                return;
+            if (last) last.RemoveCommandBuffer( CameraEvent.AfterForwardAlpha, m_CommandBuffer);
+            if(cur) cur.AddCommandBuffer(CameraEvent.AfterForwardAlpha, m_CommandBuffer);
+        }
+        //-----------------------------------------------------
+        public void Destroy()
+        {
+            if (!m_pJobHandle.IsCompleted) m_pJobHandle.Complete();
+            m_Culling.Dispose();
+            m_pCollector.Dispose();
         }
     }
 }

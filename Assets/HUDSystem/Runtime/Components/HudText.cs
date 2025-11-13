@@ -9,7 +9,7 @@ namespace Framework.HUD.Runtime
     [HudData(typeof(HudTextData))]
     public class HudText : AComponent
     {
-        public HudText(HudSystem pSystem) : base(pSystem)
+        public HudText(HudSystem pSystem, HudBaseData hudData) : base(pSystem, hudData)
         {
             m_eHudType = EHudType.Text;
         }
