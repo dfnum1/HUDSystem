@@ -680,7 +680,7 @@ namespace Framework.HUD.Editor
         //--------------------------------------------------------
         public override void OnGUI(Rect rect)
         {
-            if(scrollWhellIgnore)
+            if (scrollWhellIgnore)
             {
                 if (Event.current.type == EventType.ScrollWheel && GetRect().Contains(Event.current.mousePosition))
                 {

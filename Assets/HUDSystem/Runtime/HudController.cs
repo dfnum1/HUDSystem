@@ -14,7 +14,7 @@ namespace Framework.HUD.Runtime
     {
         private HudSystem m_pSystem;
         private HudObject m_pObject;
-        private List<HudCanvas> m_vCanvas = null;
+        private List<AComponent> m_vWidgets = null;
         private HudRenderBatch m_RenderBatch = null;
 
         private Transform m_pFollowTarget;
@@ -88,7 +88,7 @@ namespace Framework.HUD.Runtime
                 return;
             m_pObject = hudObject;
 
-            if(m_vCanvas!=null) m_vCanvas.Clear();
+            if(m_vWidgets != null) m_vWidgets.Clear();
             if (m_pObject == null || m_pObject.vHierarchies == null)
                 return;
 
@@ -131,16 +131,16 @@ namespace Framework.HUD.Runtime
             TriggerReorder();
         }
         //--------------------------------------------------------
-        public List<HudCanvas> GetCanvas()
+        public List<AComponent> GetWidgets()
         {
-            return m_vCanvas;
+            return m_vWidgets;
         }
         //--------------------------------------------------------
         internal void OnReorder()
         {
-            if (m_vCanvas == null)
+            if (m_vWidgets == null)
                 return;
-            foreach(var db in m_vCanvas)
+            foreach(var db in m_vWidgets)
             {
                 db.OnReorder();
             }
@@ -150,7 +150,7 @@ namespace Framework.HUD.Runtime
         {
             if (pComp == null) return;
             if(pComp is HudCanvas)
-                m_vCanvas.Remove((HudCanvas)pComp);
+                m_vWidgets.Remove((HudCanvas)pComp);
         }
         //--------------------------------------------------------
         internal void Destroy()
@@ -167,9 +167,9 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         public void SetDirty()
         {
-            if (m_vCanvas == null)
+            if (m_vWidgets == null)
                 return;
-            foreach (var db in m_vCanvas)
+            foreach (var db in m_vWidgets)
             {
                 db.SetDirty();
             }
@@ -215,9 +215,9 @@ namespace Framework.HUD.Runtime
                 pParent.Attach(canvas);
             else
             {
-                if (m_vCanvas == null)
-                    m_vCanvas = new List<HudCanvas>(4);
-                m_vCanvas.Add(canvas);
+                if (m_vWidgets == null)
+                    m_vWidgets = new List<AComponent>(4);
+                m_vWidgets.Add(canvas);
             }
             return canvas;
         }

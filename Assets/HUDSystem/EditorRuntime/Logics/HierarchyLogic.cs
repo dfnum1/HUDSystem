@@ -8,6 +8,7 @@
 using Framework.HUD.Runtime;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -57,7 +58,7 @@ namespace Framework.HUD.Editor
         {
             GetHud().Destroy();
             GetHud().SetHudObject(hudObject);
-            var canvas = GetHud().GetCanvas();
+            var canvas = GetHud().GetWidgets();
             if (canvas != null)
             {
                 foreach (var db in canvas)
@@ -149,65 +150,66 @@ namespace Framework.HUD.Editor
         //--------------------------------------------------------
         protected void OnDragDrop(TreeAssetView.DragAndDropData drop)
         {
-            if (drop.current != null)
+            var dragItem = drop.current?.data as WidgetItem;
+            var targetParentItem = drop.parentItem?.data as WidgetItem;
+
+            if (dragItem == null)
+                return;
+
+            var dragComp = dragItem.graphicItem;
+            var oldParent = dragComp.GetParent();
+
+            // 禁止拖拽到自身或子节点下
+            if (targetParentItem != null)
             {
-                List<ItemData> vItems = m_pTree.GetDatas();
-                if (drop.insertAtIndex < 0)
+                var targetParentComp = targetParentItem.graphicItem;
+                if (dragComp == targetParentComp || IsChildOf(dragComp, targetParentComp))
                 {
-                    if (drop.parentItem != null)
-                    {
-                        var parentWidget = drop.parentItem.data as WidgetItem;
-                        var currentWidget = drop.current.data as WidgetItem;
-                        if(currentWidget.graphicItem.GetParent()!=null)
-                        {
-                            if(currentWidget.graphicItem.GetParent() != parentWidget.graphicItem)
-                            {
-                                currentWidget.graphicItem.GetParent().Detach(currentWidget.graphicItem);
-                                parentWidget.graphicItem.Attach(currentWidget.graphicItem);
-                                RefreshTree();
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (drop.insertAtIndex <= vItems.Count)
-                    {
-                        var inserAfter = vItems[drop.insertAtIndex];
-
-                        WidgetItem inserAfterWidget = inserAfter as WidgetItem;
-                        WidgetItem current = drop.current.data as WidgetItem;
-                        if (drop.parentItem == m_pTree.GetRoot())
-                        {
-
-                            return;
-                        }
-                        if(drop.parentItem!=null)
-                        {
-                            var parentWidget = drop.parentItem.data as WidgetItem;
-                            var vChild = parentWidget.graphicItem.GetChilds();
-                            if (vChild != null)
-                            {
-                                if (current.graphicItem.GetParent() != parentWidget.graphicItem)
-                                    current.graphicItem.GetParent().Detach(current.graphicItem);
-                                inserAfterWidget.graphicItem.Attach(current.graphicItem, drop.insertAtIndex);
-                            }
-                        }
-                        else
-                        {
-                            var vChild = inserAfterWidget.graphicItem.GetChilds();
-                            if (vChild != null)
-                            {
-                                if (current.graphicItem.GetParent() != inserAfterWidget.graphicItem)
-                                    current.graphicItem.GetParent().Detach(current.graphicItem);
-                                inserAfterWidget.graphicItem.Attach(current.graphicItem, drop.insertAtIndex);
-                            }
-                        }
-
-                        RefreshTree();
-                    }
+                //    EditorUtility.DisplayDialog("错误", "不能拖拽到自身或子节点下！", "确定");
+                    return;
                 }
             }
+
+            // 1. 从原父节点移除
+            if (oldParent != null)
+            {
+                oldParent.Detach(dragComp);
+            }
+            else
+            {
+                m_vTopGraphics.Remove(dragComp);
+            }
+
+            // 2. 添加到新父节点
+            if (targetParentItem != null)
+            {
+                var targetParentComp = targetParentItem.graphicItem;
+                targetParentComp.Attach(dragComp, drop.insertAtIndex);
+            }
+            else
+            {
+                if (!m_vTopGraphics.Contains(dragComp))
+                {
+                    if (drop.insertAtIndex >= 0 && drop.insertAtIndex <= m_vTopGraphics.Count)
+                        m_vTopGraphics.Insert(drop.insertAtIndex, dragComp);
+                    else
+                        m_vTopGraphics.Add(dragComp);
+                }
+            }
+            RefreshTree();
+        }
+        //--------------------------------------------------------
+        bool IsChildOf(AComponent parent, AComponent child)
+        {
+            if (parent == null || child == null) return false;
+            var childs = parent.GetChilds();
+            if (childs == null) return false;
+            foreach (var c in childs)
+            {
+                if (c == child || IsChildOf(c, child))
+                    return true;
+            }
+            return false;
         }
         //--------------------------------------------------------
         void OnItemSelected(TreeAssetView.ItemData item)
