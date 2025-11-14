@@ -6,10 +6,9 @@
 *********************************************************************/
 using System.Collections.Generic;
 using TMPro;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
@@ -92,14 +91,14 @@ namespace Framework.HUD.Runtime
             }
         }
         //-----------------------------------------------------
-        internal void Render()
+        internal void Render(Camera camera)
         {
             if (!m_pJobHandle.IsCompleted)
             {
                 m_pJobHandle.Complete();
             }
-
-            int renderCount = m_pCollector.instanceCount / HUDUtils.batchMaxCount;
+            m_nInstanceCount = m_pCollector.instanceCount;
+            int renderCount = m_nInstanceCount / HUDUtils.batchMaxCount;
             int lasterRenderCount = m_nInstanceCount % HUDUtils.batchMaxCount;
 
             int index = 0;
@@ -115,7 +114,7 @@ namespace Framework.HUD.Runtime
                 Profiler.BeginSample("DrawMeshInstanced " + i);
                 Matrix4x4[] matrix4x4 = m_pCollector.GetObjectToWorld(index);
                 m_pCollector.FullPropertyBlack(index, m_MaterialPropertyBlock);
-                DrawMeshInstanced(matrix4x4, HUDUtils.batchMaxCount, m_MaterialPropertyBlock);
+                DrawMeshInstanced(matrix4x4, HUDUtils.batchMaxCount, m_MaterialPropertyBlock, camera);
                 Profiler.EndSample();
                 index++;
             }
@@ -125,7 +124,7 @@ namespace Framework.HUD.Runtime
                     Matrix4x4[] matrix4x4 = m_pCollector.GetObjectToWorld(index);
                     Profiler.BeginSample("DrawMeshInstanced Last");
                     m_pCollector.FullPropertyBlack(index, m_MaterialPropertyBlock);
-                    DrawMeshInstanced(matrix4x4, lasterRenderCount, m_MaterialPropertyBlock);
+                    DrawMeshInstanced(matrix4x4, lasterRenderCount, m_MaterialPropertyBlock, camera);
                     Profiler.EndSample();
                 }
             }
@@ -161,6 +160,7 @@ namespace Framework.HUD.Runtime
         //-----------------------------------------------------
         public void TriggerReorder(HudController controller)
         {
+            if (m_vHudControllers == null) m_vHudControllers = new HashSet<HudController>(128);
             if (m_vHudControllers.Contains(controller)) return;
             m_vHudControllers.Add(controller);
         }
@@ -210,7 +210,7 @@ namespace Framework.HUD.Runtime
             m_pCollector.SetTransformId(idx, transformId);
         }
         //-----------------------------------------------------
-        public void DrawMeshInstanced(Matrix4x4[] matrix4x4, int count, MaterialPropertyBlock properties)
+        public void DrawMeshInstanced(Matrix4x4[] matrix4x4, int count, MaterialPropertyBlock properties, Camera camera)
         {
             if(m_CommandBuffer == null)
             {
@@ -219,9 +219,9 @@ namespace Framework.HUD.Runtime
                 m_pSystem.OnCreateComandBuffer(m_CommandBuffer);
             }
 #if UNITY_EDITOR
-            Graphics.DrawMeshInstanced(m_pMesh, 0, m_pMaterial, matrix4x4, count, properties, ShadowCastingMode.Off, false);
+            Graphics.DrawMeshInstanced(m_pMesh, 0, m_pMaterial, matrix4x4, count, properties, ShadowCastingMode.Off, false, 0, camera);
 #else
-            m_CommandBuffer.DrawMeshInstanced(m_pMesh, 0, m_pMaterial, 0, matrix4x4, count, properties);
+            m_CommandBuffer.DrawMeshInstanced(m_pMesh, 0, m_pMaterial, 0, matrix4x4, count, properties, 0, camera);
 #endif
         }
         //-----------------------------------------------------

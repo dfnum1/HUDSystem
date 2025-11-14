@@ -17,6 +17,15 @@ namespace Framework.HUD.Editor
     //-------------------------------------------
     public class TreeAssetView : TreeView
     {
+        //-------------------------------------------
+        public struct DragAndDropData
+        {
+            public int dragAndDropPosition;
+            public TreeItemData parentItem;
+            public TreeItemData current;
+            public int insertAtIndex;
+        }
+        //-------------------------------------------
         public struct RowArgvData
         {
             public TreeItemData itemData;
@@ -135,6 +144,7 @@ namespace Framework.HUD.Editor
         }
         public delegate bool OnCellDrawEvent(RowArgvData argvData);
         public delegate bool OnItemDrag(TreeItemData data);
+        public delegate void OnItemDragDrop(DragAndDropData data);
         public delegate List<TreeItemData> OnSortColumEvent(List<TreeItemData> vDatas, MultiColumnHeader header, int c);
 
         public OnCellDrawEvent OnCellDraw = null;
@@ -154,6 +164,7 @@ namespace Framework.HUD.Editor
         public Action<ItemData> OnItemRightClick = null;
         public Action           OnViewRightClick = null;
         public OnItemDrag OnDragItem = null;
+        public OnItemDragDrop OnDragDrop = null;
         public OnSortColumEvent OnSortColum = null;
         List<ItemData> m_SourceAssets = new List<ItemData>();
         //--------------------------------------------------------
@@ -382,6 +393,11 @@ namespace Framework.HUD.Editor
                 return child;
             }
             return null;
+        }
+        //--------------------------------------------------------
+        public TreeItemData GetRoot()
+        {
+            return rootItem as TreeItemData;
         }
         //--------------------------------------------------------
         protected override void DoubleClickedItem(int id)
@@ -632,12 +648,34 @@ namespace Framework.HUD.Editor
         protected override bool CanStartDrag(CanStartDragArgs args)
         {
             if (OnDragItem == null) return false;
-            return OnDragItem((TreeItemData)args.draggedItem);
+            if (OnDragItem((TreeItemData)args.draggedItem))
+            {
+                DragAndDrop.PrepareStartDrag();
+                DragAndDrop.SetGenericData("tree_drag_item", args.draggedItem);
+                DragAndDrop.StartDrag(args.draggedItem.displayName);
+                return true;
+            }
+            return false;
         }
         //--------------------------------------------------------
         protected override void SetupDragAndDrop(SetupDragAndDropArgs args)
         {
 
+        }
+        //--------------------------------------------------
+        protected override DragAndDropVisualMode HandleDragAndDrop(DragAndDropArgs args)
+        {
+            if (args.performDrop)
+            {
+                DragAndDropData data = new DragAndDropData();
+                data.dragAndDropPosition = (int)args.dragAndDropPosition;
+                data.parentItem = args.parentItem as TreeItemData;
+                data.insertAtIndex = (int)args.insertAtIndex;
+                data.current = DragAndDrop.GetGenericData("tree_drag_item") as TreeItemData;
+                if (OnDragDrop != null) OnDragDrop(data);
+            }
+
+            return DragAndDropVisualMode.Generic;
         }
         //--------------------------------------------------------
         public override void OnGUI(Rect rect)

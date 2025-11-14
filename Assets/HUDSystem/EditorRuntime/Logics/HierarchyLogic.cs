@@ -46,9 +46,64 @@ namespace Framework.HUD.Editor
                 m_pTree.OnViewRightClick += OnViewRightClick;
                 m_pTree.OnItemRightClick += OnItemRightClick;
                 m_pTree.OnDragItem += OnDragItem;
+                m_pTree.OnDragDrop += OnDragDrop;
+                m_pTree.OnSelectChange += OnItemSelected;
                 m_pTree.Reload();
             }
             RefreshTree();
+        }
+        //--------------------------------------------------------
+        public override void OnSetHudObject(HudObject hudObject)
+        {
+            GetHud().Destroy();
+            GetHud().SetHudObject(hudObject);
+            var canvas = GetHud().GetCanvas();
+            if (canvas != null)
+            {
+                foreach (var db in canvas)
+                {
+                    m_vTopGraphics.Add(db);
+                }
+                RefreshTree();
+            }
+        }
+        //--------------------------------------------------------
+        public override void OnSave()
+        {
+            var hudObj = m_pEditor.GetHUDObject();
+            if (hudObj == null)
+                return;
+
+            var typeLists = ConvertToDataList();
+            var fields = hudObj.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+            for(int i =0;i < fields.Length; ++i)
+            {
+                if (!fields[i].FieldType.IsGenericType)
+                    continue;
+                var genericTypes = fields[i].FieldType.GenericTypeArguments;
+                if (genericTypes == null || genericTypes.Length != 1)
+                    continue;
+                if(typeLists.TryGetValue(genericTypes[0],out var vTemps))
+                {
+                    var targetType = genericTypes[0];
+                    var listType = typeof(List<>).MakeGenericType(targetType);
+                    var listInstance = Activator.CreateInstance(listType) as System.Collections.IList;
+
+                    foreach (var baseData in vTemps)
+                    {
+                        listInstance.Add(baseData);
+                    }
+                    fields[i].SetValue(hudObj, listInstance);
+                }
+            }
+
+            List<Framework.HUD.Runtime.HudObject.Hierarchy> hierarchies = new List<Framework.HUD.Runtime.HudObject.Hierarchy>();
+            foreach (var top in m_vTopGraphics)
+            {
+                var hierarchy = BuildHierarchy(top);
+                hierarchies.Add(hierarchy);
+            }
+            hudObj.vHierarchies = hierarchies;
         }
         //--------------------------------------------------------
         void RefreshTree()
@@ -78,18 +133,87 @@ namespace Framework.HUD.Editor
             }
         }
         //--------------------------------------------------------
-        public override void OnGUI()
+        protected override void OnGUI()
         {
             if(m_pTree!=null)
             {
                 m_pTree.GetColumn(0).width = viewRect.width;
-                m_pTree.OnGUI(viewRect);
+                m_pTree.OnGUI(new Rect(0,0,viewRect.width, viewRect.height));
             }
         }
         //--------------------------------------------------------
         bool OnDragItem(TreeAssetView.TreeItemData item)
         {
             return true;
+        }
+        //--------------------------------------------------------
+        protected void OnDragDrop(TreeAssetView.DragAndDropData drop)
+        {
+            if (drop.current != null)
+            {
+                List<ItemData> vItems = m_pTree.GetDatas();
+                if (drop.insertAtIndex < 0)
+                {
+                    if (drop.parentItem != null)
+                    {
+                        var parentWidget = drop.parentItem.data as WidgetItem;
+                        var currentWidget = drop.current.data as WidgetItem;
+                        if(currentWidget.graphicItem.GetParent()!=null)
+                        {
+                            if(currentWidget.graphicItem.GetParent() != parentWidget.graphicItem)
+                            {
+                                currentWidget.graphicItem.GetParent().Detach(currentWidget.graphicItem);
+                                parentWidget.graphicItem.Attach(currentWidget.graphicItem);
+                                RefreshTree();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (drop.insertAtIndex <= vItems.Count)
+                    {
+                        var inserAfter = vItems[drop.insertAtIndex];
+
+                        WidgetItem inserAfterWidget = inserAfter as WidgetItem;
+                        WidgetItem current = drop.current.data as WidgetItem;
+                        if (drop.parentItem == m_pTree.GetRoot())
+                        {
+
+                            return;
+                        }
+                        if(drop.parentItem!=null)
+                        {
+                            var parentWidget = drop.parentItem.data as WidgetItem;
+                            var vChild = parentWidget.graphicItem.GetChilds();
+                            if (vChild != null)
+                            {
+                                if (current.graphicItem.GetParent() != parentWidget.graphicItem)
+                                    current.graphicItem.GetParent().Detach(current.graphicItem);
+                                inserAfterWidget.graphicItem.Attach(current.graphicItem, drop.insertAtIndex);
+                            }
+                        }
+                        else
+                        {
+                            var vChild = inserAfterWidget.graphicItem.GetChilds();
+                            if (vChild != null)
+                            {
+                                if (current.graphicItem.GetParent() != inserAfterWidget.graphicItem)
+                                    current.graphicItem.GetParent().Detach(current.graphicItem);
+                                inserAfterWidget.graphicItem.Attach(current.graphicItem, drop.insertAtIndex);
+                            }
+                        }
+
+                        RefreshTree();
+                    }
+                }
+            }
+        }
+        //--------------------------------------------------------
+        void OnItemSelected(TreeAssetView.ItemData item)
+        {
+            WidgetItem widget = item as WidgetItem;
+            m_pEditor.OnSelectComponent(widget.graphicItem);
         }
         //--------------------------------------------------------
         void OnViewRightClick()
@@ -118,6 +242,12 @@ namespace Framework.HUD.Editor
             m_bItemRightClick = true;
             WidgetItem widget = itemData as WidgetItem;
             GenericMenu menu = new GenericMenu();
+            menu.AddItem(new GUIContent("Delete"), false, () =>
+            {
+                widget.graphicItem.Destroy();
+                GetHud().RemoveComponent(widget.graphicItem);
+                RefreshTree();
+            });
             menu.AddItem(new GUIContent("Widget/Node"), false, () =>
             {
                 OnCreateItem(typeof(HudCanvas), widget);
@@ -172,6 +302,16 @@ namespace Framework.HUD.Editor
             return true;
         }
         //--------------------------------------------------------
+        public bool IsExistID(int id)
+        {
+            HashSet<int> vIds = new HashSet<int>();
+            foreach (var db in m_vTopGraphics)
+            {
+                CollectIds(db, vIds);
+            }
+            return vIds.Contains(id);
+        }
+        //--------------------------------------------------------
         int GeneratorID()
         {
             int id = 0;
@@ -196,6 +336,50 @@ namespace Framework.HUD.Editor
             foreach(var db in childs)
             {
                 CollectIds(db, vIds);
+            }
+        }
+        //--------------------------------------------------------
+        Framework.HUD.Runtime.HudObject.Hierarchy BuildHierarchy(AComponent comp)
+        {
+            Framework.HUD.Runtime.HudObject.Hierarchy hierarchy = new Framework.HUD.Runtime.HudObject.Hierarchy();
+            hierarchy.id = comp.GetId();
+            hierarchy.parentId = comp.GetParent() != null ? comp.GetParent().GetId() : -1;
+            hierarchy.children = new List<Framework.HUD.Runtime.HudObject.Hierarchy>();
+            var childs = comp.GetChilds();
+            if (childs != null)
+            {
+                foreach (var child in childs)
+                {
+                    hierarchy.children.Add(BuildHierarchy(child));
+                }
+            }
+            return hierarchy;
+        }
+        //--------------------------------------------------------
+        Dictionary<System.Type, List<HudBaseData>> ConvertToDataList()
+        {
+            Dictionary<System.Type, List<HudBaseData>> vList = new Dictionary<Type, List<HudBaseData>>();
+            foreach (var db in m_vTopGraphics)
+            {
+                ConvertToDataList(db, vList);
+            }
+            return vList;
+        }
+        //--------------------------------------------------------
+        void ConvertToDataList(AComponent grapic, Dictionary<System.Type, List<HudBaseData>> vList)
+        {
+            if(!vList.TryGetValue(grapic.GetData().GetType(), out var vTemps))
+            {
+                vTemps = new List<HudBaseData>();
+                vList.Add(grapic.GetData().GetType(), vTemps);
+            }
+            vTemps.Add(grapic.GetData());
+            if (grapic.GetChilds() == null)
+                return;
+            var childs = grapic.GetChilds();
+            foreach (var db in childs)
+            {
+                ConvertToDataList(db, vList);
             }
         }
     }

@@ -90,6 +90,14 @@ namespace Framework.HUD.Runtime
             }
             return null;
         }
+#if UNITY_EDITOR
+        //--------------------------------------------------------
+        internal void EditInit()
+        {
+            m_bInited = false;
+            Init();
+        }
+#endif
     }
 #if UNITY_EDITOR
     [UnityEditor.CustomEditor(typeof(HudObject))]

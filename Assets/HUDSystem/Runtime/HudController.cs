@@ -5,6 +5,7 @@
 描    述:	HUD 控制器
 *********************************************************************/
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 namespace Framework.HUD.Runtime
@@ -17,7 +18,7 @@ namespace Framework.HUD.Runtime
         private HudRenderBatch m_RenderBatch = null;
 
         private Transform m_pFollowTarget;
-        private Matrix4x4 m_pFollowTransform;
+        private Matrix4x4 m_pFollowTransform = Matrix4x4.identity;
 
         private Vector3 m_Offset = Vector3.zero;
         private Vector3 m_OffsetRotation = Vector3.zero;
@@ -64,6 +65,18 @@ namespace Framework.HUD.Runtime
             return m_pObject.atlasAset;
         }
         //--------------------------------------------------------
+        public TMP_FontAsset GetFontAsset()
+        {
+            if (m_pObject == null) return null;
+            return m_pObject.fontAsset;
+        }
+        //--------------------------------------------------------
+        public Material GetMaterial()
+        {
+            if (m_pObject == null) return null;
+            return m_pObject.material;
+        }
+        //--------------------------------------------------------
         public int GetTransId()
         {
             return m_nTransId;
@@ -82,7 +95,12 @@ namespace Framework.HUD.Runtime
             if(m_RenderBatch == null)
                 m_RenderBatch = m_pSystem.GetRenderBatch(hudObject.material, hudObject.mesh, hudObject.atlasAset, hudObject.fontAsset);
 
-            m_RenderBatch.AddExpansionNotif(ExpansionNotif);
+            if (m_RenderBatch != null)
+            {
+                m_RenderBatch.AddExpansionNotif(TriggerReorder);
+                if (m_nTransId != 0) m_RenderBatch.RemoveHudController(m_nTransId);
+                m_nTransId = m_RenderBatch.AddHudController(this, true);
+            }
 
             foreach (var db in m_pObject.vHierarchies)
             {
@@ -106,9 +124,16 @@ namespace Framework.HUD.Runtime
                     UnityEngine.Debug.LogWarning(hudObject.name + " Hierarchy Root Node must be HudCanvas!");
                 }
             }
-            if (m_nTransId != 0) m_RenderBatch.RemoveHudController(m_nTransId);
-            m_nTransId = m_RenderBatch.AddHudController(this, true);
-            m_RenderBatch.SetBounds(m_nTransId, hudObject.center, hudObject.size);
+            if (m_RenderBatch != null)
+            {
+                m_RenderBatch.SetBounds(m_nTransId, hudObject.center, hudObject.size);
+            }
+            TriggerReorder();
+        }
+        //--------------------------------------------------------
+        public List<HudCanvas> GetCanvas()
+        {
+            return m_vCanvas;
         }
         //--------------------------------------------------------
         internal void OnReorder()
@@ -121,15 +146,33 @@ namespace Framework.HUD.Runtime
             }
         }
         //--------------------------------------------------------
-        internal void Destroy()
+        public void RemoveComponent(AComponent pComp)
         {
-            m_RenderBatch.RemoveExpansionNotif(ExpansionNotif);
+            if (pComp == null) return;
+            if(pComp is HudCanvas)
+                m_vCanvas.Remove((HudCanvas)pComp);
         }
         //--------------------------------------------------------
-        private void ExpansionNotif()
+        internal void Destroy()
+        {
+            if(m_RenderBatch!=null) m_RenderBatch.RemoveExpansionNotif(TriggerReorder);
+            m_RenderBatch = null;
+        }
+        //--------------------------------------------------------
+        internal void TriggerReorder()
         {
             if (m_RenderBatch == null) return;
             m_RenderBatch.TriggerReorder(this);
+        }
+        //--------------------------------------------------------
+        public void SetDirty()
+        {
+            if (m_vCanvas == null)
+                return;
+            foreach (var db in m_vCanvas)
+            {
+                db.SetDirty();
+            }
         }
         //--------------------------------------------------------
         void CreateHierarchy(AComponent pParent, HudObject.Hierarchy hierarchy)
@@ -167,6 +210,7 @@ namespace Framework.HUD.Runtime
         {
             var canvas = new HudCanvas(m_pSystem, hudData);
             canvas.SetHudController(this);
+            canvas.Init();
             if (pParent != null)
                 pParent.Attach(canvas);
             else
@@ -186,6 +230,8 @@ namespace Framework.HUD.Runtime
                 return null;
             }
             var widget = new HudImage(m_pSystem, hudData);
+            widget.SetHudController(this);
+            widget.Init();
             pParent.Attach(widget);
             return widget;
         }
@@ -198,6 +244,8 @@ namespace Framework.HUD.Runtime
                 return null;
             }
             var widget = new HudText(m_pSystem, hudData);
+            widget.SetHudController(this);
+            widget.Init();
             pParent.Attach(widget);
             return widget;
         }

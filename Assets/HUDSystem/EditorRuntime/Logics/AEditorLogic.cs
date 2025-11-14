@@ -5,7 +5,9 @@
 描    述:	HUD 编辑器
 *********************************************************************/
 #if UNITY_EDITOR
+using Framework.HUD.Runtime;
 using UnityEngine;
+using static Codice.Client.Common.Connection.AskCredentialsToUser;
 
 namespace Framework.HUD.Editor
 {
@@ -18,6 +20,29 @@ namespace Framework.HUD.Editor
         {
             m_pEditor = editor;
             this.viewRect = viewRect;
+        }
+        //--------------------------------------------------------
+        public HudSystem GetHudSystem()
+        {
+            return m_pEditor.GetHudSystem();
+        }
+        //--------------------------------------------------------
+        public HudObject GetHudObject()
+        {
+            return m_pEditor.GetHUDObject();
+        }
+        //--------------------------------------------------------
+        public HudController GetHud()
+        {
+            return m_pEditor.GetHud();
+        }
+        //--------------------------------------------------------
+        public virtual void OnSetHudObject(HudObject hudObject)
+        {
+        }
+        //--------------------------------------------------------
+        internal virtual void OnSelectComponent(AComponent component)
+        {
         }
         //--------------------------------------------------------
         public virtual void OnEnable()
@@ -39,7 +64,18 @@ namespace Framework.HUD.Editor
 
         }
         //--------------------------------------------------------
-        public virtual void OnGUI()
+        public void DrawGUI()
+        {
+            GUILayout.BeginArea(viewRect);
+            OnGUI();
+            GUILayout.EndArea();
+        }
+        //--------------------------------------------------------
+        protected virtual void OnGUI()
+        {
+        }
+        //--------------------------------------------------------
+        public virtual void OnSave() 
         {
         }
     }

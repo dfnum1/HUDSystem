@@ -47,7 +47,7 @@ namespace Framework.HUD.Runtime
             for (int i = 0; i < transformdataList.Length; i++)
             {
                 TransformData transformData = transformdataList[i];
-                if (transformData.disable == 0)
+                if (transformData.disable != 0)
                     continue;
                 if (transformData.root != 1)
                     continue;
@@ -56,7 +56,7 @@ namespace Framework.HUD.Runtime
                 float4x4 mvp = math.mul(vpMatrix, transformData.localToWorld);
                 float zvalue;
                 bool culling = Culling(mvp, transformData, out zvalue);
-                transformData.culling = (byte)(culling ? 1 : 0);
+                transformData.culling = 0;// (byte)(culling ? 1 : 0);
                 transformData.zvalue = zvalue;
 
                 if (transformData.culling == 0)

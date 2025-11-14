@@ -89,23 +89,28 @@ namespace Framework.HUD.Runtime
                 return;
 
             if (m_bInied)
+            {
+                if (m_vNameToSpriteInfo == null || m_vNameToSpriteInfo.Count != m_vSprites.Count)
+                    m_bInied = false;
+            }
+            if (m_bInied)
                 return;
             m_bInied = true;
 
-            if (m_vNameToSpriteInfo == null || m_vNameToSpriteInfo.Count != m_vSprites.Count)
+            if (m_vNameToSpriteInfo == null)
+                m_vNameToSpriteInfo = new Dictionary<string, SpriteInfo>(m_vSprites.Count);
+            m_vNameToSpriteInfo.Clear();
+            foreach (var db in m_vSprites)
             {
-                if (m_vNameToSpriteInfo == null)
-                    m_vNameToSpriteInfo = new Dictionary<string, SpriteInfo>(m_vSprites.Count);
-                foreach(var db in m_vSprites)
-                {
-                    m_vNameToSpriteInfo[db.name] = db;
-                }
+                m_vNameToSpriteInfo[db.name] = db;
             }
         }
         //--------------------------------------------------------
         public void GenAtlasMappingInfo()
         {
 #if UNITY_EDITOR
+            if (!Application.isPlaying)
+                return;
             if (m_isGenAtlasMapping) return;
             m_isGenAtlasMapping = true;
             m_AtlasTex = null;

@@ -245,7 +245,6 @@ Shader "Unlit/Hud_Image_TMP"
 			fixed4 PixShader(pixel_t input) : SV_Target
 			{
 				/*UNITY_SETUP_INSTANCE_ID(input);*/
-
 				if (input.texcoord0.z == 0)
 				{
 					fixed4 col = tex2D(_AtlasTex, input.texcoord0.xy);

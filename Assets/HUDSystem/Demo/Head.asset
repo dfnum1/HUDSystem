@@ -14,11 +14,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   center: {x: 0, y: 0}
   size: {x: 100, y: 100}
-  mesh: {fileID: 0}
-  material: {fileID: 0}
-  atlasAset: {fileID: 0}
-  fontAsset: {fileID: 0}
-  vCanvas: []
-  vImages: []
+  mesh: {fileID: 4300000, guid: b5a4655ce0c3e744ca30a64ba06787db, type: 2}
+  material: {fileID: 2100000, guid: 66f64d333b654b04aaa3b42b9d53a5fa, type: 2}
+  atlasAset: {fileID: 11400000, guid: fb0cd23d79faeda4da7919340a0fca71, type: 2}
+  fontAsset: {fileID: 11400000, guid: 2dc009d528262a149998b416ec45c61a, type: 2}
+  vCanvas:
+  - id: 0
+    name: HudCanvas
+    position: {x: 0, y: 0}
+    sizeDelta: {x: 100, y: 100}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+  vImages:
+  - id: 1
+    name: HudImage
+    position: {x: 0, y: 0}
+    sizeDelta: {x: 100, y: 100}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    sprite: {fileID: 21300000, guid: 5fdfd89b0cb4ca041a3170f83e0282ef, type: 3}
+    imageType: 0
+    fillMethod: 0
+    fillOrigin: 0
+    fillAmount: 1
   vTexts: []
-  vHierarchies: []
+  vHierarchies:
+  - id: 0
+    parentId: -1
+    children:
+    - id: 1
+      parentId: 0
+      children: []

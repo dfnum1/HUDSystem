@@ -12,5 +12,9 @@ namespace Framework.HUD.Runtime
         {
             m_eHudType = EHudType.Number;
         }
+        //--------------------------------------------------------
+        protected override void OnInit()
+        {
+        }
     }
 }

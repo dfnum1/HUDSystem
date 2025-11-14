@@ -16,5 +16,9 @@ namespace Framework.HUD.Runtime
         {
             m_eHudType = EHudType.Canvas;
         }
+        //--------------------------------------------------------
+        protected override void OnInit()
+        {
+        }
     }
 }

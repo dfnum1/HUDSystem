@@ -22,9 +22,6 @@ namespace Framework.HUD.Runtime
     {
         protected EHudType m_eHudType = EHudType.None;
 
-        protected int m_nId = 0;
-        protected string m_strName = null;
-
         protected bool m_bVisible = true;
 
         protected List<AComponent> m_vChilds = null;
@@ -47,29 +44,41 @@ namespace Framework.HUD.Runtime
             m_HudController = hudObject;
         }
         //--------------------------------------------------------
+        internal virtual void Init()
+        {
+            OnInit();
+        }
+        //--------------------------------------------------------
+        protected abstract void OnInit();
+        //--------------------------------------------------------
         internal int GetRootId()
         {
             return 0;
         }
         //--------------------------------------------------------
+        internal HudBaseData GetData()
+        {
+            return m_pHudData;
+        }
+        //--------------------------------------------------------
         internal void SetId(int nId)
         {
-            m_nId = nId;
+            m_pHudData.id = nId;
         }
         //--------------------------------------------------------
         public int GetId()
         {
-            return m_nId;
+            return m_pHudData.id;
         }
         //--------------------------------------------------------
         internal void SetName(string name)
         {
-            m_strName = name;
+            m_pHudData.name = name;
         }
         //--------------------------------------------------------
         public string GetName()
         {
-            return m_strName;
+            return m_pHudData.name;
         }
         //--------------------------------------------------------
         public EHudType GetHudType()
@@ -100,14 +109,43 @@ namespace Framework.HUD.Runtime
             return m_HudController.renderBatch;
         }
         //--------------------------------------------------------
-        public bool IsVisible()
+        public AComponent GetParent()
         {
-            if(m_pParent!=null)
-                return m_bVisible && m_pParent.IsVisible();
+            return m_pParent;
+        }
+        //--------------------------------------------------------
+        public void SetDirty()
+        {
+            OnDirty();
+            if (m_vDataSnippets != null)
+            {
+                for (int i = 0; i < m_vDataSnippets.Count; i++)
+                {
+                    m_vDataSnippets[i].SetColor(m_pHudData.color);
+                    m_vDataSnippets[i].SetPosition(m_pHudData.position);
+                    m_vDataSnippets[i].SetAngle(m_pHudData.angle);
+                    m_vDataSnippets[i].WriteParamData();
+                }
+            }
+            if (m_vChilds!=null)
+            {
+                for (int i = m_vChilds.Count - 1; i >= 0; --i)
+                {
+                    m_vChilds[i].SetDirty();
+                }
+            }
+        }
+        //--------------------------------------------------------
+        protected virtual void OnDirty()
+        {
+        }
+        //--------------------------------------------------------
+        public bool IsVisibleSelf()
+        {
             return m_bVisible;
         }
         //--------------------------------------------------------
-        public void SetVisible(bool bVisible)
+        public void SetVisibleSelf(bool bVisible)
         {
             if (m_bVisible == bVisible) return;
             m_bVisible = bVisible;
@@ -118,6 +156,19 @@ namespace Framework.HUD.Runtime
                     m_vDataSnippets[i].SetShow(bVisible);
                 }
             }
+        }
+        //--------------------------------------------------------
+        public bool IsVisible()
+        {
+            if(m_pParent!=null)
+                return m_bVisible && m_pParent.IsVisible();
+            return m_bVisible;
+        }
+        //--------------------------------------------------------
+        public void SetVisible(bool bVisible)
+        {
+            if (m_bVisible == bVisible) return;
+            SetVisibleSelf(bVisible);
             if (m_vChilds != null)
             {
                 for (int i = 0; i < m_vChilds.Count; i++)
@@ -132,15 +183,34 @@ namespace Framework.HUD.Runtime
             return m_vChilds;
         }
         //--------------------------------------------------------
-        public void Attach(AComponent pComp)
+        public void Attach(AComponent pComp, int insertIndex =-1)
         {
             if (pComp == null) return;
             if (m_vChilds == null)
                 m_vChilds = new List<AComponent>(2);
+
             if (m_vChilds.Contains(pComp))
+            {
+                int curIndex = m_vChilds.IndexOf(pComp);
+                if (insertIndex>=0 && curIndex != insertIndex)
+                {
+                    if (insertIndex < curIndex) curIndex++;
+                    m_vChilds.Insert(insertIndex, pComp);
+                    m_vChilds.RemoveAt(curIndex);
+                    m_HudController?.TriggerReorder();
+                }
                 return;
+            }
             pComp.m_pParent = this;
-            m_vChilds.Add(pComp);
+            if(insertIndex>=0)
+            {
+                m_vChilds.Insert(insertIndex, pComp);
+            }
+            else
+            {
+                m_vChilds.Add(pComp);
+            }
+            m_HudController?.TriggerReorder();
         }
         //--------------------------------------------------------
         public void Detach(AComponent pComp)
@@ -150,6 +220,7 @@ namespace Framework.HUD.Runtime
                 return;
             pComp.m_pParent = null;
             m_vChilds.Remove(pComp);
+            m_HudController?.TriggerReorder();
         }
         //--------------------------------------------------------
         public void DetachAll()
@@ -159,6 +230,7 @@ namespace Framework.HUD.Runtime
             foreach (var db in m_vChilds)
                 db.m_pParent = null;
             m_vChilds.Clear();
+            m_HudController?.TriggerReorder();
         }
         //--------------------------------------------------------
         public void ResizeDataSnippet(int count)
@@ -173,11 +245,12 @@ namespace Framework.HUD.Runtime
                     HudDataSnippet snippet = new HudDataSnippet(this);
                     snippet.Init(IsVisible(), GetTransId());
                     snippet.SetColor(m_pHudData.color);
-                    snippet.SetPosition(m_pHudData.position / 100f);
+                    snippet.SetPosition(m_pHudData.position);
                     snippet.SetAngle(m_pHudData.angle);
                     snippet.WriteData();
                     m_vDataSnippets.Add(snippet);
                 }
+                m_HudController.TriggerReorder();
             }
             else
             {
@@ -186,6 +259,7 @@ namespace Framework.HUD.Runtime
                 {
                     m_vDataSnippets.RemoveAt(m_vDataSnippets.Count - 1);
                 }
+                m_HudController.TriggerReorder();
             }
         }
         //--------------------------------------------------------
@@ -198,7 +272,7 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         internal void OnReorder()
         {
-            if (m_HudController == null || m_vDataSnippets == null)
+            if (m_HudController == null)
                 return;
 
             if (!IsVisible())
@@ -208,10 +282,14 @@ namespace Framework.HUD.Runtime
             if (renderBatch == null)
                 return;
 
-            for (int i = m_vDataSnippets.Count-1; i >=0; --i)
+            if(m_vDataSnippets!=null)
             {
-                m_vDataSnippets[i].OnReorder(renderBatch);
+                for (int i = m_vDataSnippets.Count - 1; i >= 0; --i)
+                {
+                    m_vDataSnippets[i].OnReorder(renderBatch);
+                }
             }
+
 
             if(m_vChilds!=null)
             {
@@ -220,6 +298,11 @@ namespace Framework.HUD.Runtime
                     m_vChilds[i].OnReorder();
                 }
             }
+        }
+        //--------------------------------------------------------
+        public void Destroy()
+        {
+            if (m_pParent != null) m_pParent.Detach(this);
         }
     }
 }

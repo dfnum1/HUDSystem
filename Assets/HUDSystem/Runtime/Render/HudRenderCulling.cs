@@ -74,6 +74,7 @@ namespace Framework.HUD.Runtime
                 int index = m_nReadIndex;
                 TransformData data = new TransformData();
                 data.root = root ? (byte)1 : (byte)0;
+                data.localToWorld = controller.GetWorldMatrix();
                 m_vTransformData.Add(data);
                 m_nReadIndex++;
                 return index;
@@ -83,7 +84,7 @@ namespace Framework.HUD.Runtime
         public void Remove(int index)
         {
             if (m_bDispose) return;
-            if (index >= m_vTransformData.Length) return;
+            if (index<0 || index >= m_vTransformData.Length) return;
             TransformData data = m_vTransformData[index];
             data.disable = 1;
             m_vTransformData[index] = data;
@@ -93,7 +94,7 @@ namespace Framework.HUD.Runtime
         public void SetEnable(int index)
         {
             if (m_bDispose) return;
-            if (index >= m_vTransformData.Length) return;
+            if (index < 0 || index >= m_vTransformData.Length) return;
             TransformData data = m_vTransformData[index];
             data.disable = 0;
             m_vTransformData[index] = data;
@@ -102,7 +103,7 @@ namespace Framework.HUD.Runtime
         public void SetDisable(int index)
         {
             if (m_bDispose) return;
-            if (index >= m_vTransformData.Length) return;
+            if (index < 0 || index >= m_vTransformData.Length) return;
             TransformData data = m_vTransformData[index];
             data.disable = 1;
             m_vTransformData[index] = data;
@@ -111,7 +112,7 @@ namespace Framework.HUD.Runtime
         public void SetBounds(int index, float2 center, float2 size)
         {
             if (m_bDispose) return;
-            if (index >= m_vTransformData.Length) return;
+            if (index < 0 || index >= m_vTransformData.Length) return;
             TransformData data = m_vTransformData[index];
             data.boundCenter = center;
             data.boundSize = size;

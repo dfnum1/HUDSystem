@@ -62,8 +62,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_SpriteAtlas: {fileID: 100100200, guid: b6a0f20e2bddffa4fa1086bd56517060, type: 3}
   m_AtlasMappingTex: {fileID: 7125139453182121956}
-  m_Width: 87
-  m_Height: 8
+  m_Width: 512
+  m_Height: 512
   m_AtlasMappingWidth: 8
   m_AtlasMappingHeight: 8
   m_vSprites:
@@ -81,13 +81,13 @@ MonoBehaviour:
     size: {x: 28, y: 0}
   - name: bg_build_lvlhud_3
     index: 4
-    size: {x: 14, y: 0}
+    size: {x: 15, y: 0}
   - name: bg_build_lvlhud_4
     index: 5
-    size: {x: 14, y: 40}
+    size: {x: 15, y: 40}
   - name: bg_build_lvlhud_5
     index: 6
-    size: {x: 14, y: 0}
+    size: {x: 15, y: 0}
   - name: bg_build_lvlhud_6
     index: 7
     size: {x: 29, y: 0}
@@ -99,67 +99,67 @@ MonoBehaviour:
     size: {x: 29, y: 0}
   - name: 
     index: 10
-    size: {x: 72, y: 40}
+    size: {x: 154, y: 154}
   - name: bg_icon_sel_0
     index: 11
-    size: {x: 21, y: 11}
+    size: {x: 46, y: 45}
   - name: bg_icon_sel_1
     index: 12
-    size: {x: 21, y: 17}
+    size: {x: 46, y: 67}
   - name: bg_icon_sel_2
     index: 13
-    size: {x: 21, y: 10}
+    size: {x: 46, y: 42}
   - name: bg_icon_sel_3
     index: 14
-    size: {x: 29, y: 11}
+    size: {x: 64, y: 45}
   - name: bg_icon_sel_4
     index: 15
-    size: {x: 29, y: 17}
+    size: {x: 64, y: 67}
   - name: bg_icon_sel_5
     index: 16
-    size: {x: 29, y: 10}
+    size: {x: 64, y: 42}
   - name: bg_icon_sel_6
     index: 17
-    size: {x: 20, y: 11}
+    size: {x: 44, y: 45}
   - name: bg_icon_sel_7
     index: 18
-    size: {x: 20, y: 17}
+    size: {x: 44, y: 67}
   - name: bg_icon_sel_8
     index: 19
-    size: {x: 20, y: 10}
+    size: {x: 44, y: 42}
   - name: com_bg_hud2
     index: 20
-    size: {x: 72, y: 40}
+    size: {x: 54, y: 54}
   - name: hero_head_circlel_00
     index: 21
-    size: {x: 72, y: 40}
+    size: {x: 128, y: 128}
   - name: hud_fight_anger_04
     index: 22
-    size: {x: 72, y: 40}
+    size: {x: 23, y: 67}
   - name: hud_fight_anger_05
     index: 23
-    size: {x: 72, y: 40}
+    size: {x: 23, y: 67}
   - name: hud_fight_anger_bottom_02
     index: 24
-    size: {x: 72, y: 40}
+    size: {x: 179, y: 93}
   - name: hud_fight_camp_01
     index: 25
-    size: {x: 72, y: 40}
+    size: {x: 128, y: 128}
   - name: hud_fight_camp_bottom_01
     index: 26
-    size: {x: 72, y: 40}
+    size: {x: 118, y: 118}
   - name: hud_fight_Progress_white
     index: 27
-    size: {x: 72, y: 40}
+    size: {x: 87, y: 8}
   - name: hud_fight_Progress_yellow_bottom
     index: 28
-    size: {x: 71, y: 40}
+    size: {x: 109, y: 14}
   - name: icon_hud_fight_troops
     index: 29
-    size: {x: 72, y: 40}
+    size: {x: 64, y: 64}
   - name: icon_pioneer_01
     index: 30
-    size: {x: 72, y: 40}
+    size: {x: 128, y: 128}
 --- !u!28 &7125139453182121956
 Texture2D:
   m_ObjectHideFlags: 0
@@ -202,7 +202,7 @@ Texture2D:
   m_ColorSpace: 0
   m_PlatformBlob: 
   image data: 256
-  _typelessdata: 000000000048002800000000001c000000000000001c002800000028001c0000001c0000000e0000001c0000000e0028001c0028000e0000002a0000001d0000002a0000001d0028002a0028001d00000000000000480028000000000015000b0000000b001500110000001d0015000a00150000001d000b0015000b001d00110015001d001d000a003300000014000b0033000b001400110033001d0014000a000000000048002800000000004800280000000000480028000000000048002800000000004800280000000000480028000000000048002800000000004800280000000000470028000000000048002800000000004800280000000000000000
+  _typelessdata: 003a018300480028003a0183001c0000003a0183001c0028003a01ab001c000000560183000f000000560183000f0028005601ab000f000000650183001d000000650183001d0028006501ab001d000000000000009a009a00000000002e002d0000002d002e004300000070002e002a002e00000040002d002e002d00400043002e00700040002a006e0000002c002d006e002d002c0043006e0070002c002a00000183003600360122000000800080008601430017004301a60000001700430000009e00b3005d000000ff0080008000b700840076007600a101430057000801310084006d000e008400ff00400040009e0000008000800000000000000000
   m_StreamData:
     serializedVersion: 2
     offset: 0

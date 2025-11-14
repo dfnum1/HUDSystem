@@ -32,10 +32,8 @@ namespace Framework.HUD.Runtime
 
         public Vector2 position;
         public Vector2 sizeDelta = new Vector2(100,100);
-        public float angle;
-        public Color   color;
-
-        public List<int> childs;
+        public float angle = 0;
+        public Color   color =Color.white;
     }
     //--------------------------------------------------------
     [System.Serializable]
@@ -49,7 +47,7 @@ namespace Framework.HUD.Runtime
         public string text;
         public int fontSize;
         public float lineSpacing;
-        public HorizontalAlignment horizontalAlignment;
+        public HorizontalAlignment alignment;
         public TMPro.TMP_FontAsset fontAsset;
     }
     //--------------------------------------------------------

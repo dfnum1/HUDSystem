@@ -49,6 +49,8 @@ namespace Framework.HUD.Runtime
             foreach (var db in m_vRenders)
                 db.Value.OnChangeCamera(m_pRenderCamera, camera);
             m_pRenderCamera = camera;
+            if (camera) m_pRenderCameraTransform = camera.transform;
+            else m_pRenderCameraTransform = null;
         }
         //--------------------------------------------------------
         public HudRenderBatch GetRenderBatch(Material material, Mesh mesh, HudAtlas atlas, TMP_FontAsset fontAsset)
@@ -78,11 +80,6 @@ namespace Framework.HUD.Runtime
             m_vHuds.Remove(hudController);
         }
         //--------------------------------------------------------
-        public void EditorRender()
-        {
-
-        }
-        //--------------------------------------------------------
         public void Update()
         {
         }
@@ -100,7 +97,7 @@ namespace Framework.HUD.Runtime
             BeginRender();
             foreach(var db in m_vRenders)
             {
-                db.Value.Render();
+                db.Value.Render(m_pRenderCamera);
             }
             EndRender();
         }

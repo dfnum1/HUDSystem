@@ -18,6 +18,11 @@ namespace Framework.HUD.Runtime
             m_eHudType = EHudType.Image;
         }
         //--------------------------------------------------------
+        protected override void OnInit()
+        {
+            RefreshSpirte();
+        }
+        //--------------------------------------------------------
         public void SetSprite(Sprite sprite)
         {
             HudImageData hudImageData = m_pHudData as HudImageData;
@@ -43,7 +48,12 @@ namespace Framework.HUD.Runtime
             return hudImageData.sprite;
         }
         //--------------------------------------------------------
-        void RefreshSpirte()
+        protected override void OnDirty()
+        {
+            RefreshSpirte();
+        }
+        //--------------------------------------------------------
+        internal void RefreshSpirte()
         {
             HudImageData hudImageData = m_pHudData as HudImageData;
             if (hudImageData == null)
@@ -75,14 +85,19 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         private void Simple(Sprite sprite, HudImageData hudData)
         {
-            var spriteInfo = GetHudAtlas().GetSpriteInfo(sprite.name);
-            if (spriteInfo == null) return;
+            int spriteIndex = -1;
+            HudAtlas.SpriteInfo spriteInfo = null;
+            if(sprite !=null)
+            {
+                spriteInfo = GetHudAtlas().GetSpriteInfo(sprite.name);
+                if (spriteInfo != null) spriteIndex = spriteInfo.index;
+            }
             ResizeDataSnippet(1);
             HudDataSnippet snippet = GetDataSnippet(0);
             snippet.ResetNineParam();
 
             int quadindex = 0;
-            snippet.SetSpriteId(quadindex, spriteInfo.index);
+            snippet.SetSpriteId(quadindex, spriteIndex);
             snippet.SetSpritePositon(quadindex, new float2(-hudData.sizeDelta.x / 2, -hudData.sizeDelta.y / 2));
             snippet.SetSpriteSize(quadindex, hudData.sizeDelta);
             snippet.SetAmount(1, 0, 0);
@@ -91,13 +106,18 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         private void Filled(Sprite sprite, HudImageData hudData)
         {
-            var spriteInfo = GetHudAtlas().GetSpriteInfo(sprite.name);
-            if (spriteInfo == null) return;
+            int spriteIndex = -1;
+            HudAtlas.SpriteInfo spriteInfo = null;
+            if (sprite != null)
+            {
+                spriteInfo = GetHudAtlas().GetSpriteInfo(sprite.name);
+                if (spriteInfo != null) spriteIndex = spriteInfo.index;
+            }
             ResizeDataSnippet(1);
             HudDataSnippet snippet = GetDataSnippet(0);
             snippet.ResetNineParam();
             int quadindex = 0;
-            snippet.SetSpriteId(quadindex, spriteInfo.index);
+            snippet.SetSpriteId(quadindex, spriteIndex);
             float2 spritePos = new float2(-hudData.sizeDelta.x / 2, -hudData.sizeDelta.y / 2);
             float2 spriteSize = hudData.sizeDelta;
             int method = (int)(hudData.fillMethod);
@@ -136,8 +156,7 @@ namespace Framework.HUD.Runtime
         static readonly Vector2[] s_VertScratch = new Vector2[4];
         private void Sliced(Sprite sprite, HudImageData hudData)
         {
-            if (sprite == null) return;
-            if (sprite.border.SqrMagnitude() > 0)
+            if (sprite!=null && sprite.border.SqrMagnitude() > 0)
             {
                 ResizeDataSnippet(1);
                 HudDataSnippet snippet = GetDataSnippet(0);
