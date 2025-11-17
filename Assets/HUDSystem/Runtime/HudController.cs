@@ -98,7 +98,11 @@ namespace Framework.HUD.Runtime
             if (m_RenderBatch != null)
             {
                 m_RenderBatch.AddExpansionNotif(TriggerReorder);
-                if (m_nTransId != 0) m_RenderBatch.RemoveHudController(m_nTransId);
+                if (m_nTransId != 0)
+                {
+                    m_RenderBatch.RemoveHudData(m_nTransId);
+                    m_RenderBatch.RemoveHudController(m_nTransId);
+                }
                 m_nTransId = m_RenderBatch.AddHudController(this, true);
             }
 
@@ -140,7 +144,17 @@ namespace Framework.HUD.Runtime
         {
             if (m_vWidgets == null)
                 return;
-            foreach(var db in m_vWidgets)
+
+            if(m_nTransId>=0 && m_RenderBatch !=null)
+            {
+                m_RenderBatch.RemoveHudData(m_nTransId);
+            }
+
+            m_vWidgets.Sort((w1, w2) =>
+            {
+                return w1.GetTagZ().CompareTo(w2.GetTagZ());
+            });
+            foreach (var db in m_vWidgets)
             {
                 db.OnReorder();
             }
@@ -157,6 +171,10 @@ namespace Framework.HUD.Runtime
         {
             if(m_RenderBatch!=null) m_RenderBatch.RemoveExpansionNotif(TriggerReorder);
             m_RenderBatch = null;
+            if (m_nTransId >= 0 && m_RenderBatch != null)
+            {
+                m_RenderBatch.RemoveHudData(m_nTransId);
+            }
         }
         //--------------------------------------------------------
         internal void TriggerReorder()

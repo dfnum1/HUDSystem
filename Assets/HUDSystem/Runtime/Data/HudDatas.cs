@@ -30,10 +30,12 @@ namespace Framework.HUD.Runtime
         public int id;
         public string name;
 
-        public Vector2 position;
+        public Vector3 position;
         public Vector2 sizeDelta = new Vector2(100,100);
         public float angle = 0;
         public Color   color =Color.white;
+        public bool mask;
+        public Rect maskRegion;
     }
     //--------------------------------------------------------
     [System.Serializable]

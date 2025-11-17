@@ -56,6 +56,11 @@ namespace Framework.HUD.Runtime
             return 0;
         }
         //--------------------------------------------------------
+        internal float GetTagZ()
+        {
+            return GetPosition().z;
+        }
+        //--------------------------------------------------------
         internal HudBaseData GetData()
         {
             return m_pHudData;
@@ -114,6 +119,12 @@ namespace Framework.HUD.Runtime
             return m_pParent;
         }
         //--------------------------------------------------------
+        public Vector3 GetPosition()
+        {
+            if (m_pParent != null) return m_pParent.GetPosition() + m_pHudData.position;
+            return m_pHudData.position;
+        }
+        //--------------------------------------------------------
         public void SetDirty()
         {
             OnDirty();
@@ -122,7 +133,8 @@ namespace Framework.HUD.Runtime
                 for (int i = 0; i < m_vDataSnippets.Count; i++)
                 {
                     m_vDataSnippets[i].SetColor(m_pHudData.color);
-                    m_vDataSnippets[i].SetPosition(m_pHudData.position);
+                    m_vDataSnippets[i].SetPosition(GetPosition());
+                    m_vDataSnippets[i].SetTextOrImage(GetHudType() == EHudType.Text);
                     m_vDataSnippets[i].SetAngle(m_pHudData.angle);
                     m_vDataSnippets[i].WriteParamData();
                 }
@@ -202,7 +214,7 @@ namespace Framework.HUD.Runtime
                 return;
             }
             pComp.m_pParent = this;
-            if(insertIndex>=0)
+            if(insertIndex>=0 && insertIndex<= m_vChilds.Count)
             {
                 m_vChilds.Insert(insertIndex, pComp);
             }

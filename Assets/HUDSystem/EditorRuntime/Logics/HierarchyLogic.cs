@@ -145,7 +145,7 @@ namespace Framework.HUD.Editor
         //--------------------------------------------------------
         bool OnDragItem(TreeAssetView.TreeItemData item)
         {
-            return true;
+            return m_pTree.IsSelected(item.id);
         }
         //--------------------------------------------------------
         protected void OnDragDrop(TreeAssetView.DragAndDropData drop)
@@ -280,7 +280,7 @@ namespace Framework.HUD.Editor
 
             grapic.SetId(GeneratorID());
             grapic.SetName(type.Name);
-
+            grapic.SetHudController(GetHud());
             if (item!=null)
             {
                 item.graphicItem.Attach(grapic);
@@ -289,6 +289,7 @@ namespace Framework.HUD.Editor
             {
                 m_vTopGraphics.Add(grapic);
             }
+            grapic.Init();
 
             RefreshTree();
             return grapic;

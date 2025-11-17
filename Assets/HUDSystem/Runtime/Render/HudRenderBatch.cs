@@ -175,6 +175,11 @@ namespace Framework.HUD.Runtime
             m_Culling.Remove(id);
         }
         //-----------------------------------------------------
+        public void RemoveHudData(int hash)
+        {
+            m_pCollector.Remove(hash);
+        }
+        //-----------------------------------------------------
         public void SetControllerEnable(int index)
         {
             m_Culling.SetEnable(index);

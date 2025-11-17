@@ -132,11 +132,14 @@ Shader "Unlit/Hud_Image_TMP"
 				UNITY_TRANSFER_INSTANCE_ID(input, output);
 				float4x4 param1 = UNITY_ACCESS_INSTANCED_PROP(Props, _Param1);
 				float4x4 param2 = UNITY_ACCESS_INSTANCED_PROP(Props, _Param2);
+
+				float2 tmpOrImgTagZ = toFloat2(param2[1][3]);
+				float tmpOrimg = tmpOrImgTagZ.x;
+
 				//img和tmp 公用数据
 				fixed4 color = float2ToColor(param2[2][3], param2[3][3]);
-				float2 comPos = float2(param1[2][3], param1[3][3]);
+				float3 comPos = float3(param1[2][3], param1[3][3],tmpOrImgTagZ.y);
 				float angle = param2[0][3];
-				float tmpOrimg = param2[1][3];
 
 				//tmp 需要数据
 				float4x4 localToWorld = unity_ObjectToWorld;
@@ -177,7 +180,7 @@ Shader "Unlit/Hud_Image_TMP"
 				input.vertex.xy = lerp(vertex_xy/100, vertex_xy, tmpOrimg);
 
 				rotate2D(input.vertex.xy, angle);
-				input.vertex.xy = input.vertex.xy + comPos;
+				input.vertex.xyz = input.vertex.xyz + comPos;
 
 
 				float boldparam = lossyScaleY * adjustedScale;

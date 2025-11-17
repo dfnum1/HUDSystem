@@ -60,8 +60,8 @@ namespace Framework.HUD.Runtime
         {
             get
             {
-                if (m_AtlasTex != null) return m_AtlasTex;
                 Init();
+                if (m_AtlasTex != null) return m_AtlasTex;
                 foreach (var item in m_vNameToSpriteInfo)
                 {
                     Sprite sprite = m_SpriteAtlas.GetSprite(item.Key);
@@ -95,6 +95,7 @@ namespace Framework.HUD.Runtime
             }
             if (m_bInied)
                 return;
+            m_AtlasTex = null;
             m_bInied = true;
 
             if (m_vNameToSpriteInfo == null)

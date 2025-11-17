@@ -65,8 +65,16 @@ namespace Framework.HUD.Editor
             data.sizeDelta = EditorGUILayout.Vector2Field("Size", data.sizeDelta);
             data.angle = EditorGUILayout.Slider("Angle", data.angle, 0, 360);
             data.color = EditorGUILayout.ColorField("Color", data.color);
+            data.mask = EditorGUILayout.Toggle("mask", data.mask);
+            if(data.mask)
+            {
+                EditorGUI.indentLevel++;
+                data.maskRegion = EditorGUILayout.RectField("MaskRegion", data.maskRegion);
+                EditorGUI.indentLevel--;
+            }
             if (EditorGUI.EndChangeCheck())
             {
+                GetHud().TriggerReorder();
                 pComonent.SetDirty();
             }
         }

@@ -41,6 +41,7 @@ namespace Framework.HUD.Runtime
         public byte culling;
         public byte disable;
         public byte root;
+        public float zTag;
         public float zvalue;
     }
 

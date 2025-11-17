@@ -1,6 +1,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Diagnostics;
+using UnityEngine.UIElements;
 namespace Framework.HUD.Runtime
 {
 
@@ -53,7 +54,9 @@ namespace Framework.HUD.Runtime
         }
 
         private int rootId { get { return m_pComponet.GetRootId(); } }
+        private float tagZ { get { return m_pComponet.GetTagZ(); } }
 
+        private bool isText { get { return m_pComponet.GetHudType() == EHudType.Text; } }
         private bool m_Show = true;
 
         public void SetShow(bool show)
@@ -140,7 +143,7 @@ namespace Framework.HUD.Runtime
             m_Param2.value.data = f4x4;
         }
 
-        public void SetPosition(Vector2 position)
+        public void SetPosition(Vector3 position)
         {
             float4x4 f4x4 = m_Param1.value.data;
             float4 c3 = f4x4.c3;
@@ -154,7 +157,16 @@ namespace Framework.HUD.Runtime
         {
             float4x4 f4x4 = m_Param2.value.data;
             float4 c3 = f4x4.c3;
-            c3.y = text ? 1 : 0;
+            c3.y = HUDUtils.ToOneFloat(text ? 1 : 0, tagZ);// text ? 1 : 0;
+            f4x4.c3 = c3;
+            m_Param2.value.data = f4x4;
+        }
+
+        public void SetTagZ(float tagZ)
+        {
+            float4x4 f4x4 = m_Param2.value.data;
+            float4 c3 = f4x4.c3;
+            c3.y = HUDUtils.ToOneFloat(isText?1:0, tagZ);// text ? 1 : 0;
             f4x4.c3 = c3;
             m_Param2.value.data = f4x4;
         }
@@ -272,6 +284,16 @@ namespace Framework.HUD.Runtime
             c2.y = method;
             f4x4.c2 = c2;
             m_Param2.value.data = f4x4;
+        }
+
+        public void SetMaskRegion(Rect region)
+        {
+            float4x4 f4x4 = m_Param1.value.data;
+            float4 c3 = f4x4.c3;
+         //   c3.z = position.x;
+         //   c3.w = position.y;
+            f4x4.c3 = c3;
+            m_Param1.value.data = f4x4;
         }
 
         public void SetTmpParam(float padding, float scale)
