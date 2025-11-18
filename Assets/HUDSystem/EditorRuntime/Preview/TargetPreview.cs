@@ -1278,6 +1278,14 @@ namespace Framework.HUD.Editor
                     if (evt.keyCode == KeyCode.A) m_bKeyMovePress[2] = false;
                     if (evt.keyCode == KeyCode.D) m_bKeyMovePress[3] = false;
                     if (evt.keyCode == KeyCode.LeftShift) m_bKeyMovePress[4] = false;
+                    if (evt.keyCode == KeyCode.Escape)
+                    {
+                        m_bKeyMovePress[0] = false;
+                        m_bKeyMovePress[1] = false;
+                        m_bKeyMovePress[2] = false;
+                        m_bKeyMovePress[3] = false;
+                        m_bKeyMovePress[4] = false;
+                    }
                 }
 
                 if (m_bKeyMovePress[0])

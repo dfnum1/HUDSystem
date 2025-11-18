@@ -197,7 +197,6 @@ Shader "Unlit/Hud_Image_TMP"
 
 				float2 vertex_xy = spritePos + input.vertex.xy * spriteSize;
 				input.vertex.xy = lerp(vertex_xy/100, vertex_xy, tmpOrimg);
-			//	clipRect =  lerp(clipRect/100, clipRect, tmpOrimg);
 
 				rotate2D(input.vertex.xy, angle);
 				rotate2D(vertex_xy.xy, angle);
@@ -258,7 +257,7 @@ Shader "Unlit/Hud_Image_TMP"
 				output.outlineColor = outlineColor;
 				output.texcoord0 = float4(input.texcoord0.x, input.texcoord0.y, tmpOrimg, tmpOrimg);
 				output.param = half4(scale, bias - outline, bias + outline, bias);
-				output.worldPos.xy =mul(UNITY_MATRIX_M, float4(vertex_xy,vert.z,vert.w)).xy;//vert.xy;
+				output.worldPos.xy =vertex_xy;//mul(UNITY_MATRIX_M, float4(vertex_xy,vert.z,vert.w)).xy;//vert.xy;
 				output.worldPos.zw = float2(maskType,maskType);
 				output.clipRect = clipRect;
 

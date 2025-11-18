@@ -5,6 +5,7 @@
 描    述:	HUD 组件
 *********************************************************************/
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UIElements;
 namespace Framework.HUD.Runtime
@@ -16,6 +17,79 @@ namespace Framework.HUD.Runtime
         Text,
         Image,
         Number
+    }
+    //--------------------------------------------------------
+    enum EParamOverrideType : byte
+    {
+        Name = 0,
+        Position,
+        Size,
+        Angle,
+        Color,
+        MaskType,
+        MaskRegion,
+        Sprite,
+    }
+    //------------------------------------------------------
+    [StructLayout(LayoutKind.Explicit, Size = 16)]
+    internal struct Variable
+    {
+        [FieldOffset(0)]
+        public int intVal0;
+        [FieldOffset(0)]
+        public float floatVal0;
+
+        [FieldOffset(4)]
+        public int intVal1;
+        [FieldOffset(4)]
+        public float floatVal1;
+
+        [FieldOffset(8)]
+        public int intVal2;
+        [FieldOffset(8)]
+        public float floatVal2;
+
+        [FieldOffset(12)]
+        public int intVal3;
+        [FieldOffset(12)]
+        public float floatVal3;
+
+        [FieldOffset(0)]
+        public long longValue0;
+
+        [FieldOffset(8)]
+        public long longValue1;
+
+        public Vector3 ToVector3()
+        {
+            return new Vector3(floatVal0, floatVal1, floatVal2);
+        }
+        public Vector4 ToVector4()
+        {
+            return new Vector4(floatVal0, floatVal1, floatVal2, floatVal3);
+        }
+
+        public Quaternion ToQuaternion()
+        {
+            return new Quaternion(floatVal0, floatVal1, floatVal2, floatVal3);
+        }
+        public Color ToColor()
+        {
+            return new Color(floatVal0, floatVal1, floatVal2, floatVal3);
+        }
+
+        public Vector2 ToVector2()
+        {
+            return new Vector2(floatVal0, floatVal1);
+        }
+        public void Destroy() { }
+    }
+    //--------------------------------------------------------
+    struct ParamOverrideInfo
+    {
+        public Variable paramValue;
+        public string strVal;
+        public UnityEngine.Object unityVal;
     }
     //--------------------------------------------------------
     public abstract class AComponent
@@ -32,6 +106,8 @@ namespace Framework.HUD.Runtime
 
         AComponent m_pParent = null;
         protected List<HudDataSnippet> m_vDataSnippets;
+
+        private Dictionary<EParamOverrideType, ParamOverrideInfo> m_vOverrideParams;
         //--------------------------------------------------------
         public AComponent(HudSystem pSystem, HudBaseData hudData)
         {
@@ -172,14 +248,19 @@ namespace Framework.HUD.Runtime
                     if (m_pParent != null)
                     {
                         Rect parentRegion = m_pParent.GetMaskRegion();
-                        float xMin = Mathf.Max(region.xMin, parentRegion.xMin);
-                        float yMin = Mathf.Max(region.yMin, parentRegion.yMin);
-                        float xMax = Mathf.Min(region.xMax, parentRegion.xMax);
-                        float yMax = Mathf.Min(region.yMax, parentRegion.yMax);
-                        if (xMax > xMin && yMax > yMin)
-                            return new Rect(xMin, yMin, xMax- xMin, yMax-yMin);
+                        if (parentRegion.width > 0 && parentRegion.height > 0)
+                        {
+                            float xMin = Mathf.Max(region.xMin, parentRegion.xMin);
+                            float yMin = Mathf.Max(region.yMin, parentRegion.yMin);
+                            float xMax = Mathf.Min(region.xMax, parentRegion.xMax);
+                            float yMax = Mathf.Min(region.yMax, parentRegion.yMax);
+                            if (xMax > xMin && yMax > yMin)
+                                return new Rect(xMin, yMin, xMax - xMin, yMax - yMin);
+                            else
+                                return Rect.zero;
+                        }
                         else
-                            return Rect.zero;
+                            return region;
                     }
                 }
 

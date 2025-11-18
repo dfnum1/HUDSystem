@@ -23,10 +23,22 @@ namespace Framework.HUD.Runtime
         private Vector3 m_Offset = Vector3.zero;
         private Vector3 m_OffsetRotation = Vector3.zero;
         private int m_nTransId = -1;
+#if UNITY_EDITOR
+        internal bool isEditorMode = false;
+#endif
         //--------------------------------------------------------
         public HudController(HudSystem pSystem)
         {
             m_pSystem = pSystem;
+        }
+        //--------------------------------------------------------
+        public bool IsEditorMode()
+        {
+#if UNITY_EDITOR
+            return isEditorMode;
+#else
+            return false;
+#endif
         }
         //--------------------------------------------------------
         public void SetFollowTarget(Transform target)
