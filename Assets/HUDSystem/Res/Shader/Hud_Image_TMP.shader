@@ -157,8 +157,9 @@ Shader "Unlit/Hud_Image_TMP"
 				//tmp 需要数据
 				float4x4 localToWorld = unity_ObjectToWorld;
 				float lossyScaleY = length(localToWorld[1].xyz);
-				float padding = param2[3][2];
-				float adjustedScale = param2[2][2];
+				float2 paddingScale = toFloat2(param2[1][2]);
+				float padding = paddingScale.x;//param2[3][2];
+				float adjustedScale = paddingScale.y;//param2[2][2];
 
 				//img 需要数据
 				float amount =0;//param2[3][2];
@@ -167,8 +168,8 @@ Shader "Unlit/Hud_Image_TMP"
 				unpackAmountOriginMethod(param2[1][2], amount, origin, method);
 				
 				float4 clipRect = float4(0,0,0,0);
-				clipRect.xy = toFloat2(param2[2][2]);
-				clipRect.zw = toFloat2(param2[3][2]);
+				clipRect.xy = toFloat2(param2[2][2])*100.0;
+				clipRect.zw = toFloat2(param2[3][2])*100.0;
 
 				//img和tmp spritePos和spriteSize 通用计算
 				int quadIndex = int(input.texcoord1.x);
@@ -275,7 +276,7 @@ Shader "Unlit/Hud_Image_TMP"
 			{
 				/*UNITY_SETUP_INSTANCE_ID(input);*/
 				half4 col;
-				if (input.texcoord0.z == 0)
+				if (abs(input.texcoord0.z) < 0.01)
 				{
 					col = tex2D(_AtlasTex, input.texcoord0.xy);
 					col = col * input.faceColor;

@@ -305,13 +305,13 @@ namespace Framework.HUD.Runtime
             float4 c2 = f4x4.c2;
             if(m_pComponet.GetMaskType() == EMaskType.Circle)
             {
-                c2.z = HUDUtils.ToOneFloat(region.position.x, region.position.y);
-                c2.w = HUDUtils.ToOneFloat(region.size.x, region.size.y);
+                c2.z = HUDUtils.ToOneFloat(region.position.x/100.0f, region.position.y / 100.0f);
+                c2.w = HUDUtils.ToOneFloat(region.size.x / 100.0f, region.size.y / 100.0f);
             }
             else
             {
-                c2.z = HUDUtils.ToOneFloat(region.xMin, region.yMin);
-                c2.w = HUDUtils.ToOneFloat(region.xMax, region.yMax);
+                c2.z = HUDUtils.ToOneFloat(region.xMin / 100.0f, region.yMin / 100.0f);
+                c2.w = HUDUtils.ToOneFloat(region.xMax / 100.0f, region.yMax / 100.0f);
             }
             f4x4.c2 = c2;
             m_Param2.value.data = f4x4;
@@ -321,9 +321,10 @@ namespace Framework.HUD.Runtime
         {
             float4x4 f4x4 = m_Param2.value.data;
             float4 c2 = f4x4.c2;
-            c2.w = padding;
-            c2.z = scale;
-            c2.y = 1;
+         //   c2.w = padding;
+       //     c2.z = scale;
+       //     c2.y = 1;
+            c2.y = HUDUtils.ToOneFloat(padding, scale);
             f4x4.c2 = c2;
             m_Param2.value.data = f4x4;
         }

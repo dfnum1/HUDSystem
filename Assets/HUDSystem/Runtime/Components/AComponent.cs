@@ -47,13 +47,20 @@ namespace Framework.HUD.Runtime
         internal virtual void Init()
         {
             OnInit();
+            if(m_vChilds!=null)
+            {
+                for (int i = 0; i < m_vChilds.Count; ++i)
+                {
+                    m_vChilds[i].Init();
+                }
+            }
         }
         //--------------------------------------------------------
         protected abstract void OnInit();
         //--------------------------------------------------------
         internal int GetRootId()
         {
-            return 0;
+            return m_HudController.GetTransId();
         }
         //--------------------------------------------------------
         internal float GetTagZ()
@@ -140,9 +147,9 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         public bool IsValidMask()
         {
-            if (m_pHudData.mask != EMaskType.Rect && m_pHudData.maskRegion.width > 0 && m_pHudData.maskRegion.height > 0)
+            if (m_pHudData.mask == EMaskType.Rect && m_pHudData.maskRegion.width > 0 && m_pHudData.maskRegion.height > 0)
                 return true;
-            if (m_pHudData.mask != EMaskType.Circle && m_pHudData.maskRegion.width > 0)
+            if (m_pHudData.mask == EMaskType.Circle && m_pHudData.maskRegion.width > 0)
                 return true;
             return false;
         }
@@ -196,7 +203,7 @@ namespace Framework.HUD.Runtime
                     m_vDataSnippets[i].SetTextOrImage(GetHudType() == EHudType.Text);
                     m_vDataSnippets[i].SetAngle(GetAngle());
                     m_vDataSnippets[i].SetMaskRegion(GetMaskRegion());
-                    m_vDataSnippets[i].WriteParamData();
+                    m_vDataSnippets[i].WriteData();
                 }
             }
             if (m_vChilds!=null)
@@ -357,7 +364,7 @@ namespace Framework.HUD.Runtime
             if (renderBatch == null)
                 return;
 
-            if(m_vDataSnippets!=null)
+            if (m_vDataSnippets!=null)
             {
                 for (int i = m_vDataSnippets.Count - 1; i >= 0; --i)
                 {

@@ -56,8 +56,11 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         public void UpdateTransform()
         {
-            if (m_RenderBatch != null && m_nTransId>=0)
+            if (m_RenderBatch != null && m_nTransId >= 0)
+            {
                 m_RenderBatch.UpdateHudController(m_nTransId, this);
+                m_RenderBatch.UpdateFontMaterial();
+            }
         }
         //--------------------------------------------------------
         public HudRenderBatch renderBatch
@@ -134,6 +137,12 @@ namespace Framework.HUD.Runtime
                     UnityEngine.Debug.LogWarning(hudObject.name + " Hierarchy Root Node must be HudCanvas!");
                 }
             }
+
+            foreach (var db in m_vWidgets)
+            {
+                db.Init();
+            }
+
             if (m_RenderBatch != null)
             {
                 m_RenderBatch.SetBounds(m_nTransId, hudObject.center, hudObject.size);
@@ -234,7 +243,6 @@ namespace Framework.HUD.Runtime
         {
             var canvas = new HudCanvas(m_pSystem, hudData);
             canvas.SetHudController(this);
-            canvas.Init();
             if (pParent != null)
                 pParent.Attach(canvas);
             else
@@ -255,7 +263,6 @@ namespace Framework.HUD.Runtime
             }
             var widget = new HudImage(m_pSystem, hudData);
             widget.SetHudController(this);
-            widget.Init();
             pParent.Attach(widget);
             return widget;
         }
@@ -269,7 +276,6 @@ namespace Framework.HUD.Runtime
             }
             var widget = new HudText(m_pSystem, hudData);
             widget.SetHudController(this);
-            widget.Init();
             pParent.Attach(widget);
             return widget;
         }

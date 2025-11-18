@@ -12,6 +12,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
+using UnityEngine.TextCore.Text;
 
 namespace Framework.HUD.Runtime
 {
@@ -74,7 +75,7 @@ namespace Framework.HUD.Runtime
             {
                 if (m_pMaterial && m_pMaterial.HasProperty(HUDUtils._MainTex))
                 {
-                  //      TMP_FontAsset fontAsset = TMP_Settings.defaultFontAsset;
+                    fontAsset = TMP_Settings.defaultFontAsset;
                     m_MaterialPropertyBlock.SetTexture(HUDUtils._MainTex, fontAsset.atlasTexture);
                     m_MaterialPropertyBlock.SetInt(HUDUtils._TextureWidth, fontAsset.atlasWidth);
                     m_MaterialPropertyBlock.SetInt(HUDUtils._TextureHeight, fontAsset.atlasHeight);
@@ -83,6 +84,21 @@ namespace Framework.HUD.Runtime
                     m_MaterialPropertyBlock.SetInt(HUDUtils._FontMappingWidth, fontAsset.fontMappingWidth);
                     m_MaterialPropertyBlock.SetInt(HUDUtils._FontMappingHeight, fontAsset.fontMappingHeight);
                 }
+            }
+        }
+        //-----------------------------------------------------
+        internal void UpdateFontMaterial()
+        {
+            if (m_pMaterial && m_pMaterial.HasProperty(HUDUtils._MainTex))
+            {
+                TMP_FontAsset fontAsset = TMP_Settings.defaultFontAsset;
+                m_MaterialPropertyBlock.SetTexture(HUDUtils._MainTex, fontAsset.atlasTexture);
+                m_MaterialPropertyBlock.SetInt(HUDUtils._TextureWidth, fontAsset.atlasWidth);
+                m_MaterialPropertyBlock.SetInt(HUDUtils._TextureHeight, fontAsset.atlasHeight);
+
+                m_MaterialPropertyBlock.SetTexture(HUDUtils._FontMappingTex, fontAsset.fontMappingTexture);
+                m_MaterialPropertyBlock.SetInt(HUDUtils._FontMappingWidth, fontAsset.fontMappingWidth);
+                m_MaterialPropertyBlock.SetInt(HUDUtils._FontMappingHeight, fontAsset.fontMappingHeight);
             }
         }
         //-----------------------------------------------------

@@ -56,7 +56,7 @@ namespace Framework.HUD.Runtime
             ResizeDataSnippet(snippetCount);
             bool isUsingAlternativeTypeface;
             float padding = ShaderUtilities.GetPadding(m_HudController.GetMaterial(), false, false);
-            float fontsize = hudTextData.fontSize;
+            float fontsize = hudTextData.fontSize/10.0f;
             float adjustedScale = fontsize / expandFontAssets.faceInfo.pointSize * expandFontAssets.faceInfo.scale * 0.1f;
             float curAdvance = 0;
             int curcharCount = 0;

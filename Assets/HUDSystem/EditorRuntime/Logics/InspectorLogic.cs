@@ -87,8 +87,8 @@ namespace Framework.HUD.Editor
             }
             if (EditorGUI.EndChangeCheck())
             {
-                GetHud().TriggerReorder();
                 pComonent.SetDirty();
+                GetHud().TriggerReorder();
             }
         }
         //--------------------------------------------------------
@@ -127,6 +127,7 @@ namespace Framework.HUD.Editor
             if (EditorGUI.EndChangeCheck())
             {
                 hudImage.SetDirty();
+                GetHud().TriggerReorder();
             }
         }
         //--------------------------------------------------------
@@ -140,6 +141,7 @@ namespace Framework.HUD.Editor
             if (EditorGUI.EndChangeCheck())
             {
                 hudText.SetDirty();
+                GetHud().TriggerReorder();
             }
         }
     }
