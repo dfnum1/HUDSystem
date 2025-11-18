@@ -61,15 +61,6 @@ namespace Framework.HUD.Runtime
             return math.asfloat(v);
         }
         //--------------------------------------------------------
-        public static float ToOneFloat(float v1, float v2, float v3)
-        {
-            uint uv1 = math.f32tof16(v1);
-            uint uv2 = math.f32tof16(v2);
-            uint uv3 = math.f32tof16(v3);
-            uint v = uv1 << 16 | uv2 << 8 | uv3;
-            return math.asfloat(v);
-        }
-        //--------------------------------------------------------
         public static float2 ToTowFloat(float fv)
         {
             uint uv = math.asuint(fv);

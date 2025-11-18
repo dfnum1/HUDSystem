@@ -41,6 +41,15 @@ float2 toFloat2(float fv)
     return float2(f16tof32(uv1), f16tof32(uv2));
 }
 
+void unpackAmountOriginMethod(float packed, out float amount, out float origin, out float method)
+{
+    float2 vals = toFloat2(packed);
+    amount = vals.x;
+    int tempVal = int(vals.y);
+    origin = (tempVal >> 8) & 0xFF;
+    method = tempVal & 0xFF;
+}
+
 float float4x4Value(int paramIndex, float4x4 param)
 {
     int h = fmod(paramIndex, 4);

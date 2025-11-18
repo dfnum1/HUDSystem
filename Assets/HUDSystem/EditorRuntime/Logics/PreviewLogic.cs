@@ -42,7 +42,7 @@ namespace Framework.HUD.Editor
                 m_pPreview.SetPreviewInstance(roots[0] as GameObject);
                 m_pPreview.bLeftMouseForbidMove = true;
                 m_pPreview.OnDrawAfterCB += OnPreviewDraw;
-                m_pPreview.SetLookatAndEulerAngle(Vector3.zero, new Vector3(10, 0, 0), 5);
+                m_pPreview.SetLookatAndEulerAngle(Vector3.zero, new Vector3(0, 0, 0), 200,120);
 
                 m_pEditor.GetHudSystem().SetRenderCamera(m_pPreview.GetCamera());
             }

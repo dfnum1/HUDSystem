@@ -301,7 +301,7 @@ namespace Framework.HUD.Editor
             var rowRect = argvData.rowRect;
             if (widget.depth > 0)
                 rowRect.x += widget.depth * m_pTree.DepthIndentWidth;
-            EditorGUI.LabelField(rowRect, widget.name);
+            EditorGUI.LabelField(rowRect, widget.graphicItem.GetName());
             return true;
         }
         //--------------------------------------------------------

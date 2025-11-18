@@ -24,6 +24,13 @@ namespace Framework.HUD.Runtime
         Top,
     }
     //--------------------------------------------------------
+    public enum EMaskType : byte
+    {
+        None =0,
+        Rect,
+        Circle
+    }
+    //--------------------------------------------------------
     [System.Serializable]
     public class HudBaseData
     {
@@ -34,7 +41,7 @@ namespace Framework.HUD.Runtime
         public Vector2 sizeDelta = new Vector2(100,100);
         public float angle = 0;
         public Color   color =Color.white;
-        public bool mask;
+        public EMaskType mask;
         public Rect maskRegion;
     }
     //--------------------------------------------------------

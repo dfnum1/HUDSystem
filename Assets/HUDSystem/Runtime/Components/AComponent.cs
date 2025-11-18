@@ -125,6 +125,66 @@ namespace Framework.HUD.Runtime
             return m_pHudData.position;
         }
         //--------------------------------------------------------
+        public float GetAngle()
+        {
+            if (m_pParent != null) return m_pParent.GetAngle() + m_pHudData.angle;
+            return m_pHudData.angle;
+        }
+        //--------------------------------------------------------
+        public EMaskType GetMaskType()
+        {
+            if (m_pHudData.mask != EMaskType.None) return m_pHudData.mask;
+            if (m_pParent != null) return m_pParent.GetMaskType();
+            return EMaskType.None;
+        }
+        //--------------------------------------------------------
+        public bool IsValidMask()
+        {
+            if (m_pHudData.mask != EMaskType.Rect && m_pHudData.maskRegion.width > 0 && m_pHudData.maskRegion.height > 0)
+                return true;
+            if (m_pHudData.mask != EMaskType.Circle && m_pHudData.maskRegion.width > 0)
+                return true;
+            return false;
+        }
+        //--------------------------------------------------------
+        public Rect GetMaskRegion()
+        {
+            if (IsValidMask())
+            {
+                Rect region = m_pHudData.maskRegion;
+                if(m_pHudData.mask == EMaskType.Circle)
+                {
+                    Vector3 worldPos = m_HudController.GetWorldMatrix() *(GetPosition() + new Vector3(region.position.x, region.position.y,0));
+                    region.position = new Vector2(worldPos.x, worldPos.y);
+                    return region;
+                }
+                else
+                {
+                    Vector3 worldPos = m_HudController.GetWorldMatrix() * GetPosition();
+                    region.position += new Vector2(worldPos.x, worldPos.y) - region.size / 2;
+
+                    if (m_pParent != null)
+                    {
+                        Rect parentRegion = m_pParent.GetMaskRegion();
+                        float xMin = Mathf.Max(region.xMin, parentRegion.xMin);
+                        float yMin = Mathf.Max(region.yMin, parentRegion.yMin);
+                        float xMax = Mathf.Min(region.xMax, parentRegion.xMax);
+                        float yMax = Mathf.Min(region.yMax, parentRegion.yMax);
+                        if (xMax > xMin && yMax > yMin)
+                            return new Rect(xMin, yMin, xMax, yMax);
+                        else
+                            return Rect.zero;
+                    }
+                }
+
+                return region;
+            }
+            else if (m_pParent != null)
+                return m_pParent.GetMaskRegion();
+
+            return Rect.zero;
+        }
+        //--------------------------------------------------------
         public void SetDirty()
         {
             OnDirty();
@@ -135,7 +195,8 @@ namespace Framework.HUD.Runtime
                     m_vDataSnippets[i].SetColor(m_pHudData.color);
                     m_vDataSnippets[i].SetPosition(GetPosition());
                     m_vDataSnippets[i].SetTextOrImage(GetHudType() == EHudType.Text);
-                    m_vDataSnippets[i].SetAngle(m_pHudData.angle);
+                    m_vDataSnippets[i].SetAngle(GetAngle());
+                    m_vDataSnippets[i].SetMaskRegion(GetMaskRegion());
                     m_vDataSnippets[i].WriteParamData();
                 }
             }
@@ -257,8 +318,11 @@ namespace Framework.HUD.Runtime
                     HudDataSnippet snippet = new HudDataSnippet(this);
                     snippet.Init(IsVisible(), GetTransId());
                     snippet.SetColor(m_pHudData.color);
-                    snippet.SetPosition(m_pHudData.position);
-                    snippet.SetAngle(m_pHudData.angle);
+                    snippet.SetPosition(GetPosition());
+                    snippet.SetTextOrImage(GetHudType() == EHudType.Text);
+                    snippet.SetAngle(GetAngle());
+                    snippet.SetMaskRegion(GetMaskRegion());
+
                     snippet.WriteData();
                     m_vDataSnippets.Add(snippet);
                 }

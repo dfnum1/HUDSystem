@@ -58,18 +58,31 @@ namespace Framework.HUD.Editor
                 else
                     data.id = id;
             }
+            EditorGUI.BeginChangeCheck();
             data.name = EditorGUILayout.DelayedTextField("Name", data.name);
+            if (EditorGUI.EndChangeCheck())
+            {
 
+            }
             EditorGUI.BeginChangeCheck();
             data.position = EditorGUILayout.Vector3Field("Position", data.position);
             data.sizeDelta = EditorGUILayout.Vector2Field("Size", data.sizeDelta);
             data.angle = EditorGUILayout.Slider("Angle", data.angle, 0, 360);
             data.color = EditorGUILayout.ColorField("Color", data.color);
-            data.mask = EditorGUILayout.Toggle("mask", data.mask);
-            if(data.mask)
+            data.mask = (EMaskType)EditorGUILayout.EnumPopup("mask", data.mask);
+            if(data.mask == EMaskType.Rect)
             {
                 EditorGUI.indentLevel++;
                 data.maskRegion = EditorGUILayout.RectField("MaskRegion", data.maskRegion);
+                EditorGUI.indentLevel--;
+            }
+            else if (data.mask == EMaskType.Circle)
+            {
+                EditorGUI.indentLevel++;
+                data.maskRegion.position = EditorGUILayout.Vector2Field("Offset", data.maskRegion.position);
+                float radius = EditorGUILayout.FloatField("Radius", data.maskRegion.size.x);
+                float fade = EditorGUILayout.Slider("Fade", data.maskRegion.size.y,0.01f, data.maskRegion.size.x*0.8f);
+                data.maskRegion.size = new Vector2(radius, fade);
                 EditorGUI.indentLevel--;
             }
             if (EditorGUI.EndChangeCheck())

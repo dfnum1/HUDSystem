@@ -1,7 +1,9 @@
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Diagnostics;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
+using static UnityEngine.UI.Image;
 namespace Framework.HUD.Runtime
 {
 
@@ -138,7 +140,16 @@ namespace Framework.HUD.Runtime
         {
             float4x4 f4x4 = m_Param2.value.data;
             float4 c3 = f4x4.c3;
-            c3.x = angle * Mathf.Deg2Rad;
+            c3.x = HUDUtils.ToOneFloat(angle * Mathf.Deg2Rad, (float)m_pComponet.GetMaskType());
+            f4x4.c3 = c3;
+            m_Param2.value.data = f4x4;
+        }
+
+        public void SetMaskType(int maskType)
+        {
+            float4x4 f4x4 = m_Param2.value.data;
+            float4 c3 = f4x4.c3;
+            c3.x = HUDUtils.ToOneFloat(m_pComponet.GetAngle() * Mathf.Deg2Rad, (float)maskType);
             f4x4.c3 = c3;
             m_Param2.value.data = f4x4;
         }
@@ -279,21 +290,31 @@ namespace Framework.HUD.Runtime
         {
             float4x4 f4x4 = m_Param2.value.data;
             float4 c2 = f4x4.c2;
-            c2.w = amount;
-            c2.z = origin;
-            c2.y = method;
+            //   c2.w = amount;
+            // c2.z = origin;
+            //  c2.y = method;
+            int tempVal = ((int)origin) << 8 | ((int)method);
+            c2.y = HUDUtils.ToOneFloat(amount, tempVal);
             f4x4.c2 = c2;
             m_Param2.value.data = f4x4;
         }
 
         public void SetMaskRegion(Rect region)
         {
-            float4x4 f4x4 = m_Param1.value.data;
-            float4 c3 = f4x4.c3;
-         //   c3.z = position.x;
-         //   c3.w = position.y;
-            f4x4.c3 = c3;
-            m_Param1.value.data = f4x4;
+            float4x4 f4x4 = m_Param2.value.data;
+            float4 c2 = f4x4.c2;
+            if(m_pComponet.GetMaskType() == EMaskType.Circle)
+            {
+                c2.z = HUDUtils.ToOneFloat(region.position.x, region.position.y);
+                c2.w = HUDUtils.ToOneFloat(region.size.x, region.size.y);
+            }
+            else
+            {
+                c2.z = HUDUtils.ToOneFloat(region.xMin, region.yMin);
+                c2.w = HUDUtils.ToOneFloat(region.xMax, region.yMax);
+            }
+            f4x4.c2 = c2;
+            m_Param2.value.data = f4x4;
         }
 
         public void SetTmpParam(float padding, float scale)

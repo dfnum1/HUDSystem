@@ -72,6 +72,7 @@ Shader "Unlit/Hud_Image_TMP"
 			#pragma shader_feature __ UNDERLAY_ON UNDERLAY_INNER
 
 			#include "UnityCG.cginc"
+			#include "UnityUI.cginc"
 			#include "TMPro_Properties.cginc"
 			#include "Hud.cginc"
 
@@ -106,9 +107,11 @@ Shader "Unlit/Hud_Image_TMP"
 				float4	texcoord0		: TEXCOORD0;			// Texture UV, Mask UV
 				half4	param			: TEXCOORD1;			// Scale(x), BiasIn(y), BiasOut(z), Bias(w)
 				half4	mask			: TEXCOORD2;			// Position in clip space(xy), Softness(zw)
+				float4	clipRect		: TEXCOORD3;			// xy,size
+				float4	worldPos		: TEXCOORD4;			//
 				#if (UNDERLAY_ON | UNDERLAY_INNER)
-				float4	texcoord1		: TEXCOORD3;			// Texture UV, alpha, reserved
-				half2	underlayParam	: TEXCOORD4;			// Scale(x), Bias(y)
+				float4	texcoord1		: TEXCOORD5;			// Texture UV, alpha, reserved
+				half2	underlayParam	: TEXCOORD6;			// Scale(x), Bias(y)
 				#endif
 			};
 
@@ -120,6 +123,13 @@ Shader "Unlit/Hud_Image_TMP"
 			float2 spriteAtlasMapping(int index)
 			{
 				return getAtlasMapping(index, _AtlasMappingWidth, _AtlasMappingHeight, _AtlasMappingTex);
+			}
+
+			float UnityGetCircleClipping(float2 worldPos, float4 circle)
+			{
+				float edge = max(circle.w, 0.0001);
+				float dist = distance(worldPos, circle.xy);
+				return saturate(1.0 - smoothstep(circle.z - edge, circle.z, dist));
 			}
 
 			float4x4 localToWorld;
@@ -139,7 +149,10 @@ Shader "Unlit/Hud_Image_TMP"
 				//img和tmp 公用数据
 				fixed4 color = float2ToColor(param2[2][3], param2[3][3]);
 				float3 comPos = float3(param1[2][3], param1[3][3],tmpOrImgTagZ.y);
-				float angle = param2[0][3];
+
+				float2 angleMaskType = toFloat2(param2[0][3]);
+				float angle = angleMaskType.x;
+				float maskType = int(angleMaskType.y);
 
 				//tmp 需要数据
 				float4x4 localToWorld = unity_ObjectToWorld;
@@ -148,9 +161,14 @@ Shader "Unlit/Hud_Image_TMP"
 				float adjustedScale = param2[2][2];
 
 				//img 需要数据
-				float amount = param2[3][2];
-				float origin = param2[2][2];
-				float method = param2[1][2];
+				float amount =0;//param2[3][2];
+				float origin =0;//param2[2][2];
+				float method = 0;//param2[1][2];
+				unpackAmountOriginMethod(param2[1][2], amount, origin, method);
+				
+				float4 clipRect = float4(0,0,0,0);
+				clipRect.xy = toFloat2(param2[2][2]);
+				clipRect.zw = toFloat2(param2[3][2]);
 
 				//img和tmp spritePos和spriteSize 通用计算
 				int quadIndex = int(input.texcoord1.x);
@@ -178,6 +196,7 @@ Shader "Unlit/Hud_Image_TMP"
 
 				float2 vertex_xy = spritePos + input.vertex.xy * spriteSize;
 				input.vertex.xy = lerp(vertex_xy/100, vertex_xy, tmpOrimg);
+				clipRect =  lerp(clipRect/100, clipRect, tmpOrimg);
 
 				rotate2D(input.vertex.xy, angle);
 				input.vertex.xyz = input.vertex.xyz + comPos;
@@ -229,11 +248,15 @@ Shader "Unlit/Hud_Image_TMP"
 
 
 				// Populate structure for pixel shader
+				
 				output.vertex = vPosition;
 				output.faceColor = faceColor;
 				output.outlineColor = outlineColor;
 				output.texcoord0 = float4(input.texcoord0.x, input.texcoord0.y, tmpOrimg, tmpOrimg);
 				output.param = half4(scale, bias - outline, bias + outline, bias);
+				output.worldPos.xy =vert.xy;
+				output.worldPos.zw = float2(maskType,maskType);
+				output.clipRect = clipRect;
 
 				#if (UNDERLAY_ON || UNDERLAY_INNER)
 				output.texcoord1 = float4(input.texcoord0 + layerOffset, color.a, 0);
@@ -248,42 +271,67 @@ Shader "Unlit/Hud_Image_TMP"
 			fixed4 PixShader(pixel_t input) : SV_Target
 			{
 				/*UNITY_SETUP_INSTANCE_ID(input);*/
+				half4 col;
 				if (input.texcoord0.z == 0)
 				{
-					fixed4 col = tex2D(_AtlasTex, input.texcoord0.xy);
+					col = tex2D(_AtlasTex, input.texcoord0.xy);
 					col = col * input.faceColor;
+					if(abs(input.worldPos.z - 1.0) < 0.01)
+					{
+						fixed clipFade = saturate((input.clipRect.z-input.clipRect.x)*100);
+						col.a *= lerp(1,UnityGet2DClipping(input.worldPos.xy, input.clipRect), clipFade);
+						clip(col.a - 0.001);
+					}
+					else if(abs(input.worldPos.z - 2.0) < 0.01)
+					{
+						fixed clipFade = saturate((input.clipRect.zx)*100);
+						col.a *= lerp(1,UnityGetCircleClipping(input.worldPos.xy, input.clipRect), clipFade);
+						clip(col.a - 0.001);
+					}
 					return col;
 				}
 
 				half d = tex2D(_MainTex, input.texcoord0.xy).a * input.param.x;
-				half4 c = input.faceColor * saturate(d - input.param.w);
+				col = input.faceColor * saturate(d - input.param.w);
 
 				#ifdef OUTLINE_ON
-				c = lerp(input.outlineColor, input.faceColor, saturate(d - input.param.z));
-				c *= saturate(d - input.param.y);
+				col = lerp(input.outlineColor, input.faceColor, saturate(d - input.param.z));
+				col *= saturate(d - input.param.y);
 				#endif
 
 				#if UNDERLAY_ON
 				d = tex2D(_MainTex, input.texcoord1.xy).a * input.underlayParam.x;
-				c += float4(_UnderlayColor.rgb * _UnderlayColor.a, _UnderlayColor.a) * saturate(d - input.underlayParam.y) * (1 - c.a);
+				col += float4(_UnderlayColor.rgb * _UnderlayColor.a, _UnderlayColor.a) * saturate(d - input.underlayParam.y) * (1 - c.a);
 				#endif
 
 				#if UNDERLAY_INNER
 				half sd = saturate(d - input.param.z);
 				d = tex2D(_MainTex, input.texcoord1.xy).a * input.underlayParam.x;
-				c += float4(_UnderlayColor.rgb * _UnderlayColor.a, _UnderlayColor.a) * (1 - saturate(d - input.underlayParam.y)) * sd * (1 - c.a);
+				col += float4(_UnderlayColor.rgb * _UnderlayColor.a, _UnderlayColor.a) * (1 - saturate(d - input.underlayParam.y)) * sd * (1 - c.a);
 				#endif
 
 				#if (UNDERLAY_ON | UNDERLAY_INNER)
-				c *= input.texcoord1.z;
+				col *= input.texcoord1.z;
 				#endif
 
 				//fixed4 col = tex2D(_AtlasTex, input.texcoord0.xy);
 				//col = col * input.faceColor;
 
 				//c = lerp(col, c, input.texcoord0.z);
-
-				return c;
+		
+				if(abs(input.worldPos.z - 1.0) < 0.01)
+				{
+					fixed clipFade = saturate((input.clipRect.z-input.clipRect.x)*100);
+					col.a *= lerp(1,UnityGet2DClipping(input.worldPos.xy, input.clipRect), clipFade);
+					clip(col.a - 0.001);
+				}
+				else if(abs(input.worldPos.z - 2.0) < 0.01)
+				{
+					fixed clipFade = saturate((input.clipRect.z)*100);
+					col.a *= lerp(1,UnityGetCircleClipping(input.worldPos.xy, input.clipRect), clipFade);
+					clip(col.a - 0.001);
+				}
+				return col;
 			}
 			ENDCG
 			}

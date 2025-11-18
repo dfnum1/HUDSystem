@@ -67,98 +67,74 @@ MonoBehaviour:
   m_AtlasMappingWidth: 8
   m_AtlasMappingHeight: 8
   m_vSprites:
-  - name: 
-    index: 0
-    size: {x: 72, y: 40}
-  - name: bg_build_lvlhud_0
-    index: 1
-    size: {x: 28, y: 0}
-  - name: bg_build_lvlhud_1
-    index: 2
-    size: {x: 28, y: 40}
-  - name: bg_build_lvlhud_2
-    index: 3
-    size: {x: 28, y: 0}
-  - name: bg_build_lvlhud_3
-    index: 4
-    size: {x: 15, y: 0}
-  - name: bg_build_lvlhud_4
-    index: 5
-    size: {x: 15, y: 40}
-  - name: bg_build_lvlhud_5
-    index: 6
-    size: {x: 15, y: 0}
-  - name: bg_build_lvlhud_6
-    index: 7
-    size: {x: 29, y: 0}
-  - name: bg_build_lvlhud_7
-    index: 8
-    size: {x: 29, y: 40}
-  - name: bg_build_lvlhud_8
-    index: 9
-    size: {x: 29, y: 0}
-  - name: 
-    index: 10
-    size: {x: 154, y: 154}
-  - name: bg_icon_sel_0
-    index: 11
-    size: {x: 46, y: 45}
-  - name: bg_icon_sel_1
-    index: 12
-    size: {x: 46, y: 67}
-  - name: bg_icon_sel_2
-    index: 13
-    size: {x: 46, y: 42}
-  - name: bg_icon_sel_3
-    index: 14
-    size: {x: 64, y: 45}
-  - name: bg_icon_sel_4
-    index: 15
-    size: {x: 64, y: 67}
-  - name: bg_icon_sel_5
-    index: 16
-    size: {x: 64, y: 42}
-  - name: bg_icon_sel_6
-    index: 17
-    size: {x: 44, y: 45}
-  - name: bg_icon_sel_7
-    index: 18
-    size: {x: 44, y: 67}
-  - name: bg_icon_sel_8
-    index: 19
-    size: {x: 44, y: 42}
-  - name: com_bg_hud2
-    index: 20
-    size: {x: 54, y: 54}
-  - name: hero_head_circlel_00
-    index: 21
-    size: {x: 128, y: 128}
-  - name: hud_fight_anger_04
-    index: 22
-    size: {x: 23, y: 67}
-  - name: hud_fight_anger_05
-    index: 23
-    size: {x: 23, y: 67}
-  - name: hud_fight_anger_bottom_02
-    index: 24
-    size: {x: 179, y: 93}
-  - name: hud_fight_camp_01
-    index: 25
-    size: {x: 128, y: 128}
-  - name: hud_fight_camp_bottom_01
-    index: 26
-    size: {x: 118, y: 118}
   - name: hud_fight_Progress_white
-    index: 27
+    index: 0
     size: {x: 87, y: 8}
-  - name: hud_fight_Progress_yellow_bottom
-    index: 28
+  - name: 
+    index: 1
     size: {x: 109, y: 14}
-  - name: icon_hud_fight_troops
-    index: 29
-    size: {x: 64, y: 64}
-  - name: icon_pioneer_01
-    index: 30
+  - name: hud_fight_Progress_yellow_bottom_0
+    index: 2
+    size: {x: 4, y: 0}
+  - name: hud_fight_Progress_yellow_bottom_1
+    index: 3
+    size: {x: 4, y: 14}
+  - name: hud_fight_Progress_yellow_bottom_2
+    index: 4
+    size: {x: 4, y: 0}
+  - name: hud_fight_Progress_yellow_bottom_3
+    index: 5
+    size: {x: 73, y: 0}
+  - name: hud_fight_Progress_yellow_bottom_4
+    index: 6
+    size: {x: 73, y: 14}
+  - name: hud_fight_Progress_yellow_bottom_5
+    index: 7
+    size: {x: 73, y: 0}
+  - name: hud_fight_Progress_yellow_bottom_6
+    index: 8
+    size: {x: 32, y: 0}
+  - name: hud_fight_Progress_yellow_bottom_7
+    index: 9
+    size: {x: 32, y: 14}
+  - name: hud_fight_Progress_yellow_bottom_8
+    index: 10
+    size: {x: 32, y: 0}
+  - name: Pet_Icon_Characteristic03
+    index: 11
+    size: {x: 128, y: 128}
+  - name: Pet_Icon_Characteristic04
+    index: 12
+    size: {x: 128, y: 128}
+  - name: Pet_Icon_Difficulty
+    index: 13
+    size: {x: 61, y: 59}
+  - name: Pet_Icon_Incubate
+    index: 14
+    size: {x: 55, y: 51}
+  - name: Pet_Icon_Skill_CJ
+    index: 15
+    size: {x: 128, y: 128}
+  - name: Pet_Icon_SkillAttribute_Production
+    index: 16
+    size: {x: 57, y: 67}
+  - name: Pet_Icon_Star_Normal_02
+    index: 17
+    size: {x: 55, y: 54}
+  - name: Pet_Icon_Task_LGYJ
+    index: 18
+    size: {x: 113, y: 113}
+  - name: Pet_Img_AvatarFrame
+    index: 19
+    size: {x: 96, y: 96}
+  - name: Pet_Img_CharacteristicQuality
+    index: 20
+    size: {x: 24, y: 24}
+  - name: Pet_Img_Deployment_Bubble
+    index: 21
+    size: {x: 201, y: 220}
+  - name: Pet_Img_Face_Monster02
+    index: 22
     size: {x: 128, y: 128}
 --- !u!28 &7125139453182121956
 Texture2D:
@@ -202,7 +178,7 @@ Texture2D:
   m_ColorSpace: 0
   m_PlatformBlob: 
   image data: 256
-  _typelessdata: 003a018300480028003a0183001c0000003a0183001c0028003a01ab001c000000560183000f000000560183000f0028005601ab000f000000650183001d000000650183001d0028006501ab001d000000000000009a009a00000000002e002d0000002d002e004300000070002e002a002e00000040002d002e002d00400043002e00700040002a006e0000002c002d006e002d002c0043006e0070002c002a00000183003600360122000000800080008601430017004301a60000001700430000009e00b3005d000000ff0080008000b700840076007600a101430057000801310084006d000e008400ff00400040009e0000008000800000000000000000
+  _typelessdata: 000001ac0057000801670108006d000e0167010800040000016701080004000e0167011600040000016b010800490000016b01080049000e016b01160049000001b401080020000001b401080020000e01b4011600200000000000e50080008000d2008800800080015a0088003d003b015a00cc00370033015a00000080008000ec0178003900430000016d003700360088011000710071010201100060006001a00088001800180000000000c900dc00d2000000800080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   m_StreamData:
     serializedVersion: 2
     offset: 0

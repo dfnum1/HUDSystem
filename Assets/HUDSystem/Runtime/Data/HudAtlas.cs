@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D;
+using System.Reflection;
+
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.U2D;
@@ -61,6 +63,9 @@ namespace Framework.HUD.Runtime
             get
             {
                 Init();
+#if UNITY_EDITOR
+                GetAtlasTexture();
+#endif
                 if (m_AtlasTex != null) return m_AtlasTex;
                 foreach (var item in m_vNameToSpriteInfo)
                 {
@@ -103,6 +108,8 @@ namespace Framework.HUD.Runtime
             m_vNameToSpriteInfo.Clear();
             foreach (var db in m_vSprites)
             {
+                if (string.IsNullOrEmpty(db.name))
+                    continue;
                 m_vNameToSpriteInfo[db.name] = db;
             }
         }
@@ -121,6 +128,34 @@ namespace Framework.HUD.Runtime
 #endif
         }
 #if UNITY_EDITOR
+        //--------------------------------------------------------
+        Texture GetAtlasTexture()
+        {
+            if (!Application.isPlaying)
+            {
+                if(m_SpriteAtlas != null)
+                {
+                    var getPreviewTexturesMethod = typeof(UnityEditor.U2D.SpriteAtlasExtensions).GetMethod("GetPreviewTextures", BindingFlags.NonPublic | BindingFlags.Static);
+
+                    if (getPreviewTexturesMethod != null)
+                    {
+                        Texture2D[] textures = getPreviewTexturesMethod.Invoke(null, new object[] { m_SpriteAtlas }) as Texture2D[];
+                        if (textures != null && textures.Length > 0)
+                        {
+                            m_AtlasTex = textures[0];
+                        }
+                    }
+                }
+
+            }
+            else
+            {
+                Sprite[] sprits = new Sprite[m_SpriteAtlas.spriteCount];
+                m_SpriteAtlas.GetSprites(sprits);
+                m_AtlasTex = sprits[0].texture;
+            }
+            return m_AtlasTex;
+        }
         //--------------------------------------------------------
         private void GenMappingTexture()
         {
@@ -205,7 +240,7 @@ namespace Framework.HUD.Runtime
             if (m_SpriteAtlas == null || m_SpriteAtlas.spriteCount == 0 || m_vNameToSpriteInfo == null) return;
             Sprite[] sprits = new Sprite[m_SpriteAtlas.spriteCount];
             m_SpriteAtlas.GetSprites(sprits);
-            Texture atlasTex = sprits[0].texture;
+            Texture atlasTex = GetAtlasTexture();
             int atlasWidth = atlasTex.width;
             int atlasHeight = atlasTex.height;
             int mappingWidth = m_AtlasMappingTex.width;
