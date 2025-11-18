@@ -141,6 +141,14 @@ namespace Framework.HUD.Editor
                 m_pTree.GetColumn(0).width = viewRect.width;
                 m_pTree.OnGUI(new Rect(0,0,viewRect.width, viewRect.height));
             }
+            if(Event.current.type == EventType.KeyUp)
+            {
+                if(Event.current.keyCode == KeyCode.Escape)
+                {
+                    m_pTree.SetSelection(new List<int>());
+                    m_pEditor.OnSelectComponent(null);
+                }
+            }
         }
         //--------------------------------------------------------
         bool OnDragItem(TreeAssetView.TreeItemData item)

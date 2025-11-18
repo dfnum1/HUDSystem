@@ -51,7 +51,13 @@ namespace Framework.HUD.Runtime
             {
                 m_pFollowTransform = m_pFollowTarget.localToWorldMatrix;
             }
-            return m_pFollowTransform;
+            return m_pFollowTransform*Matrix4x4.TRS(m_Offset, Quaternion.Euler(m_OffsetRotation), Vector3.one);
+        }
+        //--------------------------------------------------------
+        public void UpdateTransform()
+        {
+            if (m_RenderBatch != null && m_nTransId>=0)
+                m_RenderBatch.UpdateHudController(m_nTransId, this);
         }
         //--------------------------------------------------------
         public HudRenderBatch renderBatch

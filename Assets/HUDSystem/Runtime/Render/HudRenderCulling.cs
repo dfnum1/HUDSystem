@@ -109,6 +109,15 @@ namespace Framework.HUD.Runtime
             m_vTransformData[index] = data;
         }
         //--------------------------------------------------------
+        public void UpdateTransform(int index, Matrix4x4 worldMatrix)
+        {
+            if (m_bDispose) return;
+            if (index < 0 || index >= m_vTransformData.Length) return;
+            TransformData data = m_vTransformData[index];
+            data.localToWorld = worldMatrix;
+            m_vTransformData[index] = data;
+        }
+        //--------------------------------------------------------
         public void SetBounds(int index, float2 center, float2 size)
         {
             if (m_bDispose) return;

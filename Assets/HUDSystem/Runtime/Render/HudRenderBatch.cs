@@ -50,8 +50,6 @@ namespace Framework.HUD.Runtime
         //-----------------------------------------------------
         internal void SetAltas(HudAtlas atlas)
         {
-            if (m_pAtlasMapping == atlas)
-                return;
             m_pAtlasMapping = atlas;
             if (atlas != null)
             {
@@ -71,13 +69,10 @@ namespace Framework.HUD.Runtime
         //-----------------------------------------------------
         internal void SetFontAsset(TMP_FontAsset fontAsset)
         {
-            if (m_pFontAsset == fontAsset)
-                return;
             m_pFontAsset = fontAsset;
             if (fontAsset != null)
             {
-                int fontTexId = Shader.PropertyToID("_MainTex");
-                if (m_pMaterial && m_pMaterial.HasProperty(fontTexId))
+                if (m_pMaterial && m_pMaterial.HasProperty(HUDUtils._MainTex))
                 {
                   //      TMP_FontAsset fontAsset = TMP_Settings.defaultFontAsset;
                     m_MaterialPropertyBlock.SetTexture(HUDUtils._MainTex, fontAsset.atlasTexture);
@@ -168,6 +163,11 @@ namespace Framework.HUD.Runtime
         public int AddHudController(HudController controller, bool bRoot)
         {
             return m_Culling.Add(controller, bRoot);
+        }
+        //-----------------------------------------------------
+        public void UpdateHudController(int id, HudController controller)
+        {
+            m_Culling.UpdateTransform(id,controller.GetWorldMatrix());
         }
         //-----------------------------------------------------
         public void RemoveHudController(int id)

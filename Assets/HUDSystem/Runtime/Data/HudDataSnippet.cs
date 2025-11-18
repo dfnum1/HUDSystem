@@ -158,8 +158,8 @@ namespace Framework.HUD.Runtime
         {
             float4x4 f4x4 = m_Param1.value.data;
             float4 c3 = f4x4.c3;
-            c3.z = position.x;
-            c3.w = position.y;
+            c3.z = position.x/100.0f;
+            c3.w = position.y/100.0f;
             f4x4.c3 = c3;
             m_Param1.value.data = f4x4;
         }

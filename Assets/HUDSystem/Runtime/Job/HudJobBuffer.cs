@@ -56,7 +56,7 @@ namespace Framework.HUD.Runtime
                 float4x4 mvp = math.mul(vpMatrix, transformData.localToWorld);
                 float zvalue;
                 bool culling = Culling(mvp, transformData, out zvalue);
-                transformData.culling = 0;// (byte)(culling ? 1 : 0);
+                transformData.culling = (byte)(culling ? 1 : 0);
                 transformData.zvalue = zvalue;
 
                 if (transformData.culling == 0)

@@ -148,7 +148,7 @@ Shader "Unlit/Hud_Image_TMP"
 
 				//img和tmp 公用数据
 				fixed4 color = float2ToColor(param2[2][3], param2[3][3]);
-				float3 comPos = float3(param1[2][3], param1[3][3],tmpOrImgTagZ.y);
+				float3 comPos = float3(param1[2][3]*100.0f, param1[3][3]*100.0f,tmpOrImgTagZ.y);
 
 				float2 angleMaskType = toFloat2(param2[0][3]);
 				float angle = angleMaskType.x;
@@ -196,10 +196,13 @@ Shader "Unlit/Hud_Image_TMP"
 
 				float2 vertex_xy = spritePos + input.vertex.xy * spriteSize;
 				input.vertex.xy = lerp(vertex_xy/100, vertex_xy, tmpOrimg);
-				clipRect =  lerp(clipRect/100, clipRect, tmpOrimg);
+			//	clipRect =  lerp(clipRect/100, clipRect, tmpOrimg);
 
 				rotate2D(input.vertex.xy, angle);
+				rotate2D(vertex_xy.xy, angle);
 				input.vertex.xyz = input.vertex.xyz + comPos;
+
+				vertex_xy += comPos;
 
 
 				float boldparam = lossyScaleY * adjustedScale;
@@ -254,7 +257,7 @@ Shader "Unlit/Hud_Image_TMP"
 				output.outlineColor = outlineColor;
 				output.texcoord0 = float4(input.texcoord0.x, input.texcoord0.y, tmpOrimg, tmpOrimg);
 				output.param = half4(scale, bias - outline, bias + outline, bias);
-				output.worldPos.xy =vert.xy;
+				output.worldPos.xy =mul(UNITY_MATRIX_M, float4(vertex_xy,vert.z,vert.w)).xy;//vert.xy;
 				output.worldPos.zw = float2(maskType,maskType);
 				output.clipRect = clipRect;
 
@@ -301,13 +304,13 @@ Shader "Unlit/Hud_Image_TMP"
 
 				#if UNDERLAY_ON
 				d = tex2D(_MainTex, input.texcoord1.xy).a * input.underlayParam.x;
-				col += float4(_UnderlayColor.rgb * _UnderlayColor.a, _UnderlayColor.a) * saturate(d - input.underlayParam.y) * (1 - c.a);
+				col += float4(_UnderlayColor.rgb * _UnderlayColor.a, _UnderlayColor.a) * saturate(d - input.underlayParam.y) * (1 - col.a);
 				#endif
 
 				#if UNDERLAY_INNER
 				half sd = saturate(d - input.param.z);
 				d = tex2D(_MainTex, input.texcoord1.xy).a * input.underlayParam.x;
-				col += float4(_UnderlayColor.rgb * _UnderlayColor.a, _UnderlayColor.a) * (1 - saturate(d - input.underlayParam.y)) * sd * (1 - c.a);
+				col += float4(_UnderlayColor.rgb * _UnderlayColor.a, _UnderlayColor.a) * (1 - saturate(d - input.underlayParam.y)) * sd * (1 - col.a);
 				#endif
 
 				#if (UNDERLAY_ON | UNDERLAY_INNER)

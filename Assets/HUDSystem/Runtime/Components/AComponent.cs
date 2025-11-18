@@ -154,15 +154,14 @@ namespace Framework.HUD.Runtime
                 Rect region = m_pHudData.maskRegion;
                 if(m_pHudData.mask == EMaskType.Circle)
                 {
-                    Vector3 worldPos = m_HudController.GetWorldMatrix() *(GetPosition() + new Vector3(region.position.x, region.position.y,0));
+                    Vector3 worldPos =GetPosition() + new Vector3(region.position.x, region.position.y,0);
                     region.position = new Vector2(worldPos.x, worldPos.y);
                     return region;
                 }
                 else
                 {
-                    Vector3 worldPos = m_HudController.GetWorldMatrix() * GetPosition();
-                    region.position += new Vector2(worldPos.x, worldPos.y) - region.size / 2;
-
+                    Vector3 worldPos = m_HudController.GetWorldMatrix()*GetPosition();
+                    region.position += new Vector2(worldPos.x, worldPos.y) - region.size/2;
                     if (m_pParent != null)
                     {
                         Rect parentRegion = m_pParent.GetMaskRegion();
@@ -171,7 +170,7 @@ namespace Framework.HUD.Runtime
                         float xMax = Mathf.Min(region.xMax, parentRegion.xMax);
                         float yMax = Mathf.Min(region.yMax, parentRegion.yMax);
                         if (xMax > xMin && yMax > yMin)
-                            return new Rect(xMin, yMin, xMax, yMax);
+                            return new Rect(xMin, yMin, xMax- xMin, yMax-yMin);
                         else
                             return Rect.zero;
                     }
