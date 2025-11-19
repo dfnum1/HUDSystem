@@ -16,29 +16,34 @@ namespace Framework.HUD.Runtime
     {
         public Vector2 center = Vector2.zero;
         public Vector2 size = new Vector2(100,100);
+        public bool allowScale = true;
+        public bool allowRotation = true;
 
         public Mesh mesh;
         public Material material;
         public HudAtlas atlasAset;
         public TMP_FontAsset fontAsset;
 
-        [SerializeField]
+        [SerializeField,HideInInspector]
         internal List<HudCanvasData> vCanvas;
 
-        [SerializeField]
+        [SerializeField, HideInInspector]
         internal List<HudImageData> vImages;
-        [SerializeField]
+        [SerializeField, HideInInspector]
         internal List<HudTextData> vTexts;
-        [SerializeField]
+        [SerializeField, HideInInspector]
         internal List<HudNumberData> vNumbers;
+        [SerializeField, HideInInspector]
+        internal List<HudParticleData> vParticles;
 
         [System.Serializable]
-        public struct Hierarchy
+        public class Hierarchy
         {
             public int id;
             public int parentId;
-            public List<Hierarchy> children;
+            public List<int> children;
         }
+        [HideInInspector]
         public List<Hierarchy> vHierarchies;
 
         private bool m_bInited = false;
@@ -87,6 +92,19 @@ namespace Framework.HUD.Runtime
                     m_vDatas[txt.id] = txt;
                 }
             }
+            if (vParticles != null)
+            {
+                foreach (var txt in vParticles)
+                {
+                    m_vDatas[txt.id] = txt;
+                }
+            }
+        }
+        //--------------------------------------------------------
+        public Dictionary<int, HudBaseData> GetDatas()
+        {
+            Init();
+            return m_vDatas;
         }
         //--------------------------------------------------------
         public HudBaseData GetData(int id)
@@ -115,12 +133,29 @@ namespace Framework.HUD.Runtime
     {
         public override void OnInspectorGUI()
         {
-            DrawDefaultInspector();
             HudObject hudObject = (HudObject)target;
+            DrawDefaultInspector();
+            if(hudObject.vCanvas!=null) EditorGUILayout.LabelField("Canvas个数:" + hudObject.vCanvas.Count);
+            if (hudObject.vImages != null) EditorGUILayout.LabelField("Image个数:" + hudObject.vImages.Count);
+            if (hudObject.vTexts != null) EditorGUILayout.LabelField("Text个数:" + hudObject.vTexts.Count);
+            if (hudObject.vNumbers != null) EditorGUILayout.LabelField("Number个数:" + hudObject.vNumbers.Count);
+            if (hudObject.vParticles != null) EditorGUILayout.LabelField("Particle个数:" + hudObject.vParticles.Count);
             if (GUILayout.Button("打开编辑器"))
             {
                 Editor.HUDEditor.EditorHud(hudObject);
             }
+        }
+        //--------------------------------------------------------
+        [UnityEditor.Callbacks.OnOpenAsset(0)]
+        public static bool OnOpenAsset(int instanceID, int line)
+        {
+            var obj = EditorUtility.InstanceIDToObject(instanceID);
+            if (obj != null && obj is HudObject)
+            {
+                Editor.HUDEditor.EditorHud(obj as HudObject);
+                return true;
+            }
+            return false;
         }
     }
 #endif

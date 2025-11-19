@@ -32,7 +32,7 @@ namespace Framework.HUD.Runtime
     }
     //--------------------------------------------------------
     [System.Serializable]
-    public class HudBaseData
+    public abstract class HudBaseData
     {
         public int id;
         public string name;
@@ -45,11 +45,17 @@ namespace Framework.HUD.Runtime
         public Color   color =Color.white;
         public EMaskType mask;
         public Rect maskRegion;
+
+        public abstract AWidget CreateWidget(HudSystem pSystem);
     }
     //--------------------------------------------------------
     [System.Serializable]
     public class HudCanvasData : HudBaseData
     {
+        public override AWidget CreateWidget(HudSystem pSystem)
+        {
+            return new HudCanvas(pSystem, this);
+        }
     }
     //--------------------------------------------------------
     [System.Serializable]
@@ -59,7 +65,11 @@ namespace Framework.HUD.Runtime
         public float fontSize = 20;
         public float lineSpacing =0;
         public HorizontalAlignment alignment = HorizontalAlignment.Middle;
-    //    public TMPro.TMP_FontAsset fontAsset;
+        //    public TMPro.TMP_FontAsset fontAsset;
+        public override AWidget CreateWidget(HudSystem pSystem)
+        {
+            return new HudText(pSystem, this);
+        }
     }
     //--------------------------------------------------------
     [System.Serializable]
@@ -68,6 +78,10 @@ namespace Framework.HUD.Runtime
         public string strNumber;
         public float fontSize = 20;
         public HorizontalAlignment alignment = HorizontalAlignment.Middle;
+        public override AWidget CreateWidget(HudSystem pSystem)
+        {
+            return new HudNumber(pSystem, this);
+        }
     }
     //--------------------------------------------------------
     [System.Serializable]
@@ -102,5 +116,21 @@ namespace Framework.HUD.Runtime
         public FillMethod fillMethod;
         public int fillOrigin = 0;
         public float fillAmount = 1.0f;
+        public override AWidget CreateWidget(HudSystem pSystem)
+        {
+            return new HudImage(pSystem, this);
+        }
+    }
+    //--------------------------------------------------------
+    [System.Serializable]
+    public class HudParticleData : HudBaseData
+    {
+        public string strParticle;
+        public Vector3 scale = Vector3.one;
+        public int renderOrder = 0;
+        public override AWidget CreateWidget(HudSystem pSystem)
+        {
+            return new HudParticle(pSystem, this);
+        }
     }
 }

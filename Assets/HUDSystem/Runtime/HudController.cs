@@ -5,6 +5,7 @@
 描    述:	HUD 控制器
 *********************************************************************/
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using TMPro;
 using UnityEngine;
 
@@ -14,7 +15,8 @@ namespace Framework.HUD.Runtime
     {
         private HudSystem m_pSystem;
         private HudObject m_pObject;
-        private List<AWidget> m_vWidgets = null;
+        private List<AWidget> m_vTopWidgets = null;
+        private Dictionary<int, AWidget> m_vWidgetMaps = null;
         private HudRenderBatch m_RenderBatch = null;
 
         private Transform m_pFollowTarget;
@@ -48,6 +50,16 @@ namespace Framework.HUD.Runtime
 #endif
         }
         //--------------------------------------------------------
+        internal void SpawnInstance(AWidget pWidget, string file, System.Action<GameObject> callback)
+        {
+            m_pSystem.SpawnInstance(pWidget, file, callback);
+        }
+        //--------------------------------------------------------
+        internal void DestroyInstance(AWidget pWidget, GameObject pGo)
+        {
+            m_pSystem.DestroyInstance(pWidget, pGo);
+        }
+        //--------------------------------------------------------
         public void SetFollowTarget(Transform target)
         {
             m_pFollowTarget = target;
@@ -70,7 +82,17 @@ namespace Framework.HUD.Runtime
             {
                 m_pFollowTransform = m_pFollowTarget.localToWorldMatrix;
             }
-            return m_pFollowTransform*Matrix4x4.TRS(m_Offset, Quaternion.Euler(m_OffsetRotation), Vector3.one);
+            if(m_pObject.allowRotation && m_pObject.allowScale)
+                return m_pFollowTransform*Matrix4x4.TRS(m_Offset, Quaternion.Euler(m_OffsetRotation), Vector3.one);
+            else if (m_pObject.allowRotation)
+            {
+                return Matrix4x4.TRS(m_pFollowTransform.GetPosition()+m_Offset, m_pFollowTransform.rotation*Quaternion.Euler(m_OffsetRotation), Vector3.one);
+            }
+            else if (m_pObject.allowScale)
+            {
+                return Matrix4x4.TRS(m_pFollowTransform.GetPosition() + m_Offset, Quaternion.identity, m_pFollowTransform.lossyScale);
+            }
+            return Matrix4x4.TRS(m_pFollowTransform.GetPosition() + m_Offset, Quaternion.identity, Vector3.one);
         }
         //--------------------------------------------------------
         public void UpdateTransform()
@@ -110,13 +132,19 @@ namespace Framework.HUD.Runtime
             return m_nTransId;
         }
         //--------------------------------------------------------
+        internal Dictionary<int ,AWidget> GetWidgets()
+        {
+            return m_vWidgetMaps;
+        }
+        //--------------------------------------------------------
         public void SetHudObject(HudObject hudObject)
         {
             if (m_pObject == hudObject)
                 return;
             m_pObject = hudObject;
 
-            if(m_vWidgets != null) m_vWidgets.Clear();
+            if (m_vWidgetMaps != null) m_vWidgetMaps.Clear();
+            if (m_vTopWidgets != null) m_vTopWidgets.Clear();
             if (m_pObject == null || m_pObject.vHierarchies == null)
                 return;
 
@@ -134,12 +162,44 @@ namespace Framework.HUD.Runtime
                 m_nTransId = m_RenderBatch.AddHudController(this, true);
             }
 
-            foreach (var db in m_pObject.vHierarchies)
+            var hudDatas = m_pObject.GetDatas();
+            if (m_vWidgetMaps == null)
+                m_vWidgetMaps = new Dictionary<int, AWidget>(hudDatas.Count);
+            foreach (var db in hudDatas)
             {
-                CreateHierarchy(null, db);
+                var hudData = db.Value;
+                AWidget widget = hudData.CreateWidget(m_pSystem);
+                if (widget != null)
+                {
+                    widget.SetHudController(this);
+                    m_vWidgetMaps[db.Key] = widget;
+                }
             }
 
-            foreach (var db in m_vWidgets)
+            foreach (var node in m_pObject.vHierarchies)
+            {
+                if (node.children != null)
+                {
+                    foreach (var childId in node.children)
+                    {
+                        if (m_vWidgetMaps.TryGetValue(node.id, out var parent) && m_vWidgetMaps.TryGetValue(childId, out var child))
+                        {
+                            parent.Attach(child);
+                        }
+                    }
+                }
+            }
+            if (m_vTopWidgets == null)
+                m_vTopWidgets = new List<AWidget>(m_vWidgetMaps.Count);
+            foreach (var node in m_pObject.vHierarchies)
+            {
+                if (node.parentId == -1 && m_vWidgetMaps.TryGetValue(node.id, out var widget))
+                {
+                    m_vTopWidgets.Add(widget);
+                }
+            }
+
+            foreach (var db in m_vTopWidgets)
             {
                 db.Init();
             }
@@ -151,14 +211,44 @@ namespace Framework.HUD.Runtime
             TriggerReorder();
         }
         //--------------------------------------------------------
-        public List<AWidget> GetWidgets()
+        public List<AWidget> GetTopWidgets()
         {
-            return m_vWidgets;
+            return m_vTopWidgets;
+        }
+        //--------------------------------------------------------
+        internal void AddTopWidget(AWidget pWidget)
+        {
+            if (m_vWidgetMaps == null) m_vWidgetMaps = new Dictionary<int, AWidget>(8);
+            m_vWidgetMaps[pWidget.GetId()] = pWidget;
+            if (pWidget.GetParent() == null && !m_vTopWidgets.Contains(pWidget))
+            {
+                if (m_vTopWidgets == null) m_vTopWidgets = new List<AWidget>(2);
+                m_vTopWidgets.Add(pWidget);
+            }
+        }
+        //--------------------------------------------------------
+        internal void RemoveTopWidget(AWidget pWidget)
+        {
+            if(m_vTopWidgets!=null) m_vTopWidgets.Remove(pWidget);
+        }
+        //--------------------------------------------------------
+        internal void OnWidgetIDChange(AWidget pWidget, int newId, int oldId)
+        {
+            if (pWidget == null) return;
+            m_vWidgetMaps.Remove(oldId);
+            m_vWidgetMaps[newId] = pWidget;
+        }
+        //--------------------------------------------------------
+        internal void OnWidgetDestroy(AWidget pWidget)
+        {
+            if (pWidget == null) return;
+            m_vTopWidgets.Remove(pWidget);
+            m_vWidgetMaps.Remove(pWidget.GetId());
         }
         //--------------------------------------------------------
         internal void OnReorder()
         {
-            if (m_vWidgets == null)
+            if (m_vTopWidgets == null)
                 return;
 
             if(m_nTransId>=0 && m_RenderBatch !=null)
@@ -166,21 +256,14 @@ namespace Framework.HUD.Runtime
                 m_RenderBatch.RemoveHudData(m_nTransId);
             }
 
-            m_vWidgets.Sort((w1, w2) =>
+            m_vTopWidgets.Sort((w1, w2) =>
             {
                 return w1.GetTagZ().CompareTo(w2.GetTagZ());
             });
-            foreach (var db in m_vWidgets)
+            foreach (var db in m_vTopWidgets)
             {
                 db.OnReorder();
             }
-        }
-        //--------------------------------------------------------
-        public void RemoveComponent(AWidget pComp)
-        {
-            if (pComp == null) return;
-            if(pComp is HudCanvas)
-                m_vWidgets.Remove((HudCanvas)pComp);
         }
         //--------------------------------------------------------
         internal void Destroy()
@@ -201,24 +284,24 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         public void SetDirty()
         {
-            if (m_vWidgets == null)
+            if (m_vTopWidgets == null)
                 return;
-            foreach (var db in m_vWidgets)
+            foreach (var db in m_vTopWidgets)
             {
                 db.SetDirty();
             }
         }
         //--------------------------------------------------------
-        public AWidget RaycastHud(Vector2 screenPosition, Camera  camera, List<AWidget> vResults = null)
+        public AWidget RaycastHud(Vector2 screenPosition, Camera  camera, List<AWidget> vResults = null, bool bIngoreRayTest= false)
         {
-            if (camera == null || m_vWidgets==null) return null;
+            if (camera == null || m_vTopWidgets==null) return null;
 
             var rayTest = m_pSystem.GetRayTestCache();
             rayTest.Clear();
 
-            foreach (var comp in m_vWidgets)
+            foreach (var comp in m_vTopWidgets)
             {
-                RaycastHudRecursive(rayTest,comp, screenPosition, camera);
+                RaycastHudRecursive(rayTest,comp, screenPosition, camera, bIngoreRayTest);
             }
             if (rayTest.Count <= 0) return null;
             if (vResults != null)
@@ -237,124 +320,33 @@ namespace Framework.HUD.Runtime
             return widget;
         }
         //--------------------------------------------------------
-        void RaycastHudRecursive(List<AWidget> vRayTest, AWidget widget, Vector2 screenPosition, Camera camera)
+        void RaycastHudRecursive(List<AWidget> vRayTest, AWidget widget, Vector2 screenPosition, Camera camera, bool bIngoreRayTest)
         {
             var data = widget.GetData();
-            if (data == null || !data.rayTest) return;
+            if (data == null ) return;
+            if (!bIngoreRayTest && !data.rayTest)
+                return;
             Vector3 worldPos = camera.WorldToScreenPoint(GetWorldMatrix()*widget.GetPosition());
             Rect rect = new Rect(worldPos.x - data.sizeDelta.x * 0.5f, worldPos.y - data.sizeDelta.y * 0.5f, data.sizeDelta.x, data.sizeDelta.y);
             if (rect.Contains(screenPosition))
             {
                 vRayTest.Add(widget);
-
-                if(widget.GetChilds()!=null)
+            }
+            if (widget.GetChilds() != null)
+            {
+                foreach (var child in widget.GetChilds())
                 {
-                    foreach(var child in widget.GetChilds())
-                    {
-                        RaycastHudRecursive(vRayTest, child, screenPosition, camera);
-                    }
+                    RaycastHudRecursive(vRayTest, child, screenPosition, camera, bIngoreRayTest);
                 }
             }
-        }
-        //--------------------------------------------------------
-        void CreateHierarchy(AWidget pParent, HudObject.Hierarchy hierarchy)
-        {
-            var hudData = m_pObject.GetData(hierarchy.id);
-            if (hudData == null)
-                return;
-
-            AWidget pRoot = null;
-            if (hudData is HudCanvasData)
-            {
-                pRoot = CreateCanvas(hudData, pParent);
-            }
-            else if(hudData is HudImageData)
-            {
-                pRoot = CreateImage(pParent, hudData);
-            }
-            else if(hudData is HudTextData)
-            {
-                pRoot = CreateText(pParent, hudData);
-            }
-            else if (hudData is HudNumberData)
-            {
-                pRoot = CreateNumber(pParent, hudData);
-            }
-            if (pRoot == null)
-                return;
-
-            if (hierarchy.children != null)
-            {
-                foreach (var child in hierarchy.children)
-                {
-                    CreateHierarchy(pRoot, child);
-                }
-            }
-        }
-        //--------------------------------------------------------
-        HudCanvas CreateCanvas( HudBaseData hudData, AWidget pParent)
-        {
-            var canvas = new HudCanvas(m_pSystem, hudData);
-            canvas.SetHudController(this);
-            if (pParent != null)
-                pParent.Attach(canvas);
-            else
-            {
-                if (m_vWidgets == null)
-                    m_vWidgets = new List<AWidget>(4);
-                m_vWidgets.Add(canvas);
-            }
-            return canvas;
-        }
-        //--------------------------------------------------------
-        HudImage CreateImage(AWidget pParent,HudBaseData hudData)
-        {
-            var widget = new HudImage(m_pSystem, hudData);
-            widget.SetHudController(this);
-            if (pParent != null) pParent.Attach(widget);
-            else
-            {
-                if (m_vWidgets == null)
-                    m_vWidgets = new List<AWidget>(4);
-                m_vWidgets.Add(widget);
-            }
-            return widget;
-        }
-        //--------------------------------------------------------
-        HudText CreateText(AWidget pParent, HudBaseData hudData)
-        {
-            var widget = new HudText(m_pSystem, hudData);
-            widget.SetHudController(this);
-            if (pParent != null) pParent.Attach(widget);
-            else
-            {
-                if (m_vWidgets == null)
-                    m_vWidgets = new List<AWidget>(4);
-                m_vWidgets.Add(widget);
-            }
-            return widget;
-        }
-        //--------------------------------------------------------
-        HudNumber CreateNumber(AWidget pParent, HudBaseData hudData)
-        {
-            var widget = new HudNumber(m_pSystem, hudData);
-            widget.SetHudController(this);
-            if(pParent!=null) pParent.Attach(widget);
-            else
-            {
-                if (m_vWidgets == null)
-                    m_vWidgets = new List<AWidget>(4);
-                m_vWidgets.Add(widget);
-            }
-            return widget;
         }
 #if UNITY_EDITOR
         //--------------------------------------------------------
         public void DrawDebug(Camera camera, System.Action<AWidget,Camera> onDraw)
         {
             if (onDraw == null || camera == null) return;
-            if (m_vWidgets == null) return;
-            foreach(var db in m_vWidgets)
+            if (m_vTopWidgets == null) return;
+            foreach(var db in m_vTopWidgets)
             {
                 DrawDebug(db,camera, onDraw);
             }

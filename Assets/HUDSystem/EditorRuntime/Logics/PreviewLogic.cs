@@ -6,6 +6,7 @@
 *********************************************************************/
 #if UNITY_EDITOR
 using Framework.HUD.Runtime;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -15,10 +16,18 @@ namespace Framework.HUD.Editor
 {
     public class PreviewLogic : AEditorLogic
     {
+        public class Instance
+        {
+            public GameObject pInstance;
+            public List<ParticleSystem> vParticles = new List<ParticleSystem>();
+            public float time;
+        }
         TargetPreview m_pPreview = null;
         GUIStyle m_PreviewStyle; 
         AWidget m_pSelectComponent = null;
         GameObject m_pTestRole = null;
+        GameObject m_pPreviewRoot = null;
+        Dictionary<AWidget, Instance> m_vInstance = new Dictionary<AWidget, Instance>();
         HashSet<AWidget> m_vRayTestLocks = new HashSet<AWidget>();
         //--------------------------------------------------------
         public PreviewLogic(HUDEditor editor, Rect viewRect) : base(editor, viewRect)
@@ -51,7 +60,10 @@ namespace Framework.HUD.Editor
 
                 m_pEditor.GetHudSystem().SetRenderCamera(m_pPreview.GetCamera());
 
-                m_pTestRole = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                m_pPreviewRoot =  GameObject.CreatePrimitive(PrimitiveType.Cube);
+                m_pPreviewRoot.transform.localScale = Vector3.one * 0.2f;
+                m_pTestRole = new GameObject("HudRoot");
+                m_pPreview.AddPreview(m_pPreviewRoot);
                 m_pPreview.AddPreview(m_pTestRole);
             }
         }
@@ -60,6 +72,45 @@ namespace Framework.HUD.Editor
         {
             if (m_pPreview != null) m_pPreview.Destroy();
             m_pPreview = null;
+            if(m_pPreviewRoot!=null)
+            {
+                if (Application.isPlaying)
+                    GameObject.Destroy(m_pPreviewRoot);
+                else
+                    GameObject.DestroyImmediate(m_pPreviewRoot);
+                m_pPreviewRoot = null;
+            }
+            if (m_pTestRole != null)
+            {
+                if (Application.isPlaying)
+                    GameObject.Destroy(m_pTestRole);
+                else
+                    GameObject.DestroyImmediate(m_pTestRole);
+                m_pTestRole = null;
+            }
+        }
+        //--------------------------------------------------------
+        public override void OnSpawnInstance(AWidget pWidget, string strParticle, GameObject pIns)
+        {
+            if(pIns && m_pPreview!=null)
+                m_pPreview.AddPreview(pIns);
+
+            m_vInstance.Remove(pWidget);
+            Instance pInstacne = new Instance();
+            pInstacne.pInstance = pIns;
+            pInstacne.time = 0;
+            var particle = pIns.GetComponent<ParticleSystem>();
+            if (particle != null) pInstacne.vParticles.Add(particle);
+            var particles = pIns.GetComponentsInChildren<ParticleSystem>();
+            if (particles != null)
+                pInstacne.vParticles.AddRange(particles);
+            foreach (var db in pInstacne.vParticles)
+                db.Play(true);
+            m_vInstance[pWidget] =pInstacne;
+        }
+        //--------------------------------------------------------
+        public override void OnDestroyInstance(AWidget pWidget, GameObject pGameObject)
+        {
         }
         //--------------------------------------------------------
         protected override void OnGUI()
@@ -71,11 +122,73 @@ namespace Framework.HUD.Editor
             }
         }
         //--------------------------------------------------------
+        void DrawHudObjectBounds()
+        {
+            var hudObject = GetHudObject();
+            if (hudObject == null)
+                return;
+
+            Vector2 center2D = hudObject.center;
+            Vector2 size2D = hudObject.size/ HUDUtils.PIXEL_SIZE;
+            float boxDepth = 1f;
+
+            // 包围盒中心
+            Vector3 center = new Vector3(center2D.x, center2D.y, 0) + (m_pTestRole ? m_pTestRole.transform.position : Vector3.zero);
+            Vector3 halfSize = new Vector3(size2D.x * 0.5f, size2D.y * 0.5f, boxDepth * 0.5f);
+
+            // 8个顶点
+            Vector3[] verts = new Vector3[8];
+            verts[0] = center + new Vector3(-halfSize.x, -halfSize.y, -halfSize.z); // 左下前
+            verts[1] = center + new Vector3(halfSize.x, -halfSize.y, -halfSize.z);  // 右下前
+            verts[2] = center + new Vector3(halfSize.x, halfSize.y, -halfSize.z);   // 右上前
+            verts[3] = center + new Vector3(-halfSize.x, halfSize.y, -halfSize.z);  // 左上前
+            verts[4] = center + new Vector3(-halfSize.x, -halfSize.y, halfSize.z);  // 左下后
+            verts[5] = center + new Vector3(halfSize.x, -halfSize.y, halfSize.z);   // 右下后
+            verts[6] = center + new Vector3(halfSize.x, halfSize.y, halfSize.z);    // 右上后
+            verts[7] = center + new Vector3(-halfSize.x, halfSize.y, halfSize.z);   // 左上后
+
+            Color oldColor = Handles.color;
+            Handles.color = new Color(0,1,0,0.5f);
+
+            // 前面
+            Handles.DrawAAPolyLine(3, verts[0], verts[1], verts[2], verts[3], verts[0]);
+            // 后面
+            Handles.DrawAAPolyLine(3, verts[4], verts[5], verts[6], verts[7], verts[4]);
+            // 连接前后
+            Handles.DrawAAPolyLine(3, verts[0], verts[4]);
+            Handles.DrawAAPolyLine(3, verts[1], verts[5]);
+            Handles.DrawAAPolyLine(3, verts[2], verts[6]);
+            Handles.DrawAAPolyLine(3, verts[3], verts[7]);
+
+            Handles.color = oldColor;
+        }
+        //--------------------------------------------------------
+        public override void OnUpdate(float deltaTime)
+        {
+            foreach (var db in m_vInstance)
+            {
+                if (db.Value.vParticles != null)
+                {
+                    foreach (var par in db.Value.vParticles)
+                    {
+                        if (!par.isPlaying)
+                            par.Play();
+                        par.Simulate(deltaTime, false,false); 
+                    }
+                }
+                db.Value.time += deltaTime;
+                if (db.Value.time >= 10000) db.Value.time = 0;
+            }
+        }
+        //--------------------------------------------------------
         void OnPreviewDraw(int controllerId, Camera camera, Event evt)
         {
             var hudSystem = GetHudSystem();
             if (hudSystem == null)
                 return;
+
+
+            DrawHudObjectBounds();
             hudSystem.Update();
             hudSystem.BeginRender();
             hudSystem.Render();
@@ -99,7 +212,12 @@ namespace Framework.HUD.Editor
 
             if(m_pTestRole!=null)
             {
-                if(m_pSelectComponent==null)
+                if(m_pPreviewRoot)
+                {
+                    m_pPreviewRoot.transform.position = m_pTestRole.transform.position;
+                    m_pPreviewRoot.transform.rotation = m_pTestRole.transform.rotation;
+                }
+                if (m_pSelectComponent==null)
                 {
                     if (UnityEditor.Tools.current == Tool.Move || UnityEditor.Tools.current == Tool.Transform)
                         m_pTestRole.transform.position = Handles.DoPositionHandle(m_pTestRole.transform.position, Quaternion.identity);
@@ -129,7 +247,7 @@ namespace Framework.HUD.Editor
                 fixedScreenPos.y = camera.pixelHeight - fixedScreenPos.y;
 
                 List<AWidget> vTest = new List<AWidget>();
-                var hitComp = GetHud().RaycastHud(fixedScreenPos, camera, vTest);
+                var hitComp = GetHud().RaycastHud(fixedScreenPos, camera, vTest, true);
                 if(vTest.Count>0)
                 {
                     for(int i =0; i < vTest.Count;)
@@ -163,7 +281,7 @@ namespace Framework.HUD.Editor
             var data = widget.GetData();
             if (data == null) return;
 
-            float perUnit = 100;
+            float perUnit = HUDUtils.PIXEL_SIZE;
             if (widget.GetHudType() == EHudType.Text)
                 perUnit = 1;
 

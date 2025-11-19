@@ -17,7 +17,8 @@ namespace Framework.HUD.Runtime
         Canvas,
         Text,
         Image,
-        Number
+        Number,
+        Particle,
     }
     //--------------------------------------------------------
     enum EParamOverrideType : byte
@@ -200,7 +201,12 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         internal void SetId(int nId)
         {
+            if (m_pHudData.id == nId)
+                return;
+            int oldId = m_pHudData.id;
             m_pHudData.id = nId;
+            if (m_HudController != null)
+                m_HudController.OnWidgetIDChange(this, nId, oldId);
         }
         //--------------------------------------------------------
         public int GetId()
@@ -652,6 +658,10 @@ namespace Framework.HUD.Runtime
         public void Destroy()
         {
             if (m_pParent != null) m_pParent.Detach(this);
+            if (m_HudController != null) m_HudController.OnWidgetDestroy(this);
+            OnDestroy();
         }
+        //--------------------------------------------------------
+        protected virtual void OnDestroy() { }
     }
 }

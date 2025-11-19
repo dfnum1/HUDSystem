@@ -74,7 +74,7 @@ namespace Framework.HUD.Editor
         {
             GetHud().Destroy();
             GetHud().SetHudObject(hudObject);
-            var canvas = GetHud().GetWidgets();
+            var canvas = GetHud().GetTopWidgets();
             if (canvas != null)
             {
                 foreach (var db in canvas)
@@ -117,8 +117,7 @@ namespace Framework.HUD.Editor
             List<Framework.HUD.Runtime.HudObject.Hierarchy> hierarchies = new List<Framework.HUD.Runtime.HudObject.Hierarchy>();
             foreach (var top in m_vTopGraphics)
             {
-                var hierarchy = BuildHierarchy(top);
-                hierarchies.Add(hierarchy);
+                BuildHierarchy(top, hierarchies);
             }
             hudObj.vHierarchies = hierarchies;
         }
@@ -209,6 +208,7 @@ namespace Framework.HUD.Editor
             {
                 var targetParentComp = targetParentItem.graphicItem;
                 targetParentComp.Attach(dragComp, drop.insertAtIndex);
+                GetHud().RemoveTopWidget(dragComp);
             }
             else
             {
@@ -218,6 +218,7 @@ namespace Framework.HUD.Editor
                         m_vTopGraphics.Insert(drop.insertAtIndex, dragComp);
                     else
                         m_vTopGraphics.Add(dragComp);
+                    GetHud().AddTopWidget(dragComp);
                 }
             }
             RefreshTree();
@@ -277,7 +278,7 @@ namespace Framework.HUD.Editor
             menu.AddItem(new GUIContent("Delete"), false, () =>
             {
                 widget.graphicItem.Destroy();
-                GetHud().RemoveComponent(widget.graphicItem);
+                GetHud().OnWidgetDestroy(widget.graphicItem);
                 RefreshTree();
             });
             foreach(var tp in m_vHudTypes)
@@ -315,6 +316,7 @@ namespace Framework.HUD.Editor
                 m_vTopGraphics.Add(grapic);
             }
             grapic.Init();
+            GetHud().AddTopWidget(grapic);
 
             RefreshTree();
             return grapic;
@@ -367,21 +369,22 @@ namespace Framework.HUD.Editor
             }
         }
         //--------------------------------------------------------
-        Framework.HUD.Runtime.HudObject.Hierarchy BuildHierarchy(AWidget comp)
+        void BuildHierarchy(AWidget comp, List<Framework.HUD.Runtime.HudObject.Hierarchy> nodes)
         {
-            Framework.HUD.Runtime.HudObject.Hierarchy hierarchy = new Framework.HUD.Runtime.HudObject.Hierarchy();
-            hierarchy.id = comp.GetId();
-            hierarchy.parentId = comp.GetParent() != null ? comp.GetParent().GetId() : -1;
-            hierarchy.children = new List<Framework.HUD.Runtime.HudObject.Hierarchy>();
+            var node = new Framework.HUD.Runtime.HudObject.Hierarchy();
+            node.id = comp.GetId();
+            node.parentId = comp.GetParent() != null ? comp.GetParent().GetId() : -1;
+            node.children = new List<int>();
             var childs = comp.GetChilds();
             if (childs != null)
             {
                 foreach (var child in childs)
                 {
-                    hierarchy.children.Add(BuildHierarchy(child));
+                    node.children.Add(child.GetId());
+                    BuildHierarchy(child, nodes);
                 }
             }
-            return hierarchy;
+            nodes.Add(node);
         }
         //--------------------------------------------------------
         Dictionary<System.Type, List<HudBaseData>> ConvertToDataList()

@@ -6,6 +6,7 @@
 *********************************************************************/
 #if UNITY_EDITOR
 using Framework.HUD.Runtime;
+using System;
 using UnityEngine;
 using static Codice.Client.Common.Connection.AskCredentialsToUser;
 
@@ -64,6 +65,11 @@ namespace Framework.HUD.Editor
 
         }
         //--------------------------------------------------------
+        public virtual void OnUpdate(float deltaTime)
+        {
+
+        }
+        //--------------------------------------------------------
         public void DrawGUI()
         {
             GUILayout.BeginArea(viewRect);
@@ -76,6 +82,14 @@ namespace Framework.HUD.Editor
         }
         //--------------------------------------------------------
         public virtual void OnSave() 
+        {
+        }
+        //--------------------------------------------------------
+        public virtual void OnSpawnInstance(AWidget pWidget, string strParticle, GameObject pIns)
+        {
+        }
+        //--------------------------------------------------------
+        public virtual void OnDestroyInstance(AWidget pWidget, GameObject pGameObject)
         {
         }
     }

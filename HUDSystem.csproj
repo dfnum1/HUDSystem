@@ -64,7 +64,6 @@
     <Compile Include="Assets\HUDSystem\Runtime\Render\HudInstanceCollector.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Render\HudRenderBatch.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\PreviewLogic.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Components\AComponent.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Job\HudJobBuffer.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\HierarchyLogic.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudImage.cs" />
@@ -74,18 +73,23 @@
     <Compile Include="Assets\HUDSystem\Runtime\Data\HudDataSnippet.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Render\HudGpuRenderData.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Data\HudSetting.cs" />
+    <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\UnDoLogic.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\AEditorLogic.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Data\HudAtlas.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\HudEditor.cs" />
+    <Compile Include="Assets\HUDSystem\EditorRuntime\HudEditorInit.cs" />
+    <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\HudAtlasSpriteProvider.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Data\HudObject.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\InspectorLogic.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Preview\TreeAssetView.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Components\HudParticle.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Utils\ArrayPtr.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudNumber.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Utils\HudUtils.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudCanvas.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudText.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\HudSystem.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Components\AWidget.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Utils\HudAttributes.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\HudController.cs" />
   </ItemGroup>

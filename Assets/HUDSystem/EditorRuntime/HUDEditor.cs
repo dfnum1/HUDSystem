@@ -6,15 +6,47 @@
 *********************************************************************/
 #if UNITY_EDITOR
 using Framework.HUD.Runtime;
+using System;
 using System.Collections.Generic;
 using Unity.Jobs;
 using UnityEditor;
 using UnityEngine;
+using static UnityEngine.Application;
 
 namespace Framework.HUD.Editor
 {
-    public class HUDEditor : EditorWindow
+    public class EditorTimer
     {
+        public float m_PreviousTime;
+        public float deltaTime = 0.02f;
+        public float fixedDeltaTime = 0.02f;
+        public float m_fDeltaTime = 0f;
+        public float m_currentSnap = 1f;
+
+        //-----------------------------------------------------
+        public void Update()
+        {
+            if (Application.isPlaying)
+            {
+                // Application.targetFrameRate = 30;
+                deltaTime = Time.deltaTime;
+                m_fDeltaTime = (float)(deltaTime * m_currentSnap);
+            }
+            else
+            {
+                float curTime = Time.realtimeSinceStartup;
+                m_PreviousTime = Mathf.Min(m_PreviousTime, curTime);//very important!!!
+
+                deltaTime = curTime - m_PreviousTime;
+                m_fDeltaTime = (float)(deltaTime * m_currentSnap);
+            }
+
+            m_PreviousTime = Time.realtimeSinceStartup;
+        }
+    }
+    public class HUDEditor : EditorWindow, IHudSystemCallback
+    {
+        EditorTimer m_pTimer = new EditorTimer();
         //--------------------------------------------------------
         public static void EditorHud(HudObject pHudObject)
         {
@@ -30,6 +62,7 @@ namespace Framework.HUD.Editor
         public HudSystem GetHudSystem()
         {
             if (m_pHudSystem == null) m_pHudSystem = new HudSystem();
+            m_pHudSystem.RegisterCallback(this);
             return m_pHudSystem;
         }
         //--------------------------------------------------------
@@ -81,13 +114,13 @@ namespace Framework.HUD.Editor
         //--------------------------------------------------------
         private void OnDisable()
         {
-            m_pHudSystem.Destroy();
-            m_pHudSystem = null;
             for (int i = 0; i < m_vLogics.Count; ++i)
             {
                 m_vLogics[i].OnDisable();
             }
             if (m_pHudController != null) m_pHudController.Destroy();
+            m_pHudSystem.Destroy();
+            m_pHudSystem = null;
             m_pHudController = null;
         }
         //--------------------------------------------------------
@@ -106,9 +139,13 @@ namespace Framework.HUD.Editor
         //--------------------------------------------------------
         private void OnUpdate()
         {
-            if(!Application.isPlaying)
+            m_pTimer.Update();
+            if (!Application.isPlaying)
                 JobHandle.ScheduleBatchedJobs();
-
+            for (int i = 0; i < m_vLogics.Count; ++i)
+            {
+                m_vLogics[i].OnUpdate(m_pTimer.deltaTime);
+            }
             this.Repaint();
         }
         //--------------------------------------------------------
@@ -156,6 +193,44 @@ namespace Framework.HUD.Editor
                     return m_vLogics[i] as T;
             }
             return null;
+        }
+        //--------------------------------------------------------
+        public bool OnSpawnInstance(AWidget pWidget, string strParticle, Action<GameObject> onCallback)
+        {
+            if (string.IsNullOrEmpty(strParticle))
+            {
+                if (onCallback != null) onCallback(null);
+                return true;
+            }
+            GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(strParticle);
+            if (prefab == null)
+            {
+                if (onCallback != null) onCallback(null);
+                return true;
+            }
+            GameObject pInst = GameObject.Instantiate(prefab);
+            if (onCallback != null) onCallback(pInst);
+
+            for (int i = 0; i < m_vLogics.Count; ++i)
+            {
+                m_vLogics[i].OnSpawnInstance(pWidget, strParticle, pInst);
+            }
+            return true;
+        }
+        //--------------------------------------------------------
+        public bool OnDestroyInstance(AWidget pWidget, GameObject pGameObject)
+        {
+            for (int i = 0; i < m_vLogics.Count; ++i)
+            {
+                m_vLogics[i].OnDestroyInstance(pWidget, pGameObject);
+            }
+
+            if (Application.isPlaying)
+                GameObject.Destroy(pGameObject);
+            else GameObject.DestroyImmediate(pGameObject);
+            pGameObject = null;
+
+            return true;
         }
     }
 }

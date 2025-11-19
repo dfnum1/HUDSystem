@@ -32,7 +32,21 @@ namespace Framework.HUD.Editor
         protected override void OnGUI()
         {
             if (m_pSelectComponent == null)
+            {
+                if(GetHudObject()!=null)
+                {
+                    var hudObj = GetHudObject();
+                    hudObj.allowScale = EditorGUILayout.Toggle("允许跟随缩放", hudObj.allowScale);
+                    hudObj.allowRotation = EditorGUILayout.Toggle("允许跟随旋转", hudObj.allowRotation);
+                    hudObj.center = EditorGUILayout.Vector2Field("包围盒中心点", hudObj.center);
+                    hudObj.size = EditorGUILayout.Vector2Field("Hud包围盒大小", hudObj.size);
+                    if(GUILayout.Button("自动适配包围盒大小"))
+                    {
+                        AutoBoundSize();
+                    }
+                }
                 return;
+            }
             var hudBase = m_pSelectComponent.GetData();
             if (hudBase == null)
                 return;
@@ -52,7 +66,40 @@ namespace Framework.HUD.Editor
             {
                 DrawNumber(m_pSelectComponent as HudNumber, hudBase as HudNumberData);
             }
+            else if (hudBase is HudParticleData)
+            {
+                DrawParticle(m_pSelectComponent as HudParticle, hudBase as HudParticleData);
+            }
             EditorGUIUtility.labelWidth = lableWidth;
+        }
+        //--------------------------------------------------------
+        void AutoBoundSize()
+        {
+            // 初始化 min/max
+            Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+
+            var widgets = GetHud().GetWidgets();
+            foreach (var data in widgets)
+            {
+                Vector3 pos = data.Value.GetPosition() / HUDUtils.PIXEL_SIZE; // 换算到世界单位
+                Vector2 size = data.Value.GetSize() / HUDUtils.PIXEL_SIZE;    // 换算到世界单位
+
+                // 左下角和右上角
+                Vector3 pMin = new Vector3(pos.x - size.x * 0.5f, pos.y - size.y * 0.5f, pos.z);
+                Vector3 pMax = new Vector3(pos.x + size.x * 0.5f, pos.y + size.y * 0.5f, pos.z);
+
+                min = Vector3.Min(min, pMin);
+                max = Vector3.Max(max, pMax);
+            }
+
+            // 计算中心和大小（世界单位）
+            Vector2 newCenter = new Vector2((min.x + max.x) * 0.5f, (min.y + max.y) * 0.5f);
+            Vector2 newSize = new Vector2(max.x - min.x, max.y - min.y);
+
+            // 存储时还原为“像素单位”
+            GetHudObject().center = newCenter * HUDUtils.PIXEL_SIZE;
+            GetHudObject().size = newSize * HUDUtils.PIXEL_SIZE;
         }
         //--------------------------------------------------------
         void DrawBase(AWidget pComonent, HudBaseData data)
@@ -66,7 +113,9 @@ namespace Framework.HUD.Editor
                     EditorUtility.DisplayDialog("提示", "Id 已被占用", "好的");
                 }
                 else
-                    data.id = id;
+                {
+                    pComonent.SetId(id);
+                }
             }
             EditorGUI.BeginChangeCheck();
             data.name = EditorGUILayout.DelayedTextField("名称", data.name);
@@ -139,6 +188,10 @@ namespace Framework.HUD.Editor
                             if (data.sprite != info)
                             {
                                 data.sprite = info;
+                                if (data.sprite.border.SqrMagnitude() > 0)
+                                {
+                                    data.imageType = HudImageData.ImageType.Sliced;
+                                }
                                 hudImage.SyncData();
                                 GetHud().TriggerReorder();
                             }
@@ -159,6 +212,10 @@ namespace Framework.HUD.Editor
                             if (data.sprite != info)
                             {
                                 data.sprite = info;
+                                if (data.sprite.border.SqrMagnitude() > 0)
+                                {
+                                    data.imageType = HudImageData.ImageType.Sliced;
+                                }
                                 hudImage.SyncData();
                                 GetHud().TriggerReorder();
                             }
@@ -179,6 +236,10 @@ namespace Framework.HUD.Editor
                         if (data.sprite != info)
                         {
                             data.sprite = info;
+                            if(data.sprite.border.SqrMagnitude()>0)
+                            {
+                                data.imageType = HudImageData.ImageType.Sliced;
+                            }
                             hudImage.SyncData();
                             GetHud().TriggerReorder();
                         }
@@ -227,10 +288,10 @@ namespace Framework.HUD.Editor
         void DrawText(HudText hudText, HudTextData data)
         {
             EditorGUI.BeginChangeCheck();
-            data.text = EditorGUILayout.DelayedTextField("Text", data.text);
-            data.fontSize = EditorGUILayout.FloatField("FontSize", data.fontSize);
-            data.lineSpacing = EditorGUILayout.FloatField("Spacing", data.lineSpacing);
-            data.alignment = (HorizontalAlignment)EditorGUILayout.EnumPopup("Alignment", data.alignment);
+            data.text = EditorGUILayout.DelayedTextField("文本内容", data.text);
+            data.fontSize = EditorGUILayout.FloatField("字体大小", data.fontSize);
+            data.lineSpacing = EditorGUILayout.FloatField("间距", data.lineSpacing);
+            data.alignment = (HorizontalAlignment)EditorGUILayout.EnumPopup("对齐方式", data.alignment);
             if (EditorGUI.EndChangeCheck())
             {
                 hudText.SyncData();
@@ -241,9 +302,22 @@ namespace Framework.HUD.Editor
         void DrawNumber(HudNumber hudText, HudNumberData data)
         {
             EditorGUI.BeginChangeCheck();
-            data.strNumber = EditorGUILayout.DelayedTextField("Number", data.strNumber);
-            data.fontSize = EditorGUILayout.FloatField("FontSize", data.fontSize);
-            data.alignment = (HorizontalAlignment)EditorGUILayout.EnumPopup("Alignment", data.alignment);
+            data.strNumber = EditorGUILayout.DelayedTextField("数字内容", data.strNumber);
+            data.fontSize = EditorGUILayout.FloatField("字体大小", data.fontSize);
+            data.alignment = (HorizontalAlignment)EditorGUILayout.EnumPopup("对齐方式", data.alignment);
+            if (EditorGUI.EndChangeCheck())
+            {
+                hudText.SyncData();
+                GetHud().TriggerReorder();
+            }
+        }
+        //--------------------------------------------------------
+        void DrawParticle(HudParticle hudText, HudParticleData data)
+        {
+            EditorGUI.BeginChangeCheck();
+            data.strParticle = EditorGUILayout.DelayedTextField("特效资源", data.strParticle);
+            data.renderOrder = EditorGUILayout.IntField("渲染层级", data.renderOrder);
+            data.scale = EditorGUILayout.Vector3Field("缩放", data.scale);
             if (EditorGUI.EndChangeCheck())
             {
                 hudText.SyncData();

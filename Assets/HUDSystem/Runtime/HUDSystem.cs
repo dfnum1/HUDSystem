@@ -12,13 +12,19 @@ using UnityEngine.Rendering;
 
 namespace Framework.HUD.Runtime
 {
+    public interface IHudSystemCallback
+    {
+        bool OnSpawnInstance(AWidget pWidget, string strParticle, System.Action<GameObject> onCallback);
+        bool OnDestroyInstance(AWidget pWidget, GameObject pGameObject);
+    }
     public class HudSystem
     {
         Camera                                  m_pRenderCamera = null;
         Transform                               m_pRenderCameraTransform = null;
         private List<HudController>             m_vHuds = new List<HudController>(64);
         private Dictionary<int, HudRenderBatch> m_vRenders = new Dictionary<int, HudRenderBatch>(2);
-        private List<AWidget>                m_vRayTest = null;
+        private List<AWidget>                   m_vRayTest = null;
+        private List<IHudSystemCallback>        m_vCallbacks = null;
         //--------------------------------------------------------
         public HudSystem()
         {
@@ -67,6 +73,56 @@ namespace Framework.HUD.Runtime
             return renderBatcher;
         }
         //--------------------------------------------------------
+        public void RegisterCallback(IHudSystemCallback callback)
+        {
+            if (callback == null) return;
+            if (m_vCallbacks == null) m_vCallbacks = new List<IHudSystemCallback>(2);
+            if (m_vCallbacks.Contains(callback))
+                return;
+            m_vCallbacks.Add(callback);
+        }
+        //--------------------------------------------------------
+        public void UnRegisterCallback(IHudSystemCallback callback)
+        {
+            if (m_vCallbacks == null) return;
+            m_vCallbacks.Remove(callback);
+        }
+        //--------------------------------------------------------
+        internal void SpawnInstance(AWidget pWidget, string file, System.Action<GameObject> callback)
+        {
+            if (m_vCallbacks == null)
+                return;
+            foreach(var db in m_vCallbacks)
+            {
+                if (db.OnSpawnInstance(pWidget, file, callback))
+                    return;
+            }
+        }
+        //--------------------------------------------------------
+        internal void DestroyInstance(AWidget pWidget, GameObject pGo)
+        {
+            if (pGo == null)
+                return;
+            if (m_vCallbacks == null || m_vCallbacks.Count <= 0)
+            {
+#if UNITY_EDITOR
+                if (Application.isPlaying)
+                {
+                    GameObject.Destroy(pGo);
+                }
+                else GameObject.DestroyImmediate(pGo);
+#else
+                GameObject.Destroy(pGo);
+#endif
+                return;
+            }
+            foreach (var db in m_vCallbacks)
+            {
+                if (db.OnDestroyInstance(pWidget, pGo))
+                    return;
+            }
+        }
+        //--------------------------------------------------------
         public HudController CreateHud(HudObject hudObj)
         {
             HudController hud = new HudController(this);
@@ -87,7 +143,7 @@ namespace Framework.HUD.Runtime
             return m_vRayTest;
         }
         //--------------------------------------------------------
-        public AWidget RaycastHud(Vector2 screenPosition)
+        public AWidget RaycastHud(Vector2 screenPosition, bool bIngoreRayTest = false)
         {
             if (m_pRenderCamera == null) return null;
 
@@ -95,7 +151,7 @@ namespace Framework.HUD.Runtime
             if (m_vRayTest != null) m_vRayTest.Clear();
             foreach (var hud in m_vHuds)
             {
-                hud.RaycastHud(screenPosition, m_pRenderCamera);
+                hud.RaycastHud(screenPosition, m_pRenderCamera,null, bIngoreRayTest);
             }
             if (m_vRayTest == null || m_vRayTest.Count <= 0) return null;
             if (m_vRayTest.Count > 1)

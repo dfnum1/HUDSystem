@@ -8,11 +8,9 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
-using UnityEngine.TextCore.Text;
 
 namespace Framework.HUD.Runtime
 {
@@ -76,6 +74,10 @@ namespace Framework.HUD.Runtime
                 if (m_pMaterial && m_pMaterial.HasProperty(HUDUtils._MainTex))
                 {
                     fontAsset = TMP_Settings.defaultFontAsset;
+#if UNITY_EDITOR
+                    UnityEditor.EditorUtility.SetDirty(fontAsset);
+                    UnityEditor.AssetDatabase.SaveAssetIfDirty(fontAsset);
+#endif
                     m_MaterialPropertyBlock.SetTexture(HUDUtils._MainTex, fontAsset.atlasTexture);
                     m_MaterialPropertyBlock.SetInt(HUDUtils._TextureWidth, fontAsset.atlasWidth);
                     m_MaterialPropertyBlock.SetInt(HUDUtils._TextureHeight, fontAsset.atlasHeight);
