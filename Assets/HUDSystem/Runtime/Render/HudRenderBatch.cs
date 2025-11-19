@@ -41,7 +41,7 @@ namespace Framework.HUD.Runtime
             SetAltas(atlasMapping);
             SetFontAsset(fontAsset);
 
-            m_Culling = new HudRenderCulling(HUDUtils.capacity);
+            m_Culling = new HudRenderCulling(pSystem,HUDUtils.capacity);
             m_pCollector = new HudInstanceCollector(HUDUtils.capacity);
 
             m_pJobHandle = new JobHandle();

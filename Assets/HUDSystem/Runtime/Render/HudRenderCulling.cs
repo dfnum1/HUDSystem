@@ -22,18 +22,22 @@ namespace Framework.HUD.Runtime
     //--------------------------------------------------------
     internal unsafe class HudRenderCulling
     {
+        private TransformAccessArray m_transformArray;
         private NativeList<TransformData> m_vTransformData;
         private NativeList<TransformSort> m_vTransformSort;
         private NativeQueue<ushort> m_vRemaining;
         private int m_nReadIndex;
         private bool m_bDispose;
         private int m_nCapacity;
-        public HudRenderCulling(int _capacity)
+        private HudSystem m_pSystem;
+        public HudRenderCulling(HudSystem system, int _capacity)
         {
+            m_pSystem = system;
             m_nCapacity = _capacity;
             m_bDispose = false;
             m_nReadIndex = 0;
 
+            m_transformArray = new TransformAccessArray(_capacity);
             m_vRemaining = new NativeQueue<ushort>(Allocator.Persistent);
             m_vTransformData = new NativeList<TransformData>(_capacity, Allocator.Persistent);
             m_vTransformSort = new NativeList<TransformSort>(_capacity, Allocator.Persistent);
@@ -54,6 +58,7 @@ namespace Framework.HUD.Runtime
             if (m_nReadIndex < m_vTransformData.Length) return;
             int len = m_vTransformData.Length + m_nCapacity;
             m_vTransformData.Capacity = len;
+            m_transformArray.capacity = len;
         }
         //--------------------------------------------------------
         public int Add(HudController controller, bool root)
@@ -62,6 +67,7 @@ namespace Framework.HUD.Runtime
             if (m_vRemaining.Count > 0)
             {
                 int remainingindex = m_vRemaining.Dequeue();
+                m_transformArray[remainingindex] = controller.GetFollowTarget();
                 TransformData data = new TransformData();
                 data.root = root ? (byte)1 : (byte)0;
                 data.localToWorld = controller.GetWorldMatrix();
@@ -72,6 +78,7 @@ namespace Framework.HUD.Runtime
             {
                 TryExpansion();
                 int index = m_nReadIndex;
+                m_transformArray.Add(controller.GetFollowTarget());
                 TransformData data = new TransformData();
                 data.root = root ? (byte)1 : (byte)0;
                 data.localToWorld = controller.GetWorldMatrix();
@@ -85,6 +92,7 @@ namespace Framework.HUD.Runtime
         {
             if (m_bDispose) return;
             if (index<0 || index >= m_vTransformData.Length) return;
+            m_transformArray[index] = null;
             TransformData data = m_vTransformData[index];
             data.disable = 1;
             m_vTransformData[index] = data;
@@ -132,12 +140,19 @@ namespace Framework.HUD.Runtime
         {
             if (m_bDispose) return new JobHandle();
             Profiler.BeginSample("TransformCullingSort");
+
+            LocalToWorldJob job = new LocalToWorldJob();
+            job.transformData = transformData;
+            job.vpMatrix = vpMatrix;
+            job.forward = forward;
+            JobHandle localToWorldJobHandle = job.ScheduleReadOnly(m_transformArray, 32);
+
             TransformCullingJob sortJob = new TransformCullingJob();
             sortJob.transformSort = m_vTransformSort;
             sortJob.transformdataList = m_vTransformData;
             sortJob.vpMatrix = vpMatrix;
             sortJob.forward = forward;
-            JobHandle jobHandle = sortJob.Schedule();
+            JobHandle jobHandle = sortJob.Schedule(localToWorldJobHandle);
             Profiler.EndSample();
             return jobHandle;
         }
