@@ -29,6 +29,8 @@ namespace Framework.HUD.Runtime
         internal List<HudImageData> vImages;
         [SerializeField]
         internal List<HudTextData> vTexts;
+        [SerializeField]
+        internal List<HudNumberData> vNumbers;
 
         [System.Serializable]
         public struct Hierarchy
@@ -51,6 +53,7 @@ namespace Framework.HUD.Runtime
             if (vCanvas != null) cnt += vCanvas.Count;
             if (vImages != null) cnt += vImages.Count;
             if (vTexts != null) cnt += vTexts.Count;
+            if (vNumbers != null) cnt += vNumbers.Count;
             if (m_vDatas == null)
             {
                 m_vDatas = new Dictionary<int, HudBaseData>(cnt);
@@ -73,6 +76,13 @@ namespace Framework.HUD.Runtime
             if (vTexts != null)
             {
                 foreach (var txt in vTexts)
+                {
+                    m_vDatas[txt.id] = txt;
+                }
+            }
+            if (vNumbers != null)
+            {
+                foreach (var txt in vNumbers)
                 {
                     m_vDatas[txt.id] = txt;
                 }

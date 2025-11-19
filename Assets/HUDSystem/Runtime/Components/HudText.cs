@@ -4,6 +4,7 @@
 作    者:	HappLI
 描    述:	文字
 *********************************************************************/
+using System.Collections.Generic;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
@@ -13,9 +14,18 @@ using static PlasticGui.PlasticTableColumn;
 namespace Framework.HUD.Runtime
 {
     [HudData(typeof(HudTextData))]
-    public class HudText : AComponent
+    public class HudText : AWidget
     {
-        protected const int QUAD_COUNT = 9;
+        enum EOverrideType : byte
+        {
+            FontSize = EParamOverrideType.Count,
+            LineSpacing,
+            Alignment,
+            Count,
+        }
+
+        Vector2 m_Size = Vector2.zero;
+        string m_strText = null;
         public HudText(HudSystem pSystem, HudBaseData hudData) : base(pSystem, hudData)
         {
             m_eHudType = EHudType.Text;
@@ -26,6 +36,72 @@ namespace Framework.HUD.Runtime
             Refresh();
         }
         //--------------------------------------------------------
+        protected override void OnSyncData()
+        {
+            HudTextData hudTextData = m_pHudData as HudTextData;
+            m_strText = hudTextData.text;
+        }
+        //--------------------------------------------------------
+        public void SetText(string text)
+        {
+            if (m_strText == text)
+                return;
+            m_strText = text;
+            if (IsEditor())
+            {
+                HudTextData data = m_pHudData as HudTextData;
+                data.text = text;
+            }
+            SetDirty();
+        }
+        //--------------------------------------------------------
+        public string GetText()
+        {
+            return m_strText;
+        }
+        //--------------------------------------------------------
+        public void SetFontSize(float fontSize)
+        {
+            bool bDirty = SetOverrideParam((byte)EOverrideType.FontSize, fontSize);
+            if(bDirty) SetDirty();
+        }
+        //--------------------------------------------------------
+        public float GetFontSize()
+        {
+            if (GetOverrideParam((byte)EOverrideType.FontSize, out var temp))
+                return temp.floatVal0;
+            HudTextData data = m_pHudData as HudTextData;
+            return data.fontSize;
+        }
+        //--------------------------------------------------------
+        public void SetAlignment(HorizontalAlignment align)
+        {
+            bool bDirty = SetOverrideParam((byte)EOverrideType.Alignment, (int)align);
+            if (bDirty) SetDirty();
+        }
+        //--------------------------------------------------------
+        public HorizontalAlignment GetAlignment()
+        {
+            if (GetOverrideParam((byte)EOverrideType.Alignment, out var temp))
+                return (HorizontalAlignment)temp.intVal0;
+            HudTextData data = m_pHudData as HudTextData;
+            return data.alignment;
+        }
+        //--------------------------------------------------------
+        public void SetLineSpacing(float space)
+        {
+            bool bDirty = SetOverrideParam((byte)EOverrideType.LineSpacing, space);
+            if (bDirty) SetDirty();
+        }
+        //--------------------------------------------------------
+        public float GetLineSpacing()
+        {
+            if (GetOverrideParam((byte)EOverrideType.LineSpacing, out var temp))
+                return temp.floatVal0;
+            HudTextData data = m_pHudData as HudTextData;
+            return data.lineSpacing;
+        }
+        //--------------------------------------------------------
         protected override void OnDirty()
         {
             Refresh();
@@ -33,8 +109,7 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         internal void Refresh()
         {
-            HudTextData hudTextData = m_pHudData as HudTextData;
-            if (hudTextData == null || string.IsNullOrEmpty(hudTextData.text))
+            if (string.IsNullOrEmpty(m_strText))
             {
                 ResizeDataSnippet(0);
                 return;
@@ -45,18 +120,22 @@ namespace Framework.HUD.Runtime
             var expandFontAssets = m_HudController.GetFontAsset();
             if (expandFontAssets == null)
                 return;
-            char[] chars = hudTextData.text.ToCharArray();
+            char[] chars = m_strText.ToCharArray();
             if (chars.Length == 0)
             {
                 ResizeDataSnippet(0);
                 return;
             }
-            int charCount = math.min(4 * QUAD_COUNT, chars.Length);
-            int snippetCount = (charCount - 1) / QUAD_COUNT + 1;
+
+            float lineSpace = GetLineSpacing();
+            HorizontalAlignment alignment = GetAlignment();
+
+            int charCount = math.min(4 * HUDUtils.QUAD_COUNT, chars.Length);
+            int snippetCount = (charCount - 1) / HUDUtils.QUAD_COUNT + 1;
             ResizeDataSnippet(snippetCount);
             bool isUsingAlternativeTypeface;
             float padding = ShaderUtilities.GetPadding(m_HudController.GetMaterial(), false, false);
-            float fontsize = hudTextData.fontSize/10.0f;
+            float fontsize = GetFontSize()/10.0f;
             float adjustedScale = fontsize / expandFontAssets.faceInfo.pointSize * expandFontAssets.faceInfo.scale * 0.1f;
             float curAdvance = 0;
             int curcharCount = 0;
@@ -80,7 +159,7 @@ namespace Framework.HUD.Runtime
                 }
                 if (character != null)
                 {
-                    if (curcharCount >= QUAD_COUNT && curcharCount % QUAD_COUNT == 0)
+                    if (curcharCount >= HUDUtils.QUAD_COUNT && curcharCount % HUDUtils.QUAD_COUNT == 0)
                     {
                         snippet.SetTmpParam(padding, adjustedScale);
                         snippetIndex++;
@@ -108,7 +187,7 @@ namespace Framework.HUD.Runtime
                     tr = math.max(top_right, tr);
                     snippet.SetSpritePositon(quadIndex, bottom_left);
                     snippet.SetSpriteSize(quadIndex, (top_right - bottom_left));
-                    float advance = (character.glyph.metrics.horizontalAdvance + hudTextData.lineSpacing) * currentElementScale + hudTextData.lineSpacing;
+                    float advance = (character.glyph.metrics.horizontalAdvance + lineSpace) * currentElementScale + lineSpace;
                     curAdvance += advance;
                     quadIndex++;
                     curcharCount++;
@@ -128,14 +207,23 @@ namespace Framework.HUD.Runtime
                 }
                 datasnippet.WriteParamData();
             }
+            m_Size = new Vector2(tr.x - bl.x, tr.y - bl.y);
+
+            if (IsEditor())
+            {
+                HudTextData data = m_pHudData as HudTextData;
+                data.sizeDelta = m_Size;
+            }
+        }
+        //--------------------------------------------------------
+        new public Vector2 GetSize()
+        {
+            return m_Size;
         }
         //--------------------------------------------------------
         public float2 SetAlignment(float2 bl, float2 tr)
         {
-            HudTextData hudTextData = m_pHudData as HudTextData;
-            if (hudTextData == null)
-                return bl;
-            switch (hudTextData.alignment)
+            switch (GetAlignment())
             {
                 case HorizontalAlignment.Left:
                     {

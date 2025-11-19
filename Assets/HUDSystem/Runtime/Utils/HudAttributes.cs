@@ -5,6 +5,8 @@
 描    述:	HUD 属性标签
 *********************************************************************/
 
+using System;
+
 namespace Framework.HUD.Runtime
 {
     public class HudIconAttribute : System.Attribute
@@ -29,6 +31,19 @@ namespace Framework.HUD.Runtime
         {
 #if UNITY_EDITOR
             this.dataType = dataType;
+#endif
+        }
+    }
+    //--------------------------------------------------------
+    public class HudFieldAttribute : System.Attribute
+    {
+#if UNITY_EDITOR
+        public string fieldName;
+#endif
+        public HudFieldAttribute(string fieldName)
+        {
+#if UNITY_EDITOR
+            this.fieldName = fieldName;
 #endif
         }
     }

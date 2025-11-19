@@ -36,6 +36,8 @@ namespace Framework.HUD.Runtime
     {
         public int id;
         public string name;
+        public bool rayTest = true;
+        public bool visible = true;
 
         public Vector3 position;
         public Vector2 sizeDelta = new Vector2(100,100);
@@ -46,22 +48,30 @@ namespace Framework.HUD.Runtime
     }
     //--------------------------------------------------------
     [System.Serializable]
-    internal class HudCanvasData : HudBaseData
+    public class HudCanvasData : HudBaseData
     {
     }
     //--------------------------------------------------------
     [System.Serializable]
-    internal class HudTextData : HudBaseData
+    public class HudTextData : HudBaseData
     {
         public string text;
-        public int fontSize;
-        public float lineSpacing;
-        public HorizontalAlignment alignment;
-        public TMPro.TMP_FontAsset fontAsset;
+        public float fontSize = 20;
+        public float lineSpacing =0;
+        public HorizontalAlignment alignment = HorizontalAlignment.Middle;
+    //    public TMPro.TMP_FontAsset fontAsset;
     }
     //--------------------------------------------------------
     [System.Serializable]
-    internal class HudImageData : HudBaseData
+    public class HudNumberData : HudBaseData
+    {
+        public string strNumber;
+        public float fontSize = 20;
+        public HorizontalAlignment alignment = HorizontalAlignment.Middle;
+    }
+    //--------------------------------------------------------
+    [System.Serializable]
+    public class HudImageData : HudBaseData
     {
         public enum FillMethod : byte
         {
@@ -90,7 +100,7 @@ namespace Framework.HUD.Runtime
         public Sprite sprite;
         public ImageType imageType;
         public FillMethod fillMethod;
-        public float fillOrigin = 0;
+        public int fillOrigin = 0;
         public float fillAmount = 1.0f;
     }
 }

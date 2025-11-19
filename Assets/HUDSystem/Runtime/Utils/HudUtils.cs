@@ -14,6 +14,7 @@ namespace Framework.HUD.Runtime
 {
     public class HUDUtils
     {
+        public const int QUAD_COUNT = 9;
         public const float default_unit = 0.01f;
         public static float3 ONE3 = new float3(1, 1, 1);
         public static float2 ONE2 = new float2(1,1);

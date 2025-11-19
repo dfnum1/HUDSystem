@@ -412,6 +412,11 @@ namespace Framework.HUD.Editor
                 m_PreviewUtility.cameraFieldOfView = m_fFov;
         }
         //-----------------------------------------------------
+        public void SetZoom(float zoomFactor)
+        {
+            m_ZoomFactor = zoomFactor;
+        }
+        //-----------------------------------------------------
         public void InitCameraPos(Vector3 pos, Vector3 dir)
         {
             if (m_PreviewInstance != null) m_PreviewInstance.transform.position = pos;

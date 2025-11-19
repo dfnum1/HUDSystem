@@ -5,14 +5,24 @@
 描    述:	图片
 *********************************************************************/
 
+using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Framework.HUD.Runtime
 {
     [HudData(typeof(HudImageData))]
-    public class HudImage : AComponent
+    public class HudImage : AWidget
     {
+        enum EOverrideType : byte
+        {
+            ImageType = EParamOverrideType.Count,
+            FillMethod,
+            FillOrigin,
+            FillAmount,
+            Count,
+        }
+        Sprite m_Sprite;
         public HudImage(HudSystem pSystem, HudBaseData hudData) : base(pSystem, hudData)
         {
             m_eHudType = EHudType.Image;
@@ -25,27 +35,83 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         public void SetSprite(Sprite sprite)
         {
-            HudImageData hudImageData = m_pHudData as HudImageData;
-            if(hudImageData == null)
+            if (m_Sprite == sprite)
+                return;
+            m_Sprite = sprite;
+            if (IsEditor())
             {
-                UnityEngine.Debug.LogWarning(GetId() + " SetSprite Error: HudImageData is null!");
-                return;
+                HudImageData hudImageData = m_pHudData as HudImageData;
+                hudImageData.sprite = sprite;
             }
-            if (hudImageData.sprite == sprite)
-                return;
-
             RefreshSpirte();
         }
         //--------------------------------------------------------
         public Sprite GetSprite()
         {
+            return m_Sprite;
+        }
+        //--------------------------------------------------------
+        protected override void OnSyncData()
+        {
             HudImageData hudImageData = m_pHudData as HudImageData;
-            if (hudImageData == null)
-            {
-                UnityEngine.Debug.LogWarning(GetId() + " GetSprite Error: HudImageData is null!");
-                return null;
-            }
-            return hudImageData.sprite;
+            m_Sprite = hudImageData.sprite;
+        }
+        //--------------------------------------------------------
+        public void SetImageType(HudImageData.ImageType type)
+        {
+            bool bDirty = SetOverrideParam((byte)EOverrideType.ImageType, (int)type);
+            if(bDirty) RefreshSpirte();
+        }
+        //--------------------------------------------------------
+        public HudImageData.ImageType GetImageType()
+        {
+            if (GetOverrideParam((byte)EOverrideType.ImageType, out var temp))
+                return (HudImageData.ImageType)temp.intVal0;
+            HudImageData hudImageData = m_pHudData as HudImageData;
+            return hudImageData.imageType;
+        }
+        //--------------------------------------------------------
+        public void SetFillMethod(HudImageData.FillMethod type)
+        {
+            bool bDirty = SetOverrideParam((byte)EOverrideType.FillMethod, (int)type);
+            if (bDirty) RefreshSpirte();
+        }
+        //--------------------------------------------------------
+        public HudImageData.FillMethod GetFillMethod()
+        {
+            if (GetOverrideParam((byte)EOverrideType.FillMethod, out var temp))
+                return (HudImageData.FillMethod)temp.intVal0;
+            HudImageData hudImageData = m_pHudData as HudImageData;
+            return hudImageData.fillMethod;
+        }
+        //--------------------------------------------------------
+        public void SetFillOrigin(int type)
+        {
+            bool bDirty = SetOverrideParam((byte)EOverrideType.FillOrigin, type);
+            if (bDirty) RefreshSpirte();
+        }
+        //--------------------------------------------------------
+        public int GetFillOrigin()
+        {
+            if (GetOverrideParam((byte)EOverrideType.FillOrigin, out var temp))
+                return temp.intVal0;
+            HudImageData hudImageData = m_pHudData as HudImageData;
+            return hudImageData.fillOrigin;
+        }
+        //--------------------------------------------------------
+        public void SetFillAmount(float amount)
+        {
+            amount = Mathf.Clamp01(amount);
+            bool bDirty = SetOverrideParam((byte)EOverrideType.FillAmount, amount);
+            if (bDirty) RefreshSpirte();
+        }
+        //--------------------------------------------------------
+        public float GetFillAmount()
+        {
+            if (GetOverrideParam((byte)EOverrideType.FillAmount, out var temp))
+                return temp.floatVal0;
+            HudImageData hudImageData = m_pHudData as HudImageData;
+            return hudImageData.fillOrigin;
         }
         //--------------------------------------------------------
         protected override void OnDirty()
@@ -67,23 +133,23 @@ namespace Framework.HUD.Runtime
             {
                 case HudImageData.ImageType.Simple:
                     {
-                        Simple(hudImageData.sprite, hudImageData);
+                        Simple(GetSprite());
                     }
                     break;
                 case HudImageData.ImageType.Sliced:
                     {
-                        Sliced(hudImageData.sprite, hudImageData);
+                        Sliced(GetSprite());
                     }
                     break;
                 case HudImageData.ImageType.Filled:
                     {
-                        Filled(hudImageData.sprite, hudImageData);
+                        Filled(GetSprite());
                     }
                     break;
             }
         }
         //--------------------------------------------------------
-        private void Simple(Sprite sprite, HudImageData hudData)
+        private void Simple(Sprite sprite)
         {
             int spriteIndex = -1;
             HudAtlas.SpriteInfo spriteInfo = null;
@@ -96,15 +162,17 @@ namespace Framework.HUD.Runtime
             HudDataSnippet snippet = GetDataSnippet(0);
             snippet.ResetNineParam();
 
+            Vector2 size = GetSize();
+
             int quadindex = 0;
             snippet.SetSpriteId(quadindex, spriteIndex);
-            snippet.SetSpritePositon(quadindex, new float2(-hudData.sizeDelta.x / 2, -hudData.sizeDelta.y / 2));
-            snippet.SetSpriteSize(quadindex, hudData.sizeDelta);
+            snippet.SetSpritePositon(quadindex, new float2(-size.x / 2, -size.y / 2));
+            snippet.SetSpriteSize(quadindex, size);
             snippet.SetAmount(1, 0, 0);
             snippet.WriteParamData();
         }
         //--------------------------------------------------------
-        private void Filled(Sprite sprite, HudImageData hudData)
+        private void Filled(Sprite sprite)
         {
             int spriteIndex = -1;
             HudAtlas.SpriteInfo spriteInfo = null;
@@ -113,19 +181,25 @@ namespace Framework.HUD.Runtime
                 spriteInfo = GetHudAtlas().GetSpriteInfo(sprite.name);
                 if (spriteInfo != null) spriteIndex = spriteInfo.index;
             }
+
+            Vector2 size = GetSize();
+            int fillMethod = (int)GetFillMethod();
+            float fillAmount = GetFillAmount();
+            int nFillOrigin = GetFillOrigin();
+
             ResizeDataSnippet(1);
             HudDataSnippet snippet = GetDataSnippet(0);
             snippet.ResetNineParam();
             int quadindex = 0;
             snippet.SetSpriteId(quadindex, spriteIndex);
-            float2 spritePos = new float2(-hudData.sizeDelta.x / 2, -hudData.sizeDelta.y / 2);
-            float2 spriteSize = hudData.sizeDelta;
-            int method = (int)(hudData.fillMethod);
-            spritePos[method] = spritePos[method] + spriteSize[method] * (1 - hudData.fillAmount) * hudData.fillOrigin;
-            spriteSize[method] = spriteSize[method] * hudData.fillAmount;
+            float2 spritePos = new float2(-size.x / 2, -size.y / 2);
+            float2 spriteSize = size;
+            int method = fillMethod;
+            spritePos[method] = spritePos[method] + spriteSize[method] * (1 - fillAmount) * nFillOrigin;
+            spriteSize[method] = spriteSize[method] * fillAmount;
             snippet.SetSpritePositon(quadindex, spritePos);
             snippet.SetSpriteSize(quadindex, spriteSize);
-            snippet.SetAmount(hudData.fillAmount, hudData.fillOrigin, (int)hudData.fillMethod);
+            snippet.SetAmount(fillAmount, nFillOrigin, fillMethod);
             snippet.WriteParamData();
         }
         //--------------------------------------------------------
@@ -154,17 +228,18 @@ namespace Framework.HUD.Runtime
         }
         //--------------------------------------------------------
         static readonly Vector2[] s_VertScratch = new Vector2[4];
-        private void Sliced(Sprite sprite, HudImageData hudData)
+        private void Sliced(Sprite sprite)
         {
             if (sprite!=null && sprite.border.SqrMagnitude() > 0)
             {
+                Vector2 size = GetSize();
                 ResizeDataSnippet(1);
                 HudDataSnippet snippet = GetDataSnippet(0);
                 snippet.ResetNineParam();
                 Vector4 border, padding;
                 padding = UnityEngine.Sprites.DataUtility.GetPadding(sprite);
                 border = sprite.border;
-                Rect rect = new Rect(-hudData.sizeDelta.x / 2, -hudData.sizeDelta.y / 2, hudData.sizeDelta.x, hudData.sizeDelta.y);
+                Rect rect = new Rect(-size.x / 2, -size.y / 2, size.x, size.y);
                 Vector4 adjustedBorders = GetAdjustedBorders(border, rect);
                 s_VertScratch[0] = new Vector2(padding.x, padding.y);
                 s_VertScratch[3] = new Vector2(rect.width - padding.z, rect.height - padding.w);
@@ -202,7 +277,7 @@ namespace Framework.HUD.Runtime
             }
             else
             {
-                Simple(sprite, hudData);
+                Simple(sprite);
             }
         }
     }

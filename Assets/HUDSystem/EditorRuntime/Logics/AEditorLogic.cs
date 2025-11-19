@@ -41,7 +41,7 @@ namespace Framework.HUD.Editor
         {
         }
         //--------------------------------------------------------
-        internal virtual void OnSelectComponent(AComponent component)
+        internal virtual void OnSelectComponent(AWidget component)
         {
         }
         //--------------------------------------------------------

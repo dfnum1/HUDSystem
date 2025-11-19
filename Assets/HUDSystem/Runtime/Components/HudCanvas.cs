@@ -10,7 +10,7 @@ using UnityEngine;
 namespace Framework.HUD.Runtime
 {
     [HudData(typeof(HudCanvasData))]
-    public class HudCanvas : AComponent
+    public class HudCanvas : AWidget
     {
         public HudCanvas(HudSystem pSystem, HudBaseData hudData) : base(pSystem, hudData)
         {
@@ -19,6 +19,22 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         protected override void OnInit()
         {
+            Refresh();
+        }
+        //--------------------------------------------------------
+        protected override void OnSyncData()
+        {
+            
+        }
+        //--------------------------------------------------------
+        protected override void OnDirty()
+        {
+            Refresh();
+        }
+        //--------------------------------------------------------
+        void Refresh()
+        {
+            OnAlpha();
         }
     }
 }

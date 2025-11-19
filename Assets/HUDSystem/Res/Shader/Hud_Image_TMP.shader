@@ -258,7 +258,7 @@ Shader "Unlit/Hud_Image_TMP"
 				output.texcoord0 = float4(input.texcoord0.x, input.texcoord0.y, tmpOrimg, tmpOrimg);
 				output.param = half4(scale, bias - outline, bias + outline, bias);
 				output.worldPos.xy =vertex_xy;//mul(UNITY_MATRIX_M, float4(vertex_xy,vert.z,vert.w)).xy;//vert.xy;
-				output.worldPos.zw = float2(maskType,maskType);
+				output.worldPos.zw = float2(maskType,color.a);
 				output.clipRect = clipRect;
 
 				#if (UNDERLAY_ON || UNDERLAY_INNER)
@@ -291,6 +291,7 @@ Shader "Unlit/Hud_Image_TMP"
 						col.a *= lerp(1,UnityGetCircleClipping(input.worldPos.xy, input.clipRect), clipFade);
 						clip(col.a - 0.001);
 					}
+					col.a *= input.worldPos.w;
 					return col;
 				}
 

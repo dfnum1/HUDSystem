@@ -31,8 +31,8 @@ namespace Framework.HUD.Runtime
         private Float4x4Value m_Param1 = new Float4x4Value();
         private Float4x4Value m_Param2 = new Float4x4Value();
 
-        private AComponent m_pComponet;
-        public HudDataSnippet(AComponent _componet)
+        private AWidget m_pComponet;
+        public HudDataSnippet(AWidget _componet)
         {
             m_pComponet = _componet;
         }

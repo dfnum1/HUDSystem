@@ -6,19 +6,25 @@
 *********************************************************************/
 #if UNITY_EDITOR
 using Framework.HUD.Runtime;
+using System;
+using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.Experimental.GraphView;
+using UnityEditor.Search;
+using UnityEditor.SearchService;
 using UnityEngine;
+using static Framework.HUD.Runtime.HudAtlas;
 
 namespace Framework.HUD.Editor
 {
     public class InspectorLogic : AEditorLogic
     {
-        AComponent m_pSelectComponent = null;
+        AWidget m_pSelectComponent = null;
         public InspectorLogic(HUDEditor editor, Rect viewRect) : base(editor, viewRect)
         {
         }
         //--------------------------------------------------------
-        internal override void OnSelectComponent(AComponent component)
+        internal override void OnSelectComponent(AWidget component)
         {
             m_pSelectComponent = component;
         }
@@ -42,13 +48,17 @@ namespace Framework.HUD.Editor
             {
                 DrawText(m_pSelectComponent as HudText, hudBase as HudTextData);
             }
+            else if (hudBase is HudNumberData)
+            {
+                DrawNumber(m_pSelectComponent as HudNumber, hudBase as HudNumberData);
+            }
             EditorGUIUtility.labelWidth = lableWidth;
         }
         //--------------------------------------------------------
-        void DrawBase(AComponent pComonent, HudBaseData data)
+        void DrawBase(AWidget pComonent, HudBaseData data)
         {
             pComonent.SetVisibleSelf(EditorGUILayout.Toggle("Visible", pComonent.IsVisibleSelf()));
-            int id = EditorGUILayout.DelayedIntField("ID", data.id);
+            int id = EditorGUILayout.DelayedIntField("唯一Id", data.id);
             if(id != data.id)
             {
                 if (m_pEditor.GetLogic<HierarchyLogic>().IsExistID(id))
@@ -59,10 +69,10 @@ namespace Framework.HUD.Editor
                     data.id = id;
             }
             EditorGUI.BeginChangeCheck();
-            data.name = EditorGUILayout.DelayedTextField("Name", data.name);
+            data.name = EditorGUILayout.DelayedTextField("名称", data.name);
+            data.rayTest = EditorGUILayout.Toggle("可点击", data.rayTest);
             if (EditorGUI.EndChangeCheck())
             {
-
             }
             EditorGUI.BeginChangeCheck();
             data.position = EditorGUILayout.Vector3Field("位置", data.position);
@@ -90,7 +100,7 @@ namespace Framework.HUD.Editor
             }
             if (EditorGUI.EndChangeCheck())
             {
-                pComonent.SetDirty();
+                pComonent.SyncData();
                 GetHud().TriggerReorder();
             }
         }
@@ -98,7 +108,87 @@ namespace Framework.HUD.Editor
         void DrawImage(HudImage hudImage, HudImageData data)
         {
             EditorGUI.BeginChangeCheck();
-            data.sprite = (Sprite)EditorGUILayout.ObjectField("图片", data.sprite, typeof(Sprite), false);
+            GUILayout.BeginHorizontal();
+            {
+                GUILayout.Label("图片资源");
+                GUILayout.BeginHorizontal();
+
+                // 精确绘制Sprite区域
+                Rect previewRect = GUILayoutUtility.GetRect(48, 48, GUILayout.Width(48), GUILayout.Height(48));
+                if (data.sprite != null)
+                {
+                    Texture2D tex = data.sprite.texture;
+                    Rect texRect = data.sprite.textureRect;
+                    // 归一化UV
+                    Rect uv = new Rect(
+                        texRect.x / tex.width,
+                        texRect.y / tex.height,
+                        texRect.width / tex.width,
+                        texRect.height / tex.height
+                    );
+                    GUI.DrawTextureWithTexCoords(previewRect, tex, uv);
+
+                    // 点击弹窗
+                    if (Event.current.type == EventType.MouseDown && previewRect.Contains(Event.current.mousePosition))
+                    {
+                        var atlas = hudImage.GetHudAtlas();
+                        var provider = ScriptableObject.CreateInstance<HudAtlasSpriteSearchProvider>();
+                        provider.atlas = atlas;
+                        provider.onSelect = (info) =>
+                        {
+                            if (data.sprite != info)
+                            {
+                                data.sprite = info;
+                                hudImage.SyncData();
+                                GetHud().TriggerReorder();
+                            }
+                        };
+                        SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
+                        Event.current.Use();
+                    }
+                }
+                else
+                {
+                    if (GUI.Button(previewRect, "None"))
+                    {
+                        var atlas = hudImage.GetHudAtlas();
+                        var provider = ScriptableObject.CreateInstance<HudAtlasSpriteSearchProvider>();
+                        provider.atlas = atlas;
+                        provider.onSelect = (info) =>
+                        {
+                            if (data.sprite != info)
+                            {
+                                data.sprite = info;
+                                hudImage.SyncData();
+                                GetHud().TriggerReorder();
+                            }
+                        };
+                        SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
+                    }
+                }
+
+                GUILayout.BeginVertical();
+                GUILayout.Label(data.sprite ? data.sprite.name : "None", EditorStyles.miniLabel);
+                if (GUILayout.Button("Select", GUILayout.Width(60)))
+                {
+                    var atlas = hudImage.GetHudAtlas();
+                    var provider = ScriptableObject.CreateInstance<HudAtlasSpriteSearchProvider>();
+                    provider.atlas = atlas;
+                    provider.onSelect = (info) =>
+                    {
+                        if (data.sprite != info)
+                        {
+                            data.sprite = info;
+                            hudImage.SyncData();
+                            GetHud().TriggerReorder();
+                        }
+                    };
+                    SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
+                }
+                GUILayout.EndVertical();
+                GUILayout.EndHorizontal();
+            }
+            GUILayout.EndHorizontal();
             data.imageType = (HudImageData.ImageType)EditorGUILayout.EnumPopup("绘制类型", data.imageType);
             if (data.imageType == HudImageData.ImageType.Filled)
             {
@@ -123,13 +213,13 @@ namespace Framework.HUD.Editor
                     if(data.sprite!=null && data.sprite.rect.size != size)
                     {
                         data.sizeDelta = data.sprite.rect.size;
-                        hudImage.SetDirty();
+                        hudImage.SyncData();
                     }
                 }
             }
             if (EditorGUI.EndChangeCheck())
             {
-                hudImage.SetDirty();
+                hudImage.SyncData();
                 GetHud().TriggerReorder();
             }
         }
@@ -138,12 +228,25 @@ namespace Framework.HUD.Editor
         {
             EditorGUI.BeginChangeCheck();
             data.text = EditorGUILayout.DelayedTextField("Text", data.text);
-            data.fontSize = EditorGUILayout.IntField("FontSize", data.fontSize);
+            data.fontSize = EditorGUILayout.FloatField("FontSize", data.fontSize);
             data.lineSpacing = EditorGUILayout.FloatField("Spacing", data.lineSpacing);
             data.alignment = (HorizontalAlignment)EditorGUILayout.EnumPopup("Alignment", data.alignment);
             if (EditorGUI.EndChangeCheck())
             {
-                hudText.SetDirty();
+                hudText.SyncData();
+                GetHud().TriggerReorder();
+            }
+        }
+        //--------------------------------------------------------
+        void DrawNumber(HudNumber hudText, HudNumberData data)
+        {
+            EditorGUI.BeginChangeCheck();
+            data.strNumber = EditorGUILayout.DelayedTextField("Number", data.strNumber);
+            data.fontSize = EditorGUILayout.FloatField("FontSize", data.fontSize);
+            data.alignment = (HorizontalAlignment)EditorGUILayout.EnumPopup("Alignment", data.alignment);
+            if (EditorGUI.EndChangeCheck())
+            {
+                hudText.SyncData();
                 GetHud().TriggerReorder();
             }
         }

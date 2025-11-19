@@ -117,8 +117,8 @@ namespace Framework.HUD.Runtime
         public void GenAtlasMappingInfo()
         {
 #if UNITY_EDITOR
-            if (!Application.isPlaying)
-                return;
+       //     if (!Application.isPlaying)
+        //        return;
             if (m_isGenAtlasMapping) return;
             m_isGenAtlasMapping = true;
             m_AtlasTex = null;

@@ -20,23 +20,39 @@ namespace Framework.HUD.Editor
     {
         class WidgetItem : TreeAssetView.ItemData
         {
-            public AComponent graphicItem;
+            public AWidget graphicItem;
             public override Color itemColor()
             {
                 return Color.white;
             }
         }
 
-        List<AComponent> m_vTopGraphics = new List<AComponent>();
+        List<AWidget> m_vTopGraphics = new List<AWidget>();
         TreeAssetView m_pTree = null;
         bool m_bItemRightClick = false;
+        bool m_bTreeCallSelectChange = false;
+
+        List<System.Type> m_vHudTypes = new List<Type>();
         public HierarchyLogic(HUDEditor editor, Rect viewRect) : base(editor,viewRect)
         {
+
         }
         //--------------------------------------------------------
         public override void OnEnable()
         {
-            if(m_pTree == null)
+            m_vHudTypes.Clear();
+            foreach (var assembly in System.AppDomain.CurrentDomain.GetAssemblies())
+            {
+                Type[] types = assembly.GetTypes();
+                for (int t = 0; t < types.Length; ++t)
+                {
+                    System.Type enumType = types[t];
+                    if (!enumType.IsDefined(typeof(HudDataAttribute)))
+                        continue;
+                    m_vHudTypes.Add(enumType);
+                }
+            }
+            if (m_pTree == null)
             {
                 m_pTree = new TreeAssetView(new string[] { "节点列表" });
                 m_pTree.buildMutiColumnDepth = true;
@@ -117,7 +133,7 @@ namespace Framework.HUD.Editor
             m_pTree.EndTreeData();
         }
         //--------------------------------------------------------
-        void AddGraphicItem(AComponent grapic, int depth)
+        void AddGraphicItem(AWidget grapic, int depth)
         {
             var item = new WidgetItem();
             item.depth = depth;
@@ -207,7 +223,7 @@ namespace Framework.HUD.Editor
             RefreshTree();
         }
         //--------------------------------------------------------
-        bool IsChildOf(AComponent parent, AComponent child)
+        bool IsChildOf(AWidget parent, AWidget child)
         {
             if (parent == null || child == null) return false;
             var childs = parent.GetChilds();
@@ -223,7 +239,18 @@ namespace Framework.HUD.Editor
         void OnItemSelected(TreeAssetView.ItemData item)
         {
             WidgetItem widget = item as WidgetItem;
+            m_bTreeCallSelectChange = true;
             m_pEditor.OnSelectComponent(widget.graphicItem);
+            m_bTreeCallSelectChange = false;
+        }
+        //--------------------------------------------------------
+        internal override void OnSelectComponent(AWidget component)
+        {
+            if (m_bTreeCallSelectChange) return;
+            if (component == null)
+                return;
+            m_pTree.SetSelection(new List<int>() { component.GetId() });
+            m_pTree.SetExpandedRecursive(component.GetId(), true);
         }
         //--------------------------------------------------------
         void OnViewRightClick()
@@ -231,18 +258,13 @@ namespace Framework.HUD.Editor
             if (m_bItemRightClick)
                 return;
             GenericMenu menu = new GenericMenu();
-            menu.AddItem(new GUIContent("Widget/Node"), false, () =>
+            foreach (var tp in m_vHudTypes)
             {
-                OnCreateItem(typeof(HudCanvas), null);
-            });
-            menu.AddItem(new GUIContent("Widget/Text"), false, () =>
-            {
-                OnCreateItem(typeof(HudText), null);
-            });
-            menu.AddItem(new GUIContent("Widget/Image"), false, () =>
-            {
-                OnCreateItem(typeof(HudImage), null);
-            });
+                menu.AddItem(new GUIContent("Widget/" + tp.Name), false, () =>
+                {
+                    OnCreateItem(tp, null);
+                });
+            }
             menu.ShowAsContext();
             m_bItemRightClick = false;
         }
@@ -258,22 +280,17 @@ namespace Framework.HUD.Editor
                 GetHud().RemoveComponent(widget.graphicItem);
                 RefreshTree();
             });
-            menu.AddItem(new GUIContent("Widget/Node"), false, () =>
+            foreach(var tp in m_vHudTypes)
             {
-                OnCreateItem(typeof(HudCanvas), widget);
-            });
-            menu.AddItem(new GUIContent("Widget/Text"), false, () =>
-            {
-                OnCreateItem(typeof(HudText), widget);
-            });
-            menu.AddItem(new GUIContent("Widget/Image"), false, () =>
-            {
-                OnCreateItem(typeof(HudImage), widget);
-            });
+                menu.AddItem(new GUIContent("Widget/" + tp.Name), false, () =>
+                {
+                    OnCreateItem(tp, widget);
+                });
+            }
             menu.ShowAsContext();
         }
         //--------------------------------------------------------
-        AComponent OnCreateItem(System.Type type, WidgetItem item)
+        AWidget OnCreateItem(System.Type type, WidgetItem item)
         {
             HudDataAttribute hudAttr = type.GetCustomAttribute<HudDataAttribute>();
             if (hudAttr == null)
@@ -282,7 +299,7 @@ namespace Framework.HUD.Editor
             var grapicItem = Activator.CreateInstance(type,m_pEditor.GetHudSystem(), hudData);
             if (grapicItem == null)
                 return null;
-            var grapic = grapicItem as AComponent;
+            var grapic = grapicItem as AWidget;
             if (grapic == null)
                 return null;
 
@@ -338,7 +355,7 @@ namespace Framework.HUD.Editor
             return id;
         }
         //--------------------------------------------------------
-        void CollectIds(AComponent grapic, HashSet<int> vIds)
+        void CollectIds(AWidget grapic, HashSet<int> vIds)
         {
             vIds.Add(grapic.GetId());
             if (grapic.GetChilds() == null)
@@ -350,7 +367,7 @@ namespace Framework.HUD.Editor
             }
         }
         //--------------------------------------------------------
-        Framework.HUD.Runtime.HudObject.Hierarchy BuildHierarchy(AComponent comp)
+        Framework.HUD.Runtime.HudObject.Hierarchy BuildHierarchy(AWidget comp)
         {
             Framework.HUD.Runtime.HudObject.Hierarchy hierarchy = new Framework.HUD.Runtime.HudObject.Hierarchy();
             hierarchy.id = comp.GetId();
@@ -377,7 +394,7 @@ namespace Framework.HUD.Editor
             return vList;
         }
         //--------------------------------------------------------
-        void ConvertToDataList(AComponent grapic, Dictionary<System.Type, List<HudBaseData>> vList)
+        void ConvertToDataList(AWidget grapic, Dictionary<System.Type, List<HudBaseData>> vList)
         {
             if(!vList.TryGetValue(grapic.GetData().GetType(), out var vTemps))
             {

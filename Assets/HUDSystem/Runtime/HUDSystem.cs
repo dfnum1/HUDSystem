@@ -18,6 +18,7 @@ namespace Framework.HUD.Runtime
         Transform                               m_pRenderCameraTransform = null;
         private List<HudController>             m_vHuds = new List<HudController>(64);
         private Dictionary<int, HudRenderBatch> m_vRenders = new Dictionary<int, HudRenderBatch>(2);
+        private List<AWidget>                m_vRayTest = null;
         //--------------------------------------------------------
         public HudSystem()
         {
@@ -78,6 +79,35 @@ namespace Framework.HUD.Runtime
         {
             hudController.Destroy();
             m_vHuds.Remove(hudController);
+        }
+        //--------------------------------------------------------
+        internal List<AWidget> GetRayTestCache()
+        {
+            if (m_vRayTest == null) m_vRayTest = new List<AWidget>(2);
+            return m_vRayTest;
+        }
+        //--------------------------------------------------------
+        public AWidget RaycastHud(Vector2 screenPosition)
+        {
+            if (m_pRenderCamera == null) return null;
+
+            if (m_vHuds == null) return null;
+            if (m_vRayTest != null) m_vRayTest.Clear();
+            foreach (var hud in m_vHuds)
+            {
+                hud.RaycastHud(screenPosition, m_pRenderCamera);
+            }
+            if (m_vRayTest == null || m_vRayTest.Count <= 0) return null;
+            if (m_vRayTest.Count > 1)
+            {
+                m_vRayTest.Sort((w1, w2) =>
+                {
+                    return w1.GetTagZ().CompareTo(w2.GetTagZ());
+                });
+            }
+            AWidget widget = m_vRayTest[0];
+            m_vRayTest.Clear();
+            return widget;
         }
         //--------------------------------------------------------
         public void Update()

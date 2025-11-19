@@ -36,6 +36,7 @@ namespace Framework.HUD.Editor
         public HudController GetHud()
         {
             if (m_pHudController == null) m_pHudController = new HudController(GetHudSystem());
+            m_pHudController.SetEditorMode(true);
             return m_pHudController;
         }
         //--------------------------------------------------------
@@ -139,7 +140,7 @@ namespace Framework.HUD.Editor
             GUILayout.EndArea();
         }
         //--------------------------------------------------------
-        internal void OnSelectComponent(AComponent component)
+        internal void OnSelectComponent(AWidget component)
         {
             for (int i = 0; i < m_vLogics.Count; ++i)
             {
