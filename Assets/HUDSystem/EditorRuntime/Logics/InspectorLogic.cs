@@ -163,7 +163,7 @@ namespace Framework.HUD.Editor
                 GUILayout.BeginHorizontal();
 
                 // 精确绘制Sprite区域
-                Rect previewRect = GUILayoutUtility.GetRect(48, 48, GUILayout.Width(48), GUILayout.Height(48));
+                Rect previewRect = GUILayoutUtility.GetRect(96, 96, GUILayout.Width(96), GUILayout.Height(96));
                 if (data.sprite != null)
                 {
                     Texture2D tex = data.sprite.texture;

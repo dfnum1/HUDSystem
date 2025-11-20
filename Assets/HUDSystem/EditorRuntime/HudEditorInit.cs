@@ -42,6 +42,7 @@ namespace Framework.HUD.Editor
         {
             s_CustomIcon = LoadTexture("icon.png");
             EditorApplication.projectWindowItemOnGUI += OnProjectWindowItemGUI;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
         }
         //-----------------------------------------------------
         static void OnProjectWindowItemGUI(string guid, Rect selectionRect)
@@ -55,6 +56,26 @@ namespace Framework.HUD.Editor
                 //       GUI.DrawTexture(iconRect, s_CustomIcon, ScaleMode.ScaleToFit);
                 if (EditorGUIUtility.GetIconForObject(obj) != s_CustomIcon)
                     EditorGUIUtility.SetIconForObject(obj, s_CustomIcon);
+            }
+        }
+        //-----------------------------------------------------
+        private static void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.EnteredPlayMode)
+            {
+                // 检查标记
+                string guid = EditorPrefs.GetString("HudAtlas_GenAtlasMapping_GUID", "");
+                if (!string.IsNullOrEmpty(guid))
+                {
+                    var path = AssetDatabase.GUIDToAssetPath(guid);
+                    var hudAtlas = AssetDatabase.LoadAssetAtPath<Framework.HUD.Runtime.HudAtlas>(path);
+                    if (hudAtlas != null)
+                    {
+                        hudAtlas.GenAtlasMappingInfo(true);
+                        EditorPrefs.DeleteKey("HudAtlas_GenAtlasMapping_GUID");
+                        EditorApplication.isPlaying = false;
+                    }
+                }
             }
         }
     }

@@ -114,20 +114,65 @@ namespace Framework.HUD.Runtime
             }
         }
         //--------------------------------------------------------
-        public void GenAtlasMappingInfo()
+        public void GenAtlasMappingInfo(bool bForce = false)
         {
 #if UNITY_EDITOR
-       //     if (!Application.isPlaying)
-        //        return;
-            if (m_isGenAtlasMapping) return;
+
+            if (m_isGenAtlasMapping && !bForce) return;
+            if(!Application.isPlaying)
+            {
+                Debug.LogWarning("Please enter Play Mode to generate Atlas Mapping Info.");
+                return;
+            }       
             m_isGenAtlasMapping = true;
+
             m_AtlasTex = null;
+            ClearAllSubAssets(this);
+            m_AtlasMappingTex = null;
             CollectRefresh();
             GenMappingTexture();
             GenAtlasMappingTextrue();
 #endif
         }
 #if UNITY_EDITOR
+        //--------------------------------------------------------
+        public static void ClearAllSubAssets(UnityEngine.Object parentAsset)
+        {
+            if (parentAsset == null) return;
+
+            string assetPath = AssetDatabase.GetAssetPath(parentAsset);
+            var allAssets = AssetDatabase.LoadAllAssetsAtPath(assetPath);
+
+            foreach (var subAsset in allAssets)
+            {
+                // 跳过主资源本身
+                if (subAsset == parentAsset) continue;
+
+                AssetDatabase.RemoveObjectFromAsset(subAsset);
+                UnityEngine.Object.DestroyImmediate(subAsset, true);
+            }
+
+            EditorUtility.SetDirty(parentAsset);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+        //--------------------------------------------------------
+        public static void RemoveSubAsset(UnityEngine.Object parentAsset, UnityEngine.Object subAsset)
+        {
+            if (parentAsset == null || subAsset == null)
+                return;
+
+            // 1. 从主资源移除
+            AssetDatabase.RemoveObjectFromAsset(subAsset);
+
+            // 2. 销毁内存对象
+            UnityEngine.Object.DestroyImmediate(subAsset, true);
+
+            // 3. 标记主资源已修改并保存
+            EditorUtility.SetDirty(parentAsset);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
         //--------------------------------------------------------
         Texture GetAtlasTexture()
         {
@@ -235,6 +280,49 @@ namespace Framework.HUD.Runtime
             }
         }
         //--------------------------------------------------------
+        Vector4 GetInnerUV(Sprite sprite)
+        {
+            if (Application.isPlaying)
+                return UnityEngine.Sprites.DataUtility.GetOuterUV(sprite);
+            else
+            {
+                Rect rect = sprite.rect;
+                Texture2D tex = GetAtlasTexture() as Texture2D;
+                Vector4 padding = UnityEngine.Sprites.DataUtility.GetPadding(sprite);
+
+                float atlasWidth = tex.width;
+                float atlasHeight = tex.height;
+
+                float xMin = (rect.x + padding.x) / atlasWidth;
+                float yMin = (rect.y + padding.y) / atlasHeight;
+                float xMax = (rect.x + rect.width - padding.z) / atlasWidth;
+                float yMax = (rect.y + rect.height - padding.w) / atlasHeight;
+
+                return new Vector4(xMin, yMin, xMax, yMax);
+            }
+        }
+        //--------------------------------------------------------
+        Vector4 GetOuterUV(Sprite sprite)
+        {
+            if (Application.isPlaying)
+                return UnityEngine.Sprites.DataUtility.GetOuterUV(sprite);
+            else
+            {
+                Rect rect = sprite.rect;
+                Texture2D tex = GetAtlasTexture() as Texture2D;
+
+                float atlasWidth = tex.width;
+                float atlasHeight = tex.height;
+
+                float xMin = rect.x / atlasWidth;
+                float yMin = rect.y / atlasHeight;
+                float xMax = (rect.x + rect.width) / atlasWidth;
+                float yMax = (rect.y + rect.height) / atlasHeight;
+
+                return new Vector4(xMin, yMin, xMax, yMax);
+            }
+        }
+        //--------------------------------------------------------
         private void GenAtlasMappingTextrue()
         {
             if (m_SpriteAtlas == null || m_SpriteAtlas.spriteCount == 0 || m_vNameToSpriteInfo == null) return;
@@ -253,14 +341,14 @@ namespace Framework.HUD.Runtime
                 SpriteInfo spriteInfo;
                 if (m_vNameToSpriteInfo.TryGetValue(name, out spriteInfo))
                 {
-                    var uv = UnityEngine.Sprites.DataUtility.GetOuterUV(sprite);
+                    var uv = GetOuterUV(sprite);
                     SetSpriteUV(spriteInfo, new Vector2(uv.x, uv.y), new Vector2(uv.z, uv.w));
                 }
                 if (sprite.border.SqrMagnitude() > 0)
                 {
                     Vector4 outer, inner, padding, border;
-                    outer = UnityEngine.Sprites.DataUtility.GetOuterUV(sprite);
-                    inner = UnityEngine.Sprites.DataUtility.GetInnerUV(sprite);
+                    outer = GetOuterUV(sprite);
+                    inner = GetInnerUV(sprite);
                     padding = UnityEngine.Sprites.DataUtility.GetPadding(sprite);
                     border = sprite.border;
                     Vector2[] s_UVScratch = new Vector2[4];
@@ -349,7 +437,19 @@ namespace Framework.HUD.Runtime
             HudAtlas hudAtlas = (HudAtlas)target;
             if (GUILayout.Button("Gen Atlas Mapping Info"))
             {
-                hudAtlas.GenAtlasMappingInfo();
+                EditorPrefs.DeleteKey("HudAtlas_GenAtlasMapping_GUID");
+                if (!Application.isPlaying)
+                {
+                    string guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(hudAtlas));
+                    EditorPrefs.SetString("HudAtlas_GenAtlasMapping_GUID", guid);
+
+                    var newScene = UnityEditor.SceneManagement.EditorSceneManager.NewScene(
+                        UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,
+                        UnityEditor.SceneManagement.NewSceneMode.Single);
+                    UnityEditor.EditorApplication.isPlaying = true;
+                    return;
+                }
+                hudAtlas.GenAtlasMappingInfo(true);
                 EditorUtility.SetDirty(hudAtlas);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
