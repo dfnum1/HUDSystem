@@ -16,6 +16,8 @@ public class Demo : MonoBehaviour, IHudSystemCallback
         m_pHudSystem = new HudSystem();
         m_pHudSystem.SetRenderCamera(Camera.main);
         m_pHudSystem.RegisterCallback(this);
+
+        Application.targetFrameRate = 120;
     }
     // Start is called before the first frame update
     void Start()
