@@ -372,11 +372,11 @@ namespace Framework.HUD.Runtime
         {
             m_bDestroyed = true;
             if (m_RenderBatch != null) m_RenderBatch.RemoveExpansionNotif(TriggerReorder);
-            m_RenderBatch = null;
             if (m_nTransId >= 0 && m_RenderBatch != null)
             {
                 m_RenderBatch.RemoveHudData(m_nTransId);
             }
+            m_RenderBatch = null;
             if (m_vWidgetMaps != null)
             {
                 foreach (var db in m_vWidgetMaps)

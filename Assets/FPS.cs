@@ -32,7 +32,7 @@ public class FPS : MonoBehaviour
         m_lastUpdateShowTime = Time.realtimeSinceStartup;
         m_fps = new Rect(0, 0, 100, 100);
         m_dtime = new Rect(0, 100, 100, 100);
-        m_style.fontSize = 80;
+        m_style.fontSize = 50;
         m_style.normal.textColor = Color.red;
     }
 

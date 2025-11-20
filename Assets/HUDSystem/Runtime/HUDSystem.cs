@@ -139,6 +139,16 @@ namespace Framework.HUD.Runtime
             TypePool.Free(hudController);
         }
         //--------------------------------------------------------
+        public void ClearHuds()
+        {
+            foreach (var hud in m_vHuds)
+            {
+                hud.Destroy();
+                TypePool.Free(hud);
+            }
+            m_vHuds.Clear();
+        }
+        //--------------------------------------------------------
         internal List<AWidget> GetRayTestCache()
         {
             if (m_vRayTest == null) m_vRayTest = new List<AWidget>(2);
