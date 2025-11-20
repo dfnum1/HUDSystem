@@ -4,11 +4,12 @@
 作    者:	HappLI
 描    述:	HUD 数据对象层
 *********************************************************************/
-using Framework.HUD.Editor;
 using System.Collections.Generic;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Framework.HUD.Runtime
 {
@@ -154,7 +155,7 @@ namespace Framework.HUD.Runtime
             }
             if (hudObject.fontAsset && GUILayout.Button("生产字体映射"))
             {
-                HUDEditorInit.GenFontAtlasMapping(hudObject.fontAsset);
+                Editor.HUDEditorInit.GenFontAtlasMapping(hudObject.fontAsset);
             }
         }
         //--------------------------------------------------------

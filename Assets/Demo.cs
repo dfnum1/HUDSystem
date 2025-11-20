@@ -68,7 +68,9 @@ public class Demo : MonoBehaviour, IHudSystemCallback
 
     public bool OnSpawnInstance(AWidget pWidget, string strParticle, System.Action<GameObject> onCallback)
     {
+#if UNITY_EDITOR
         onCallback(GameObject.Instantiate(UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(strParticle)));
+#endif
         return true;
     }
 

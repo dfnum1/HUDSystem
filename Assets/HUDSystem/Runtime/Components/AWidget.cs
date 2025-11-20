@@ -6,9 +6,7 @@
 *********************************************************************/
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Unity.Plastic.Newtonsoft.Json.Linq;
 using UnityEngine;
-using UnityEngine.UIElements;
 namespace Framework.HUD.Runtime
 {
     public enum EHudType : byte

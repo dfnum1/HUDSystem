@@ -4,7 +4,6 @@
 作    者:	HappLI
 描    述:	
 *********************************************************************/
-using log4net.Util;
 using System;
 using System.Collections.Generic;
 using Unity.Burst;
@@ -14,7 +13,6 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Jobs;
-using UnityEngine.Profiling;
 
 namespace Framework.HUD.Runtime
 {

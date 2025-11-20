@@ -229,7 +229,7 @@ namespace Framework.HUD.Runtime
 #if UNITY_EDITOR
             Graphics.DrawMeshInstanced(m_pMesh, 0, m_pMaterial, matrix4x4, count, properties, ShadowCastingMode.Off, false, 0, camera);
 #else
-            m_CommandBuffer.DrawMeshInstanced(m_pMesh, 0, m_pMaterial, 0, matrix4x4, count, properties, 0, camera);
+            m_CommandBuffer.DrawMeshInstanced(m_pMesh, 0, m_pMaterial, 0, matrix4x4,count, m_MaterialPropertyBlock);
 #endif
         }
         //-----------------------------------------------------

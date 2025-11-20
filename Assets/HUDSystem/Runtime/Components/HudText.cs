@@ -4,12 +4,10 @@
 作    者:	HappLI
 描    述:	文字
 *********************************************************************/
-using System.Collections.Generic;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.TextCore;
-using static PlasticGui.PlasticTableColumn;
 
 namespace Framework.HUD.Runtime
 {

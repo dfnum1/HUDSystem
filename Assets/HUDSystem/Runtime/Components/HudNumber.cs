@@ -8,8 +8,6 @@ using System;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
-using static Framework.HUD.Runtime.HudAtlas;
-using static PlasticGui.PlasticTableColumn;
 
 namespace Framework.HUD.Runtime
 {
@@ -129,7 +127,7 @@ namespace Framework.HUD.Runtime
             float fontSize = GetFontSize()/10.0f;
             for (int i = 0; i < count; i++)
             {
-                SpriteInfo spriteInfo = hudAtlas.GetSpriteInfo(chars[i].ToString());
+                HudAtlas.SpriteInfo spriteInfo = hudAtlas.GetSpriteInfo(chars[i].ToString());
                 if (spriteInfo != null)
                 {
                     float2 size = new float2(spriteInfo.size.x, spriteInfo.size.y);
