@@ -87,8 +87,8 @@ namespace Framework.HUD.Runtime
         public bool Culling(float4x4 mvp, TransformData data, out float zvalue)
         {
             if (InView(mvp, float2.zero, out zvalue)) return false;
-            float2 center = data.boundCenter / 100f;
-            float2 halfsize = data.boundSize / 200f;
+            float2 center = data.boundCenter;
+            float2 halfsize = data.boundSize;
             float2 leftDownPos = center - halfsize;
             float2 leftUpPos = center - new float2(halfsize.x, -halfsize.y);
             float2 rightUpPos = center + halfsize;
@@ -143,13 +143,6 @@ namespace Framework.HUD.Runtime
                 if (transformData.root != 1)
                     continue;
 
-                //! culling check
-                float4x4 mvp = math.mul(vpMatrix, transformData.localToWorld);
-                float zvalue;
-                bool culling = Culling(mvp, transformData, out zvalue);
-                transformData.culling = (byte)(culling ? 1 : 0);
-                transformData.zvalue = zvalue;
-
                 if (transformData.culling == 0)
                 {
                     TransformSort sortdata = new TransformSort();
@@ -159,37 +152,6 @@ namespace Framework.HUD.Runtime
                 }
             }
             transformSort.Sort(new PointDataComparer());
-        }
-
-        public bool Culling(float4x4 mvp, TransformData data, out float zvalue)
-        {
-            if (InView(mvp, float2.zero, out zvalue)) return false;
-            float2 center = data.boundCenter / 100f;
-            float2 halfsize = data.boundSize / 200f;
-            float2 leftDownPos = center - halfsize;
-            float2 leftUpPos = center - new float2(halfsize.x, -halfsize.y);
-            float2 rightUpPos = center + halfsize;
-            float2 rightDownPos = center + new float2(halfsize.x, -halfsize.y);
-            if (InView(mvp, leftDownPos, out zvalue)) return false;
-
-            if (InView(mvp, leftUpPos, out zvalue)) return false;
-
-            if (InView(mvp, rightUpPos, out zvalue)) return false;
-
-            if (InView(mvp, rightDownPos, out zvalue)) return false;
-
-            return true;
-        }
-
-        public unsafe bool InView(float4x4 mvp, float2 pos, out float zvalue)
-        {
-            float4 mvpPos = math.mul(mvp, new float4(pos.x, pos.y, 0, 1));
-            float3 view = mvpPos.xyz / mvpPos.w;
-            bool inview = (view.x >= -1f && view.x <= 1f)
-                          && (view.y >= -1f && view.y <= 1f)
-                          && (view.z >= -1 && view.z <= 1f);
-            zvalue = view.z;
-            return inview;
         }
     }
 

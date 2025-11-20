@@ -276,8 +276,11 @@ namespace Framework.HUD.Editor
             GenericMenu menu = new GenericMenu();
             menu.AddItem(new GUIContent("Delete"), false, () =>
             {
+                if(m_pTree.IsSelected(widget.id))
+                {
+                    m_pEditor.OnSelectComponent(null);
+                }
                 widget.graphicItem.Destroy();
-                GetHud().OnWidgetDestroy(widget.graphicItem);
                 RefreshTree();
             });
             foreach(var tp in m_vHudTypes)

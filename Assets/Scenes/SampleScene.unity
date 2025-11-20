@@ -338,7 +338,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hudObject: {fileID: 11400000, guid: 05a47dea123b4f5468d1d144fc72f3d6, type: 2}
-  spawnCnt: 5000
+  spawnCnt: 10000
   headIcons:
   - {fileID: 21300000, guid: 2b1774ffe15e64245bdeb4ec9b04e05b, type: 3}
   - {fileID: 21300000, guid: c9885145026030643a8ffbf38b971536, type: 3}
@@ -366,7 +366,7 @@ Transform:
   m_GameObject: {fileID: 1501000907}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 9.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

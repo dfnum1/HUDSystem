@@ -176,14 +176,23 @@ namespace Framework.HUD.Editor
         {
             foreach (var db in m_vInstance)
             {
+                bool bAllNull = true;
                 if (db.Value.vParticles != null)
                 {
                     foreach (var par in db.Value.vParticles)
                     {
+                        if(par == null)
+                            continue;
+                        bAllNull = false;
                         if (!par.isPlaying)
                             par.Play();
                         par.Simulate(deltaTime, false,false); 
                     }
+                }
+                if (bAllNull)
+                {
+                    m_vInstance.Remove(db.Key);
+                    break;
                 }
                 db.Value.time += deltaTime;
                 if (db.Value.time >= 10000) db.Value.time = 0;

@@ -184,9 +184,12 @@ namespace Framework.HUD.Runtime
             {
                 m_RenderBatch.UpdateHudController(m_nTransId, this);
             }
-            foreach(var db in m_vTopWidgets)
+            if (m_vTopWidgets != null)
             {
-                db.DoTransformChanged();
+                foreach (var db in m_vTopWidgets)
+                {
+                    db.DoTransformChanged();
+                }
             }
         }
         //--------------------------------------------------------
