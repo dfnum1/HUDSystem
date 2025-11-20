@@ -86,6 +86,7 @@
     <Compile Include="Assets\HUDSystem\Runtime\Utils\ArrayPtr.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudNumber.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Utils\HudUtils.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Utils\TypePool.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudCanvas.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudText.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\HudSystem.cs" />
@@ -95,9 +96,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\HUDSystem\Res\Shader\Hud.cginc" />
-    <None Include="Assets\HUDSystem\Res\Shader\HudNum.shader" />
-    <None Include="Assets\HUDSystem\Res\Shader\HudImage.shader" />
-    <None Include="Assets\HUDSystem\Res\Shader\HudTMP.shader" />
     <None Include="Assets\HUDSystem\Res\Shader\TMPro_Properties.cginc" />
     <None Include="Assets\HUDSystem\HUDSystem.asmdef" />
     <None Include="Assets\HUDSystem\Res\Shader\Hud_Image_TMP.shader" />

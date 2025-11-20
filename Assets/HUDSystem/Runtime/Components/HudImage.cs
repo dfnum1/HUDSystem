@@ -11,6 +11,47 @@ using UnityEngine;
 
 namespace Framework.HUD.Runtime
 {
+    //--------------------------------------------------------
+    [System.Serializable]
+    public class HudImageData : HudBaseData
+    {
+        public enum FillMethod : byte
+        {
+            Horizontal,
+            Vertical,
+        }
+
+        public enum ImageType : byte
+        {
+            Simple,
+            Sliced,
+            Filled,
+        }
+
+        public enum OriginHorizontal : byte
+        {
+            Left,
+            Right,
+        }
+
+        public enum OriginVertical : byte
+        {
+            Bottom,
+            Top,
+        }
+        public Sprite sprite;
+        public ImageType imageType;
+        public FillMethod fillMethod;
+        public int fillOrigin = 0;
+        public float fillAmount = 1.0f;
+        public override AWidget CreateWidget(HudSystem pSystem)
+        {
+            return TypePool.MallocWidget<HudImage>(pSystem, this);
+        }
+    }
+    //--------------------------------------------------------
+    // ! HudImage
+    //--------------------------------------------------------
     [HudData(typeof(HudImageData))]
     public class HudImage : AWidget
     {
@@ -23,7 +64,7 @@ namespace Framework.HUD.Runtime
             Count,
         }
         Sprite m_Sprite;
-        public HudImage(HudSystem pSystem, HudBaseData hudData) : base(pSystem, hudData)
+        public HudImage() : base()
         {
             m_eHudType = EHudType.Image;
         }
@@ -279,6 +320,11 @@ namespace Framework.HUD.Runtime
             {
                 Simple(sprite);
             }
+        }
+        //--------------------------------------------------------
+        protected override void OnDestroy()
+        {
+            m_Sprite = null;
         }
     }
 }

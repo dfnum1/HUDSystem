@@ -10,6 +10,21 @@ using UnityEngine;
 
 namespace Framework.HUD.Runtime
 {
+    //--------------------------------------------------------
+    [System.Serializable]
+    public class HudParticleData : HudBaseData
+    {
+        public string strParticle;
+        public Vector3 scale = Vector3.one;
+        public int renderOrder = 0;
+        public override AWidget CreateWidget(HudSystem pSystem)
+        {
+            return TypePool.MallocWidget<HudParticle>(pSystem, this);
+        }
+    }
+    //--------------------------------------------------------
+    //! HudParticle
+    //--------------------------------------------------------
     [HudData(typeof(HudParticleData))]
     public class HudParticle : AWidget
     {
@@ -22,7 +37,7 @@ namespace Framework.HUD.Runtime
         string m_strCurrentParticle = null;
         string m_strParticle = null;
         List<ParticleSystemRenderer> m_vParticles = null;
-        public HudParticle(HudSystem pSystem, HudBaseData hudData) : base(pSystem, hudData)
+        public HudParticle() : base()
         {
             m_eHudType = EHudType.Particle;
         }

@@ -68,7 +68,8 @@ namespace Framework.HUD.Editor
         //--------------------------------------------------------
         public HudController GetHud()
         {
-            if (m_pHudController == null) m_pHudController = new HudController(GetHudSystem());
+            if (m_pHudController == null) m_pHudController = new HudController();
+            m_pHudController.SetHudSystem(GetHudSystem());
             m_pHudController.SetEditorMode(true);
             return m_pHudController;
         }

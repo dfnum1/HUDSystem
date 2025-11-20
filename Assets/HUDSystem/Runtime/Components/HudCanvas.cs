@@ -9,10 +9,22 @@ using UnityEngine;
 
 namespace Framework.HUD.Runtime
 {
+    //--------------------------------------------------------
+    [System.Serializable]
+    public class HudCanvasData : HudBaseData
+    {
+        public override AWidget CreateWidget(HudSystem pSystem)
+        {
+            return TypePool.MallocWidget<HudCanvas>(pSystem,this);
+        }
+    }
+    //--------------------------------------------------------
+    //! HudCanvas
+    //--------------------------------------------------------
     [HudData(typeof(HudCanvasData))]
     public class HudCanvas : AWidget
     {
-        public HudCanvas(HudSystem pSystem, HudBaseData hudData) : base(pSystem, hudData)
+        public HudCanvas() : base()
         {
             m_eHudType = EHudType.Canvas;
         }

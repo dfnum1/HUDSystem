@@ -125,7 +125,8 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         public HudController CreateHud(HudObject hudObj)
         {
-            HudController hud = new HudController(this);
+            var hud = TypePool.Malloc<HudController>();
+            hud.SetHudSystem(this);
             hud.SetHudObject(hudObj);
             m_vHuds.Add(hud);
             return hud;
@@ -135,6 +136,7 @@ namespace Framework.HUD.Runtime
         {
             hudController.Destroy();
             m_vHuds.Remove(hudController);
+            TypePool.Free(hudController);
         }
         //--------------------------------------------------------
         internal List<AWidget> GetRayTestCache()

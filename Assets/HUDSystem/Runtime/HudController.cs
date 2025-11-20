@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Framework.HUD.Runtime
 {
-    public class HudController
+    public class HudController : TypeObject
     {
         private HudSystem m_pSystem;
         private HudObject m_pObject;
@@ -24,12 +24,20 @@ namespace Framework.HUD.Runtime
         private Vector3 m_Offset = Vector3.zero;
         private Vector3 m_OffsetRotation = Vector3.zero;
         private int m_nTransId = -1;
+
+        private bool m_bDestroyed = false;
 #if UNITY_EDITOR
         internal bool m_bEditorMode = false;
 #endif
         //--------------------------------------------------------
-        public HudController(HudSystem pSystem)
+        public HudController()
         {
+            m_bDestroyed = false;
+        }
+        //--------------------------------------------------------
+        internal void SetHudSystem(HudSystem pSystem)
+        {
+            m_bDestroyed = false;
             m_pSystem = pSystem;
         }
         //--------------------------------------------------------
@@ -99,7 +107,6 @@ namespace Framework.HUD.Runtime
             if (m_RenderBatch != null && m_nTransId >= 0)
             {
                 m_RenderBatch.UpdateHudController(m_nTransId, this);
-                m_RenderBatch.UpdateFontMaterial();
             }
         }
         //--------------------------------------------------------
@@ -138,6 +145,7 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         public void SetHudObject(HudObject hudObject)
         {
+            m_bDestroyed = false;
             if (m_pObject == hudObject)
                 return;
             m_pObject = hudObject;
@@ -240,12 +248,13 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         internal void OnWidgetDestroy(AWidget pWidget)
         {
+            if (m_bDestroyed) return;
             if (pWidget == null) return;
             m_vTopWidgets.Remove(pWidget);
             m_vWidgetMaps.Remove(pWidget.GetId());
         }
         //--------------------------------------------------------
-        internal void OnReorder()
+        internal void OnRebuild()
         {
             if (m_vTopWidgets == null)
                 return;
@@ -261,18 +270,41 @@ namespace Framework.HUD.Runtime
             });
             foreach (var db in m_vTopWidgets)
             {
-                db.OnReorder();
+                db.OnRebuild();
             }
         }
         //--------------------------------------------------------
-        internal void Destroy()
+        internal override void Destroy()
         {
-            if(m_RenderBatch!=null) m_RenderBatch.RemoveExpansionNotif(TriggerReorder);
+            m_bDestroyed = true;
+            if (m_RenderBatch != null) m_RenderBatch.RemoveExpansionNotif(TriggerReorder);
             m_RenderBatch = null;
             if (m_nTransId >= 0 && m_RenderBatch != null)
             {
                 m_RenderBatch.RemoveHudData(m_nTransId);
             }
+            if (m_vWidgetMaps != null)
+            {
+                foreach (var db in m_vWidgetMaps)
+                {
+                    db.Value.Destroy();
+                }
+                m_vWidgetMaps.Clear();
+            }
+            if (m_vTopWidgets != null) m_vTopWidgets.Clear();
+            m_pSystem = null;
+            m_pObject = null;
+
+            m_pFollowTarget = null;
+            m_pFollowTransform = Matrix4x4.identity;
+
+            m_Offset = Vector3.zero;
+            m_OffsetRotation = Vector3.zero;
+            m_nTransId = -1;
+
+#if UNITY_EDITOR
+            m_bEditorMode = false;
+#endif
         }
         //--------------------------------------------------------
         internal void TriggerReorder()

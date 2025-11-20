@@ -1,0 +1,222 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!28 &-766434889744706618
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 8
+  m_Height: 8
+  m_CompleteImageSize: 256
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 1
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 0
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 0
+  m_PlatformBlob: 
+  image data: 256
+  _typelessdata: 000000000048002800000000001c000000000000001c002800000028001c0000001c0000000e0000001c0000000e0028001c0028000e0000002a0000001d0000002a0000001d0028002a0028001d00000000000000480028000000000015000b0000000b001500110000001d0015000a00150000001d000b0015000b001d00110015001d001d000a003300000014000b0033000b001400110033001d0014000a000000000048002800000000004800280000000000480028000000000048002800000000004800280000000000480028000000000048002800000000004800280000000000470028000000000048002800000000004800280000000000000000
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f725c729f5c88440bcb373414d5ac8a, type: 3}
+  m_Name: HudAtlas
+  m_EditorClassIdentifier: 
+  m_SpriteAtlas: {fileID: 100100200, guid: b6a0f20e2bddffa4fa1086bd56517060, type: 3}
+  m_AtlasMappingTex: {fileID: 7125139453182121956}
+  m_Width: 1024
+  m_Height: 512
+  m_AtlasMappingWidth: 16
+  m_AtlasMappingHeight: 16
+  m_vSprites:
+  - name: '-'
+    index: 0
+    size: {x: 1024, y: 512}
+  - name: +
+    index: 1
+    size: {x: 1024, y: 512}
+  - name: 0
+    index: 2
+    size: {x: 1024, y: 512}
+  - name: 1
+    index: 3
+    size: {x: 1024, y: 512}
+  - name: 2
+    index: 4
+    size: {x: 1024, y: 512}
+  - name: 3
+    index: 5
+    size: {x: 1024, y: 512}
+  - name: 4
+    index: 6
+    size: {x: 1024, y: 512}
+  - name: 5
+    index: 7
+    size: {x: 1024, y: 512}
+  - name: 6
+    index: 8
+    size: {x: 1024, y: 512}
+  - name: 7
+    index: 9
+    size: {x: 1024, y: 512}
+  - name: 8
+    index: 10
+    size: {x: 1024, y: 512}
+  - name: 9
+    index: 11
+    size: {x: 1024, y: 512}
+  - name: hud_fight_Progress_white
+    index: 12
+    size: {x: 1024, y: 512}
+  - name: 
+    index: 13
+    size: {x: 1023, y: 512}
+  - name: hud_fight_Progress_yellow_bottom_0
+    index: 14
+    size: {x: 37, y: 0}
+  - name: hud_fight_Progress_yellow_bottom_1
+    index: 15
+    size: {x: 37, y: 512}
+  - name: hud_fight_Progress_yellow_bottom_2
+    index: 16
+    size: {x: 37, y: 0}
+  - name: hud_fight_Progress_yellow_bottom_3
+    index: 17
+    size: {x: 685, y: 0}
+  - name: hud_fight_Progress_yellow_bottom_4
+    index: 18
+    size: {x: 685, y: 512}
+  - name: hud_fight_Progress_yellow_bottom_5
+    index: 19
+    size: {x: 685, y: 0}
+  - name: hud_fight_Progress_yellow_bottom_6
+    index: 20
+    size: {x: 300, y: 0}
+  - name: hud_fight_Progress_yellow_bottom_7
+    index: 21
+    size: {x: 300, y: 512}
+  - name: hud_fight_Progress_yellow_bottom_8
+    index: 22
+    size: {x: 300, y: 0}
+  - name: Pet_Icon_Characteristic03
+    index: 23
+    size: {x: 1024, y: 512}
+  - name: Pet_Icon_Characteristic04
+    index: 24
+    size: {x: 1024, y: 512}
+  - name: Pet_Icon_Difficulty
+    index: 25
+    size: {x: 879, y: 425}
+  - name: Pet_Icon_Incubate
+    index: 26
+    size: {x: 893, y: 415}
+  - name: Pet_Icon_Skill_CJ
+    index: 27
+    size: {x: 1024, y: 512}
+  - name: Pet_Icon_SkillAttribute_Production
+    index: 28
+    size: {x: 872, y: 511}
+  - name: Pet_Icon_Star_Normal_02
+    index: 29
+    size: {x: 895, y: 439}
+  - name: Pet_Icon_Task_LGYJ
+    index: 30
+    size: {x: 911, y: 455}
+  - name: Pet_Img_AvatarFrame
+    index: 31
+    size: {x: 1024, y: 512}
+  - name: Pet_Img_CharacteristicQuality
+    index: 32
+    size: {x: 1024, y: 512}
+  - name: Pet_Img_Deployment_Bubble
+    index: 33
+    size: {x: 906, y: 496}
+  - name: Pet_Img_Face_Monster02
+    index: 34
+    size: {x: 1024, y: 512}
+--- !u!28 &7125139453182121956
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 16
+  m_Height: 16
+  m_CompleteImageSize: 1024
+  m_MipsStripped: 0
+  m_TextureFormat: 4
+  m_MipCount: 1
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMipmapLimit: 0
+  m_MipmapLimitGroupName: 
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 0
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 0
+  m_PlatformBlob: 
+  image data: 1024
+  _typelessdata: 00000000040002000000000004000200000000000400020000000000040002000000000004000200000000000400020000000000040002000000000004000200000000000400020000000000040002000000000004000200000000000400020000000000040002000000000003ff02000000000000250000000000000025020000000200002500000025000002ad00000025000002ad02000025020002ad000002d30000012c000002d30000012c020002d30200012c0000000000000400020000000000040002000047002b036f01a900310038037d019f0000000004000200005a0000036801ff00400028037f01b70038001c038f01c700000000040002000000000004000200003a0000038a01f00000000004000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 

@@ -13,6 +13,21 @@ using static PlasticGui.PlasticTableColumn;
 
 namespace Framework.HUD.Runtime
 {
+    //--------------------------------------------------------
+    [System.Serializable]
+    public class HudNumberData : HudBaseData
+    {
+        public string strNumber;
+        public float fontSize = 20;
+        public HorizontalAlignment alignment = HorizontalAlignment.Middle;
+        public override AWidget CreateWidget(HudSystem pSystem)
+        {
+            return TypePool.MallocWidget<HudNumber>(pSystem, this);
+        }
+    }
+    //--------------------------------------------------------
+    //! HudNumber
+    //--------------------------------------------------------
     [HudData(typeof(HudNumberData))]
     public class HudNumber : AWidget
     {
@@ -24,7 +39,7 @@ namespace Framework.HUD.Runtime
         }
         Vector2 m_Size = Vector2.zero;
         string m_strNumber = "";
-        public HudNumber(HudSystem pSystem, HudBaseData hudData) : base(pSystem, hudData)
+        public HudNumber() : base()
         {
             m_eHudType = EHudType.Number;
         }
@@ -166,6 +181,12 @@ namespace Framework.HUD.Runtime
                     }
                     break;
             }
+        }
+        //--------------------------------------------------------
+        protected override void OnDestroy()
+        {
+            m_strNumber = null;
+            m_Size = Vector2.zero;
         }
     }
 }

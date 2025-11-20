@@ -89,21 +89,6 @@ namespace Framework.HUD.Runtime
             }
         }
         //-----------------------------------------------------
-        internal void UpdateFontMaterial()
-        {
-            if (m_pMaterial && m_pMaterial.HasProperty(HUDUtils._MainTex))
-            {
-                TMP_FontAsset fontAsset = TMP_Settings.defaultFontAsset;
-                m_MaterialPropertyBlock.SetTexture(HUDUtils._MainTex, fontAsset.atlasTexture);
-                m_MaterialPropertyBlock.SetInt(HUDUtils._TextureWidth, fontAsset.atlasWidth);
-                m_MaterialPropertyBlock.SetInt(HUDUtils._TextureHeight, fontAsset.atlasHeight);
-
-                m_MaterialPropertyBlock.SetTexture(HUDUtils._FontMappingTex, fontAsset.fontMappingTexture);
-                m_MaterialPropertyBlock.SetInt(HUDUtils._FontMappingWidth, fontAsset.fontMappingWidth);
-                m_MaterialPropertyBlock.SetInt(HUDUtils._FontMappingHeight, fontAsset.fontMappingHeight);
-            }
-        }
-        //-----------------------------------------------------
         internal void Render(Camera camera)
         {
             if (!m_pJobHandle.IsCompleted)
@@ -151,7 +136,7 @@ namespace Framework.HUD.Runtime
             if (m_vHudControllers != null && m_vHudControllers.Count > 0)
             {
                 foreach (var item in m_vHudControllers)
-                    item.OnReorder();
+                    item.OnRebuild();
                 m_vHudControllers.Clear();
             }
 

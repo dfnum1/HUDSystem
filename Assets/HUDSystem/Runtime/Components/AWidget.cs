@@ -66,7 +66,7 @@ namespace Framework.HUD.Runtime
         };
     }
     //--------------------------------------------------------
-    public abstract class AWidget
+    public abstract class AWidget : TypeObject
     {
         protected EHudType m_eHudType = EHudType.None;
 
@@ -84,9 +84,17 @@ namespace Framework.HUD.Runtime
 
         private Dictionary<byte, ParamOverrideInfo> m_vOverrideParams = null;
         //--------------------------------------------------------
-        public AWidget(HudSystem pSystem, HudBaseData hudData)
+        public AWidget()
         {
-            m_pHudSystem = pSystem;
+        }
+        //--------------------------------------------------------
+        internal void SetHudSystem(HudSystem hudSystem)
+        {
+            m_pHudSystem = hudSystem;
+        }
+        //--------------------------------------------------------
+        internal void SetHudData(HudBaseData hudData)
+        {
             m_pHudData = hudData;
         }
         //--------------------------------------------------------
@@ -625,7 +633,7 @@ namespace Framework.HUD.Runtime
             return m_vDataSnippets[index];
         }
         //--------------------------------------------------------
-        internal void OnReorder()
+        internal void OnRebuild()
         {
             if (m_HudController == null)
                 return;
@@ -650,16 +658,27 @@ namespace Framework.HUD.Runtime
             {
                 for(int i = m_vChilds.Count-1; i>=0; --i)
                 {
-                    m_vChilds[i].OnReorder();
+                    m_vChilds[i].OnRebuild();
                 }
             }
         }
         //--------------------------------------------------------
-        public void Destroy()
+        internal override void Destroy()
         {
+            OnDestroy();
             if (m_pParent != null) m_pParent.Detach(this);
             if (m_HudController != null) m_HudController.OnWidgetDestroy(this);
-            OnDestroy();
+            m_bVisible = true;
+            m_strName = null;
+            if (m_vChilds != null) m_vChilds.Clear();
+            m_pHudSystem = null;
+            m_HudController = null;
+            m_pHudData = null;
+            m_pParent = null;
+            if (m_vDataSnippets != null) m_vDataSnippets.Clear();
+            if (m_vOverrideParams != null) m_vOverrideParams.Clear();
+
+            TypePool.Free(this);
         }
         //--------------------------------------------------------
         protected virtual void OnDestroy() { }
