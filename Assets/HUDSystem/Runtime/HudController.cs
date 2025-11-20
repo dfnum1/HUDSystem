@@ -81,6 +81,14 @@ namespace Framework.HUD.Runtime
             {
                 return this.m_Offset;
             }
+            set
+            {
+                if(this.m_Offset != value)
+                {
+                    this.m_Offset = value;
+                    UpdateTransform();
+                }
+            }
         }
         //--------------------------------------------------------
         public Vector3 OffsetRotation
@@ -88,6 +96,14 @@ namespace Framework.HUD.Runtime
             get
             {
                 return this.m_OffsetRotation;
+            }
+            set
+            {
+                if (this.m_OffsetRotation != value)
+                {
+                    this.m_OffsetRotation = value;
+                    UpdateTransform();
+                }
             }
         }
         //--------------------------------------------------------
@@ -146,11 +162,31 @@ namespace Framework.HUD.Runtime
             return Matrix4x4.TRS(position,rotation, scale);
         }
         //--------------------------------------------------------
+        public Matrix4x4 GetWorldMatrix()
+        {
+            Matrix4x4 worldMatrix = m_pFollowTransform;
+            if (m_pFollowTarget)
+            {
+                worldMatrix = m_pFollowTarget.localToWorldMatrix;
+            }
+            Vector3 position = worldMatrix.GetPosition() + m_Offset;
+            Quaternion rotation = Quaternion.identity;
+            if (AllowRotation) rotation = worldMatrix.rotation * Quaternion.Euler(m_OffsetRotation);
+            Vector3 scale = Vector3.one;
+            if (AllowScale) scale = worldMatrix.lossyScale;
+
+            return Matrix4x4.TRS(position, rotation, scale);
+        }
+        //--------------------------------------------------------
         public void UpdateTransform()
         {
             if (m_RenderBatch != null && m_nTransId >= 0)
             {
                 m_RenderBatch.UpdateHudController(m_nTransId, this);
+            }
+            foreach(var db in m_vTopWidgets)
+            {
+                db.DoTransformChanged();
             }
         }
         //--------------------------------------------------------
@@ -199,7 +235,9 @@ namespace Framework.HUD.Runtime
             if (m_pObject == null || m_pObject.vHierarchies == null)
                 return;
 
-            if(m_RenderBatch == null)
+            m_pObject.Init();
+
+            if (m_RenderBatch == null)
                 m_RenderBatch = m_pSystem.GetRenderBatch(hudObject.material, hudObject.mesh, hudObject.atlasAset, hudObject.fontAsset);
 
             if (m_RenderBatch != null)
@@ -265,6 +303,15 @@ namespace Framework.HUD.Runtime
         public List<AWidget> GetTopWidgets()
         {
             return m_vTopWidgets;
+        }
+        //--------------------------------------------------------
+        public T GetWidgetById<T>(int id) where T : AWidget
+        {
+            if (m_vWidgetMaps != null && m_vWidgetMaps.TryGetValue(id, out var widget))
+            {
+                return widget as T;
+            }
+            return null;
         }
         //--------------------------------------------------------
         internal void AddTopWidget(AWidget pWidget)
@@ -401,7 +448,7 @@ namespace Framework.HUD.Runtime
             if (data == null ) return;
             if (!bIngoreRayTest && !data.rayTest)
                 return;
-            Vector3 worldPos = camera.WorldToScreenPoint(GetWorldMatrixJob()*widget.GetPosition());
+            Vector3 worldPos = camera.WorldToScreenPoint(GetWorldMatrix()*widget.GetPosition());
             Rect rect = new Rect(worldPos.x - data.sizeDelta.x * 0.5f, worldPos.y - data.sizeDelta.y * 0.5f, data.sizeDelta.x, data.sizeDelta.y);
             if (rect.Contains(screenPosition))
             {

@@ -4,6 +4,7 @@
 作    者:	HappLI
 描    述:	渲染裁剪和排序
 *********************************************************************/
+using System;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -19,6 +20,10 @@ namespace Framework.HUD.Runtime
     internal unsafe class HudRenderCulling
     {
         private TransformAccessArray m_transformArray;
+        private NativeList<ushort> m_transformDataIndex;
+        private int m_nAccReadIndex;
+
+
         private NativeList<TransformData> m_vTransformData;
         private NativeList<TransformSort> m_vTransformSort;
         private NativeQueue<ushort> m_vRemaining;
@@ -32,8 +37,10 @@ namespace Framework.HUD.Runtime
             m_nCapacity = _capacity;
             m_bDispose = false;
             m_nReadIndex = 0;
+            m_nAccReadIndex = 0;
 
             m_transformArray = new TransformAccessArray(_capacity);
+            m_transformDataIndex = new NativeList<ushort>(_capacity, Allocator.Persistent);
             m_vRemaining = new NativeQueue<ushort>(Allocator.Persistent);
             m_vTransformData = new NativeList<TransformData>(_capacity, Allocator.Persistent);
             m_vTransformSort = new NativeList<TransformSort>(_capacity, Allocator.Persistent);
@@ -54,7 +61,35 @@ namespace Framework.HUD.Runtime
             if (m_nReadIndex < m_vTransformData.Length) return;
             int len = m_vTransformData.Length + m_nCapacity;
             m_vTransformData.Capacity = len;
+        }
+        //--------------------------------------------------------
+        private void TryExpansionAcc()
+        {
+            if (m_nAccReadIndex < m_transformDataIndex.Length) return;
+            int len = m_transformDataIndex.Length + m_nCapacity;
+            m_transformDataIndex.Capacity = len;
             m_transformArray.capacity = len;
+        }
+        //--------------------------------------------------------
+        int AddTransformAcc(Transform pTranform, int dataIndex)
+        {
+            if (pTranform == null)
+                return -1;
+            TryExpansionAcc();
+            int index = m_nAccReadIndex;
+            m_transformArray.Add(pTranform);
+            m_transformDataIndex.Add((ushort)dataIndex);
+            m_nAccReadIndex++;
+            return index;
+        }
+        //--------------------------------------------------------
+        void RemoveTransformAcc(int index)
+        {
+            if (index<0 || index>= m_transformDataIndex.Length)
+                return;
+            m_transformDataIndex.RemoveAtSwapBack(index);
+            m_transformArray.RemoveAtSwapBack(index);
+            if(m_nAccReadIndex>0) m_nAccReadIndex--;
         }
         //--------------------------------------------------------
         public int Add(HudController controller, bool root)
@@ -65,7 +100,6 @@ namespace Framework.HUD.Runtime
             if (m_vRemaining.Count > 0)
             {
                 int remainingindex = m_vRemaining.Dequeue();
-                m_transformArray[remainingindex] = pTransfrom;
                 TransformData data = new TransformData();
                 data.root = root ? (byte)1 : (byte)0;
                 data.transformJob = controller.HasFollowTransform() ? (byte)1 : (byte)0;
@@ -74,6 +108,7 @@ namespace Framework.HUD.Runtime
                 data.allowRotation = controller.AllowRotation ? (byte)1 : (byte)0;
                 data.offsetRotation = controller.OffsetRotation;
                 data.offsetPosition = controller.OffsetPosition;
+                data.transformAccIndex = AddTransformAcc(pTransfrom, remainingindex);
                 m_vTransformData[remainingindex] = data;
                 return remainingindex;
             }
@@ -81,7 +116,6 @@ namespace Framework.HUD.Runtime
             {
                 TryExpansion();
                 int index = m_nReadIndex;
-                m_transformArray.Add(pTransfrom);
                 TransformData data = new TransformData();
                 data.root = root ? (byte)1 : (byte)0;
                 data.transformJob = controller.HasFollowTransform() ? (byte)1 : (byte)0;
@@ -90,6 +124,7 @@ namespace Framework.HUD.Runtime
                 data.allowRotation = controller.AllowRotation ? (byte)1 : (byte)0;
                 data.offsetRotation = controller.OffsetRotation;
                 data.offsetPosition = controller.OffsetPosition;
+                data.transformAccIndex = AddTransformAcc(pTransfrom, index);
                 m_vTransformData.Add(data);
                 m_nReadIndex++;
                 return index;
@@ -100,8 +135,9 @@ namespace Framework.HUD.Runtime
         {
             if (m_bDispose) return;
             if (index<0 || index >= m_vTransformData.Length) return;
-            m_transformArray[index] = null;
             TransformData data = m_vTransformData[index];
+            RemoveTransformAcc(data.transformAccIndex);
+            data.transformAccIndex = -1;
             data.disable = 1;
             m_vTransformData[index] = data;
             m_vRemaining.Enqueue((ushort)index);
@@ -130,7 +166,6 @@ namespace Framework.HUD.Runtime
             if (m_bDispose) return;
             if (index < 0 || index >= m_vTransformData.Length) return;
 
-            m_transformArray[index] = controller.GetFollowTargetJob();
             TransformData data = m_vTransformData[index];
             data.localToWorld = controller.GetWorldMatrixJob();
             data.allowScale = controller.AllowScale ? (byte)1 : (byte)0;
@@ -139,6 +174,21 @@ namespace Framework.HUD.Runtime
             data.offsetPosition = controller.OffsetPosition;
             data.transformJob = controller.HasFollowTransform() ? (byte)1 : (byte)0;
 
+            if(data.transformAccIndex>=0)
+            {
+                if(controller.GetFollowTargetJob()!=null)
+                    m_transformArray[data.transformAccIndex] = controller.GetFollowTargetJob();
+                else
+                {
+                    RemoveTransformAcc(data.transformAccIndex);
+                    data.transformAccIndex = -1;
+                }    
+            }
+            else
+            {
+                if (controller.GetFollowTargetJob() != null)
+                    data.transformAccIndex = AddTransformAcc(controller.GetFollowTargetJob(), index);
+            }
             m_vTransformData[index] = data;
         }
         //--------------------------------------------------------
@@ -158,7 +208,8 @@ namespace Framework.HUD.Runtime
             Profiler.BeginSample("TransformCullingSort");
 
             LocalToWorldJob job = new LocalToWorldJob();
-            job.transformData = transformData;
+            job.transformData = m_vTransformData;
+            job.transformDataIndex = m_transformDataIndex;
             job.vpMatrix = vpMatrix;
             job.forward = forward;
             JobHandle localToWorldJobHandle = job.ScheduleReadOnly(m_transformArray, 32);
@@ -177,6 +228,7 @@ namespace Framework.HUD.Runtime
         {
             m_bDispose = true;
             m_transformArray.Dispose();
+            m_transformDataIndex.Dispose();
             m_vRemaining.Dispose();
             m_vTransformData.Dispose();
             m_vTransformSort.Dispose();

@@ -72,7 +72,6 @@
     <Compile Include="Assets\HUDSystem\Runtime\Job\HudJobData.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Data\HudDataSnippet.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Render\HudGpuRenderData.cs" />
-    <Compile Include="Assets\HUDSystem\Runtime\Data\HudSetting.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\UnDoLogic.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\AEditorLogic.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Data\HudAtlas.cs" />

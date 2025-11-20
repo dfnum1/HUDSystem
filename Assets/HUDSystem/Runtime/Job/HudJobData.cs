@@ -36,6 +36,7 @@ namespace Framework.HUD.Runtime
     [BurstCompile]
     public struct TransformData
     {
+        public int transformAccIndex;
         public float4x4 localToWorld;
         public float2 boundCenter;
         public float2 boundSize;

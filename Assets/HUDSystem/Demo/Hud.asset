@@ -1,0 +1,263 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ae12502455811b43b452f0fe0c9b42a, type: 3}
+  m_Name: Hud
+  m_EditorClassIdentifier: 
+  center: {x: 0, y: 0.99999905}
+  size: {x: 109, y: 100}
+  allowScale: 1
+  allowRotation: 1
+  mesh: {fileID: 4300000, guid: b5a4655ce0c3e744ca30a64ba06787db, type: 2}
+  material: {fileID: 2100000, guid: 66f64d333b654b04aaa3b42b9d53a5fa, type: 2}
+  atlasAset: {fileID: 11400000, guid: fb0cd23d79faeda4da7919340a0fca71, type: 2}
+  fontAsset: {fileID: 11400000, guid: 2dc009d528262a149998b416ec45c61a, type: 2}
+  vCanvas:
+  - id: 0
+    name: "\u5934\u50CFHud"
+    rayTest: 1
+    visible: 1
+    position: {x: 0, y: 1, z: 0}
+    sizeDelta: {x: 100, y: 100}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    mask: 0
+    maskRegion:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+  - id: 3
+    name: "\u540D\u79F0"
+    rayTest: 1
+    visible: 1
+    position: {x: 0, y: 0, z: -0.04873061}
+    sizeDelta: {x: 100, y: 100}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    mask: 0
+    maskRegion:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+  - id: 7
+    name: "\u661F\u7EA7"
+    rayTest: 1
+    visible: 1
+    position: {x: 0.35455018, y: -0.013240099, z: -0.01782}
+    sizeDelta: {x: 29.08994, y: 97.352005}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    mask: 0
+    maskRegion:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+  vImages:
+  - id: 1
+    name: Bg
+    rayTest: 1
+    visible: 1
+    position: {x: 0, y: 0, z: 0}
+    sizeDelta: {x: 100, y: 100}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    mask: 0
+    maskRegion:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    sprite: {fileID: 21300000, guid: 7ac4b08a7f3c19648933ef8b8fbc39fb, type: 3}
+    imageType: 0
+    fillMethod: 0
+    fillOrigin: 0
+    fillAmount: 1
+  - id: 2
+    name: Icon
+    rayTest: 1
+    visible: 1
+    position: {x: 0, y: 0, z: -0.026722431}
+    sizeDelta: {x: 100, y: 100}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    mask: 2
+    maskRegion:
+      serializedVersion: 2
+      x: 0
+      y: 6
+      width: 41.12
+      height: 4.6
+    sprite: {fileID: 21300000, guid: a7dc2128da1eed447a5f49ff36185a8b, type: 3}
+    imageType: 0
+    fillMethod: 0
+    fillOrigin: 0
+    fillAmount: 1
+  - id: 4
+    name: Bg
+    rayTest: 1
+    visible: 1
+    position: {x: 0, y: -0.4241737, z: 0}
+    sizeDelta: {x: 109, y: 14}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    mask: 0
+    maskRegion:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    sprite: {fileID: 21300000, guid: 7cca7b8063fb30847a3abd6fab312b3f, type: 3}
+    imageType: 1
+    fillMethod: 0
+    fillOrigin: 0
+    fillAmount: 1
+  - id: 8
+    name: 1
+    rayTest: 1
+    visible: 1
+    position: {x: 0.057293475, y: 0.16319871, z: 0}
+    sizeDelta: {x: 16, y: 16}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    mask: 0
+    maskRegion:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    sprite: {fileID: 21300000, guid: fecbabf7e6340b043805aca0786a234b, type: 3}
+    imageType: 0
+    fillMethod: 0
+    fillOrigin: 0
+    fillAmount: 1
+  - id: 9
+    name: 2
+    rayTest: 1
+    visible: 1
+    position: {x: 0.069560826, y: 0, z: 0}
+    sizeDelta: {x: 16, y: 16}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    mask: 0
+    maskRegion:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    sprite: {fileID: 21300000, guid: fecbabf7e6340b043805aca0786a234b, type: 3}
+    imageType: 0
+    fillMethod: 0
+    fillOrigin: 0
+    fillAmount: 1
+  - id: 10
+    name: 3
+    rayTest: 1
+    visible: 1
+    position: {x: -0.004945576, y: -0.14920151, z: 0}
+    sizeDelta: {x: 16, y: 16}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    mask: 0
+    maskRegion:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    sprite: {fileID: 21300000, guid: fecbabf7e6340b043805aca0786a234b, type: 3}
+    imageType: 0
+    fillMethod: 0
+    fillOrigin: 0
+    fillAmount: 1
+  vTexts:
+  - id: 5
+    name: Name
+    rayTest: 1
+    visible: 1
+    position: {x: 0, y: -0.42088073, z: 0}
+    sizeDelta: {x: 0.5665179, y: 0.14229912}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    mask: 0
+    maskRegion:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    text: "\u4F60\u597D123"
+    fontSize: 15
+    lineSpacing: 0
+    alignment: 1
+  vNumbers: []
+  vParticles:
+  - id: 6
+    name: "\u6D4B\u8BD5\u7279\u6548"
+    rayTest: 1
+    visible: 1
+    position: {x: 0, y: 0, z: 0}
+    sizeDelta: {x: 100, y: 100}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    mask: 0
+    maskRegion:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    strParticle: Assets/HUDSystem/Demo/TestParticle.prefab
+    scale: {x: 0.005, y: 0.005, z: 1}
+    renderOrder: 0
+  vHierarchies:
+  - id: 1
+    parentId: 0
+    children: 
+  - id: 6
+    parentId: 0
+    children: 
+  - id: 2
+    parentId: 0
+    children: 
+  - id: 4
+    parentId: 3
+    children: 
+  - id: 5
+    parentId: 3
+    children: 
+  - id: 3
+    parentId: 0
+    children: 0400000005000000
+  - id: 8
+    parentId: 7
+    children: 
+  - id: 9
+    parentId: 7
+    children: 
+  - id: 10
+    parentId: 7
+    children: 
+  - id: 7
+    parentId: 0
+    children: 08000000090000000a000000
+  - id: 0
+    parentId: -1
+    children: 0100000006000000020000000300000007000000

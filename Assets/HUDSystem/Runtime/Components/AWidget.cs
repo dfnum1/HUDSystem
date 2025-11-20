@@ -367,7 +367,7 @@ namespace Framework.HUD.Runtime
                 }
                 else
                 {
-                    Vector3 worldPos = m_HudController.GetWorldMatrixJob()*GetPosition();
+                    Vector3 worldPos = m_HudController.GetWorldMatrix()*GetPosition();
                     region.position += new Vector2(worldPos.x, worldPos.y) - region.size/2;
                     if (m_pParent != null)
                     {
@@ -661,6 +661,27 @@ namespace Framework.HUD.Runtime
                     m_vChilds[i].OnRebuild();
                 }
             }
+        }
+        //--------------------------------------------------------
+        internal void DoTransformChanged()
+        {
+            if (m_HudController == null)
+                return;
+            if (!IsVisible())
+                return;
+
+            OnTransformChanged();
+            if (m_vChilds != null)
+            {
+                for (int i = m_vChilds.Count - 1; i >= 0; --i)
+                {
+                    m_vChilds[i].DoTransformChanged();
+                }
+            }
+        }
+        //--------------------------------------------------------
+        protected virtual void OnTransformChanged()
+        {
         }
         //--------------------------------------------------------
         internal override void Destroy()

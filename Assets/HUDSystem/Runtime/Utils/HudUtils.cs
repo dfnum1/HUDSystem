@@ -39,7 +39,7 @@ namespace Framework.HUD.Runtime
         public static int _FontMappingTex = Shader.PropertyToID("_FontMappingTex");
         public static int _FontMappingWidth = Shader.PropertyToID("_FontMappingWidth");
         public static int _FontMappingHeight = Shader.PropertyToID("_FontMappingHeight");
-
+        //--------------------------------------------------------
         private static int ms_nUniqueID = 0;
         //--------------------------------------------------------
         internal static int GetUniqueID()

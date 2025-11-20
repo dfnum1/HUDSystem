@@ -72,7 +72,6 @@ namespace Framework.HUD.Editor
         //--------------------------------------------------------
         public override void OnSetHudObject(HudObject hudObject)
         {
-            GetHud().Destroy();
             GetHud().SetHudObject(hudObject);
             var canvas = GetHud().GetTopWidgets();
             if (canvas != null)

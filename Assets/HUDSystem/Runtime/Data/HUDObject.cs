@@ -4,6 +4,7 @@
 作    者:	HappLI
 描    述:	HUD 数据对象层
 *********************************************************************/
+using Framework.HUD.Editor;
 using System.Collections.Generic;
 using TMPro;
 using UnityEditor;
@@ -49,8 +50,10 @@ namespace Framework.HUD.Runtime
         private bool m_bInited = false;
         Dictionary<int, HudBaseData> m_vDatas = null;
         //--------------------------------------------------------
-        void Init()
+        internal void Init()
         {
+            if (m_vDatas == null)
+                m_bInited = false;
             if (m_bInited)
                 return;
             m_bInited = true;
@@ -143,6 +146,16 @@ namespace Framework.HUD.Runtime
             if (GUILayout.Button("打开编辑器"))
             {
                 Editor.HUDEditor.EditorHud(hudObject);
+            }
+            if (hudObject.atlasAset && GUILayout.Button("生成图集映射"))
+            {
+                string guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(hudObject));
+                EditorPrefs.SetString("HudAtlas_GenAtlasMapping_GUID_Select", guid);
+                HudAtlasEditor.GenAtlasMappingInfo(hudObject.atlasAset,true);
+            }
+            if (hudObject.fontAsset && GUILayout.Button("生产字体映射"))
+            {
+                HUDEditorInit.GenFontAtlasMapping(hudObject.fontAsset);
             }
         }
         //--------------------------------------------------------

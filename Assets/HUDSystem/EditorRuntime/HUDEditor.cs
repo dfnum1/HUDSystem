@@ -90,7 +90,7 @@ namespace Framework.HUD.Editor
             m_pHudSystem = new HudSystem();
             if (m_vLogics.Count<=0)
             {
-                m_vLogics.Add(new HierarchyLogic(this,new Rect(0,0,300,position.height)));
+                m_vLogics.Add(new HierarchyLogic(this, new Rect(0, 0, 300, position.height)));
                 m_vLogics.Add(new PreviewLogic(this, new Rect(300, 0, position.width-600, position.height)));
                 m_vLogics.Add(new InspectorLogic(this, new Rect(position.width-300, 0, 300, position.height)));
             }
@@ -105,6 +105,7 @@ namespace Framework.HUD.Editor
         {
             if (m_pHudObject == hudObject)
                 return;
+            GetHud().Destroy();
             m_pHudObject = hudObject;
             hudObject.EditInit();
             for (int i = 0; i < m_vLogics.Count; ++i)

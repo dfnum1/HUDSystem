@@ -429,7 +429,7 @@ namespace Framework.HUD.Runtime
     }
 #if UNITY_EDITOR
     [CustomEditor(typeof(HudAtlas))]
-    class HudAtlasEditor : UnityEditor.Editor
+    internal class HudAtlasEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
@@ -437,21 +437,29 @@ namespace Framework.HUD.Runtime
             HudAtlas hudAtlas = (HudAtlas)target;
             if (GUILayout.Button("Gen Atlas Mapping Info"))
             {
-                EditorPrefs.DeleteKey("HudAtlas_GenAtlasMapping_GUID");
-                if (!Application.isPlaying)
-                {
-                    string guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(hudAtlas));
-                    EditorPrefs.SetString("HudAtlas_GenAtlasMapping_GUID", guid);
+                GenAtlasMappingInfo(hudAtlas);
+            }
+        }
+        //--------------------------------------------------------
+        public static void GenAtlasMappingInfo(HudAtlas hudAtlas, bool bDirtyRefresh = true)
+        {
+            EditorPrefs.DeleteKey("HudAtlas_GenAtlasMapping_GUID");
+            if (!Application.isPlaying)
+            {
+                string guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(hudAtlas));
+                EditorPrefs.SetString("HudAtlas_GenAtlasMapping_GUID", guid);
 
-                    var newScene = UnityEditor.SceneManagement.EditorSceneManager.NewScene(
-                        UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,
-                        UnityEditor.SceneManagement.NewSceneMode.Single);
-                    UnityEditor.EditorApplication.isPlaying = true;
-                    return;
-                }
-                hudAtlas.GenAtlasMappingInfo(true);
-                EditorUtility.SetDirty(hudAtlas);
-                AssetDatabase.SaveAssets();
+                var newScene = UnityEditor.SceneManagement.EditorSceneManager.NewScene(
+                    UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,
+                    UnityEditor.SceneManagement.NewSceneMode.Single);
+                UnityEditor.EditorApplication.isPlaying = true;
+                return;
+            }
+            hudAtlas.GenAtlasMappingInfo(true);
+            EditorUtility.SetDirty(hudAtlas);
+            if(bDirtyRefresh)
+            {
+                AssetDatabase.SaveAssetIfDirty(hudAtlas);
                 AssetDatabase.Refresh();
             }
         }

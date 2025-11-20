@@ -32,13 +32,22 @@ namespace Framework.HUD.Runtime
         [NativeDisableContainerSafetyRestriction]
         public NativeArray<TransformData> transformData;
 
+        [NativeDisableParallelForRestriction]
+        [NativeDisableContainerSafetyRestriction]
+        [ReadOnly]
+        public NativeList<ushort> transformDataIndex;
+
         public float4x4 vpMatrix;
 
         public float3 forward;
 
         public unsafe void Execute(int index, TransformAccess transform)
         {
-            TransformData data = transformData[index];
+            int dataIndex = transformDataIndex[index];
+            if (dataIndex < 0 || dataIndex >= transformData.Length)
+                return;
+
+            TransformData data = transformData[dataIndex];
             if (data.disable == 0)
             {
                 if(data.transformJob!=0 && transform.isValid)
@@ -71,7 +80,7 @@ namespace Framework.HUD.Runtime
                     data.culling = (byte)(culling ? 1 : 0);
                     data.zvalue = zvalue;
                 }
-                transformData[index] = data;
+                transformData[dataIndex] = data;
             }
         }
 

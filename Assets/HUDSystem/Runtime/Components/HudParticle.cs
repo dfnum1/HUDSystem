@@ -33,6 +33,7 @@ namespace Framework.HUD.Runtime
             Scale = EParamOverrideType.Count,
             SortingOrder,
         }
+        Transform m_pParticleTransform = null;
         GameObject m_pParticle = null;
         string m_strCurrentParticle = null;
         string m_strParticle = null;
@@ -101,10 +102,8 @@ namespace Framework.HUD.Runtime
                         m_pParticle = inst;
                         if(m_pParticle!=null)
                         {
-                            m_pParticle.transform.position = GetController().GetWorldMatrixJob() * GetPosition();
-                            m_pParticle.transform.eulerAngles = new Vector3(0, 0, GetAngle());
-                            m_pParticle.transform.localScale = IsVisible() ? GetScale() : Vector3.zero;
-
+                            m_pParticleTransform = m_pParticle.transform;
+                            OnTransformChanged();
                             if (m_vParticles == null) m_vParticles = new List<ParticleSystemRenderer>(2);
                             var temps = m_pParticle.GetComponents<ParticleSystemRenderer>();
                             if (temps != null) m_vParticles.AddRange(temps);
@@ -119,13 +118,8 @@ namespace Framework.HUD.Runtime
                     });
                 }
             }
-            if (m_pParticle)
-            {
-                m_pParticle.transform.position = GetController().GetWorldMatrixJob() * GetPosition();
-                m_pParticle.transform.eulerAngles = new Vector3(0, 0, GetAngle());
-                m_pParticle.transform.localScale = IsVisible()? GetScale():Vector3.zero;
-            }
-            if(m_vParticles!=null)
+            OnTransformChanged();
+            if (m_vParticles!=null)
             {
                 foreach (var db in m_vParticles)
                 {
@@ -134,10 +128,33 @@ namespace Framework.HUD.Runtime
             }
         }
         //--------------------------------------------------------
+        protected override void OnTransformChanged()
+        {
+            if (m_pParticleTransform)
+            {
+                Transform pFollow = GetController().GetFollowTarget();
+                if (pFollow)
+                {
+                    if(m_pParticleTransform.parent != pFollow)
+                        m_pParticleTransform.SetParent(pFollow);
+                    m_pParticleTransform.position = pFollow.position + GetPosition();
+                    m_pParticleTransform.eulerAngles = new Vector3(0, 0, GetAngle());
+                    m_pParticleTransform.localScale = IsVisible() ? GetScale() : Vector3.zero;
+                }
+                else
+                {
+                    m_pParticleTransform.SetParent(null);
+                    m_pParticleTransform.position = GetController().GetWorldMatrix() * GetPosition();
+                    m_pParticleTransform.eulerAngles = new Vector3(0, 0, GetAngle());
+                    m_pParticleTransform.localScale = IsVisible() ? GetScale() : Vector3.zero;
+                }
+            }
+        }
+        //--------------------------------------------------------
         public new void SetPosition(Vector3 vPos)
         {
             if (m_pParticle)
-                m_pParticle.transform.position = GetController().GetWorldMatrixJob() * GetPosition();
+                m_pParticle.transform.position = GetController().GetWorldMatrix() * GetPosition();
         }
         //--------------------------------------------------------
         protected override void OnSyncData()
