@@ -12,7 +12,6 @@ using UnityEngine;
 
 namespace Framework.HUD.Runtime
 {
-    [CreateAssetMenu]
     public class HudObject : ScriptableObject
     {
         public Vector2 center = Vector2.zero;

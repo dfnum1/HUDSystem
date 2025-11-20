@@ -13,6 +13,7 @@ using UnityEditor.Experimental.GraphView;
 using UnityEditor.Search;
 using UnityEditor.SearchService;
 using UnityEngine;
+using UnityEngine.Windows;
 using static Framework.HUD.Runtime.HudAtlas;
 
 namespace Framework.HUD.Editor
@@ -302,7 +303,24 @@ namespace Framework.HUD.Editor
         void DrawNumber(HudNumber hudText, HudNumberData data)
         {
             EditorGUI.BeginChangeCheck();
-            data.strNumber = EditorGUILayout.DelayedTextField("数字内容", data.strNumber);
+            string input = EditorGUILayout.DelayedTextField("数字内容", data.strNumber);
+
+            // 过滤非法字符
+            string filtered = "";
+            if(!string.IsNullOrEmpty(input))
+            {
+                foreach (char c in input)
+                {
+                    if ((c >= '0' && c <= '9') || c == '+' || c == '-'/* || c == '.'*/)
+                        filtered += c;
+                }
+                if (filtered != data.strNumber)
+                    data.strNumber = filtered;
+                else
+                    data.strNumber = input;
+            }
+
+
             data.fontSize = EditorGUILayout.FloatField("字体大小", data.fontSize);
             data.alignment = (HorizontalAlignment)EditorGUILayout.EnumPopup("对齐方式", data.alignment);
             if (EditorGUI.EndChangeCheck())

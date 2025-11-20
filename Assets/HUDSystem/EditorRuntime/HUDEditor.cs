@@ -50,10 +50,36 @@ namespace Framework.HUD.Editor
         //--------------------------------------------------------
         public static void EditorHud(HudObject pHudObject)
         {
-            HUDEditor hudEditor = GetWindow<HUDEditor>("HUD Editor");
-            hudEditor.SetHudObject(pHudObject);
-            hudEditor.Focus();
+            if (pHudObject == null)
+                return;
+            var windows = Resources.FindObjectsOfTypeAll<HUDEditor>();
+            HUDEditor targetEditor = null;
+            foreach (var win in windows)
+            {
+                if (win.m_pHudObject == pHudObject)
+                {
+                    win.m_pHudObject = null;
+                    targetEditor = win;
+                    targetEditor.SetHudObject(pHudObject);
+                    targetEditor.Focus();
+                    return;
+                }
+            }
+
+            foreach (var win in windows)
+            {
+                if (win.m_pHudObject == null)
+                {
+                    targetEditor = win;
+                    break;
+                }
+            }
+            if(targetEditor == null)
+                targetEditor = GetWindow<HUDEditor>("HUD Editor["+ pHudObject.name + "]");
+            targetEditor.SetHudObject(pHudObject);
+            targetEditor.Focus();
         }
+        //--------------------------------------------------------
         HudSystem m_pHudSystem = null;
         HudObject m_pHudObject = null;
         HudController m_pHudController = null;
@@ -124,6 +150,7 @@ namespace Framework.HUD.Editor
             m_pHudSystem.Destroy();
             m_pHudSystem = null;
             m_pHudController = null;
+            m_pHudObject = null;
         }
         //--------------------------------------------------------
         void OnEvent(Event evt)
@@ -176,6 +203,10 @@ namespace Framework.HUD.Editor
                 }
                 EditorUtility.SetDirty(m_pHudObject);
                 AssetDatabase.SaveAssetIfDirty(m_pHudObject);
+            }
+            if (GUILayout.Button("说明文档", GUILayout.Width(80)))
+            {
+                Application.OpenURL("https://docs.qq.com/doc/DTGJMdnZ4SVJhdk9R");
             }
             GUILayout.EndHorizontal();
             GUILayout.EndArea();

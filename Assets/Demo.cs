@@ -51,7 +51,7 @@ public class Demo : MonoBehaviour, IHudSystemCallback
     // Update is called once per frame
     void Update()
     {
-        transform.rotation = Quaternion.Euler(0, Time.time * 10, 0);
+        transform.rotation = Quaternion.Euler(0, Time.time * 5, 0);
         m_pHudSystem.Update();
         m_pHudSystem.Render();
     }

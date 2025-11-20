@@ -208,25 +208,7 @@ MonoBehaviour:
     lineSpacing: 0
     alignment: 1
   vNumbers: []
-  vParticles:
-  - id: 6
-    name: "\u6D4B\u8BD5\u7279\u6548"
-    rayTest: 1
-    visible: 1
-    position: {x: 0, y: 0, z: 0}
-    sizeDelta: {x: 100, y: 100}
-    angle: 0
-    color: {r: 1, g: 1, b: 1, a: 1}
-    mask: 0
-    maskRegion:
-      serializedVersion: 2
-      x: 0
-      y: 0
-      width: 0
-      height: 0
-    strParticle: Assets/HUDSystem/Demo/TestParticle.prefab
-    scale: {x: 0.005, y: 0.005, z: 1}
-    renderOrder: 0
+  vParticles: []
   vHierarchies:
   - id: 1
     parentId: 0

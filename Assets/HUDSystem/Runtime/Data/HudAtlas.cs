@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D;
 using System.Reflection;
+using System.ComponentModel;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -20,14 +22,14 @@ namespace Framework.HUD.Runtime
     [CreateAssetMenu]
     public class HudAtlas : ScriptableObject
     {
-        [SerializeField]
+        [SerializeField, Header("图集资源")]
         private SpriteAtlas m_SpriteAtlas;
 
-        [SerializeField]
+        [SerializeField, Header("精灵映射纹理")]
         private Texture2D m_AtlasMappingTex;
         public Texture2D atlasMappingTex { get { return m_AtlasMappingTex; } }
 
-        [SerializeField]
+        [SerializeField, Header("图集大小")]
         private int m_Width;
         public int width { get { return m_Width; } }
 
@@ -35,7 +37,7 @@ namespace Framework.HUD.Runtime
         private int m_Height;
         public int height { get { return m_Height; } }
 
-        [SerializeField]
+        [SerializeField, Header("映射纹理大小")]
         private int m_AtlasMappingWidth;
         public int atlasMappingWidth { get { return m_AtlasMappingWidth; } }
 
@@ -53,7 +55,7 @@ namespace Framework.HUD.Runtime
             public int index;
             public Vector2Int size;
         }
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private List<SpriteInfo> m_vSprites;
         private Dictionary<string, SpriteInfo> m_vNameToSpriteInfo = new Dictionary<string, SpriteInfo>();
 
@@ -435,7 +437,7 @@ namespace Framework.HUD.Runtime
         {
             DrawDefaultInspector();
             HudAtlas hudAtlas = (HudAtlas)target;
-            if (GUILayout.Button("Gen Atlas Mapping Info"))
+            if (GUILayout.Button("生成图集映射"))
             {
                 GenAtlasMappingInfo(hudAtlas);
             }

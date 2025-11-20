@@ -6,6 +6,7 @@
 *********************************************************************/
 #if UNITY_EDITOR
 using Framework.HUD.Runtime;
+using PlasticGui.WorkspaceWindow.QueryViews;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,8 @@ namespace Framework.HUD.Editor
         TreeAssetView m_pTree = null;
         bool m_bItemRightClick = false;
         bool m_bTreeCallSelectChange = false;
+
+        WidgetItem m_pDeleteItem = null;
 
         List<System.Type> m_vHudTypes = new List<Type>();
         public HierarchyLogic(HUDEditor editor, Rect viewRect) : base(editor,viewRect)
@@ -99,18 +102,17 @@ namespace Framework.HUD.Editor
                 var genericTypes = fields[i].FieldType.GenericTypeArguments;
                 if (genericTypes == null || genericTypes.Length != 1)
                     continue;
-                if(typeLists.TryGetValue(genericTypes[0],out var vTemps))
+                var targetType = genericTypes[0];
+                var listType = typeof(List<>).MakeGenericType(targetType);
+                var listInstance = Activator.CreateInstance(listType) as System.Collections.IList;
+                if (typeLists.TryGetValue(genericTypes[0], out var vTemps))
                 {
-                    var targetType = genericTypes[0];
-                    var listType = typeof(List<>).MakeGenericType(targetType);
-                    var listInstance = Activator.CreateInstance(listType) as System.Collections.IList;
-
                     foreach (var baseData in vTemps)
                     {
                         listInstance.Add(baseData);
                     }
-                    fields[i].SetValue(hudObj, listInstance);
                 }
+                fields[i].SetValue(hudObj, listInstance);
             }
 
             List<Framework.HUD.Runtime.HudObject.Hierarchy> hierarchies = new List<Framework.HUD.Runtime.HudObject.Hierarchy>();
@@ -162,6 +164,21 @@ namespace Framework.HUD.Editor
                     m_pTree.SetSelection(new List<int>());
                     m_pEditor.OnSelectComponent(null);
                 }
+            }
+        }
+        //--------------------------------------------------------
+        public override void OnUpdate(float deltaTime)
+        {
+            if(m_pDeleteItem!=null)
+            {
+                if (m_pTree.IsSelected(m_pDeleteItem.id))
+                {
+                    m_pEditor.OnSelectComponent(null);
+                }
+                m_vTopGraphics.Remove(m_pDeleteItem.graphicItem);
+                m_pDeleteItem.graphicItem.Destroy();
+                RefreshTree();
+                m_pDeleteItem = null;
             }
         }
         //--------------------------------------------------------
@@ -276,12 +293,7 @@ namespace Framework.HUD.Editor
             GenericMenu menu = new GenericMenu();
             menu.AddItem(new GUIContent("Delete"), false, () =>
             {
-                if(m_pTree.IsSelected(widget.id))
-                {
-                    m_pEditor.OnSelectComponent(null);
-                }
-                widget.graphicItem.Destroy();
-                RefreshTree();
+                m_pDeleteItem = itemData as WidgetItem;
             });
             foreach(var tp in m_vHudTypes)
             {
@@ -298,14 +310,14 @@ namespace Framework.HUD.Editor
             HudDataAttribute hudAttr = type.GetCustomAttribute<HudDataAttribute>();
             if (hudAttr == null)
                 return null;
-            var hudData = Activator.CreateInstance(hudAttr.dataType);
-            var grapicItem = Activator.CreateInstance(type,m_pEditor.GetHudSystem(), hudData);
+            HudBaseData hudData = (HudBaseData)Activator.CreateInstance(hudAttr.dataType);
+            var grapicItem = hudData.CreateWidget(m_pEditor.GetHudSystem());
             if (grapicItem == null)
                 return null;
             var grapic = grapicItem as AWidget;
             if (grapic == null)
                 return null;
-
+            grapicItem.SetHudData(hudData);
             grapic.SetId(GeneratorID());
             grapic.SetName(type.Name);
             grapic.SetHudController(GetHud());

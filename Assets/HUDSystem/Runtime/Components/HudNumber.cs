@@ -18,7 +18,7 @@ namespace Framework.HUD.Runtime
     public class HudNumberData : HudBaseData
     {
         public string strNumber;
-        public float fontSize = 20;
+        public float fontSize = 1;
         public HorizontalAlignment alignment = HorizontalAlignment.Middle;
         public override AWidget CreateWidget(HudSystem pSystem)
         {
@@ -126,7 +126,7 @@ namespace Framework.HUD.Runtime
             int quadindex = 0;
             float curlen = 0.001f;
 
-            float fontSize = GetFontSize();
+            float fontSize = GetFontSize()/10.0f;
             for (int i = 0; i < count; i++)
             {
                 SpriteInfo spriteInfo = hudAtlas.GetSpriteInfo(chars[i].ToString());
@@ -142,6 +142,7 @@ namespace Framework.HUD.Runtime
                     snippet.SetSpriteId(quadindex, spriteInfo.index);
                     snippet.SetSpritePositon(quadindex, new float2(curlen, -size.y / 2));
                     snippet.SetSpriteSize(quadindex, size);
+                    snippet.SetAmount(1, 0, 0);
                     curlen += size.x;
                     quadindex++;
                     if (quadindex >= HUDUtils.QUAD_COUNT) break;
