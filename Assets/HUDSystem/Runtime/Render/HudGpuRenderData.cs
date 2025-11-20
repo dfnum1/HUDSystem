@@ -86,6 +86,13 @@ namespace Framework.HUD.Runtime
             m_vExpansionNotif.Remove(notify);
         }
         //--------------------------------------------------------
+        public void Clear()
+        {
+            m_vExpansionNotif.Clear();
+            renderdataHashMap.Clear();
+            renderData.Resize(renderdataHashMap.Capacity);
+        }
+        //--------------------------------------------------------
         public void Dispose()
         {
             m_bDispose = true;

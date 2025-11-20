@@ -224,6 +224,17 @@ namespace Framework.HUD.Runtime
             return jobHandle;
         }
         //--------------------------------------------------------
+        public void Clear()
+        {
+            m_transformArray.SetTransforms(new Transform[0]);
+            m_transformDataIndex.Clear();
+            m_vRemaining.Clear();
+            m_vTransformData.Clear();
+            m_vTransformSort.Clear();
+            m_nReadIndex = 0;
+            m_nAccReadIndex = 0;
+        }
+        //--------------------------------------------------------
         public void Dispose()
         {
             m_bDispose = true;

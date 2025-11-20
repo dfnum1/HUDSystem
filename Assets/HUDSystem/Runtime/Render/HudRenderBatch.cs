@@ -89,6 +89,15 @@ namespace Framework.HUD.Runtime
             }
         }
         //-----------------------------------------------------
+        internal void Clear()
+        {
+            m_pCollector.Clear();
+            m_Culling.Clear();
+            m_nInstanceCount = 0;
+            m_vHudControllers?.Clear();
+            m_CommandBuffer?.Clear();
+        }
+        //-----------------------------------------------------
         internal void Render(Camera camera)
         {
             if (!m_pJobHandle.IsCompleted)

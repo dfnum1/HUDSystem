@@ -31,7 +31,7 @@ namespace Framework.HUD.Runtime
             m_bDispose = false;
             m_pGpuData = new HudGpuRenderData(_capacity);
             m_float4x4Values = new Dictionary<string, GPUInstanceData<float4x4, Matrix4x4>>();
-            m_JobHandles = new NativeArray<JobHandle>(8, Allocator.Persistent); ;
+            m_JobHandles = new NativeArray<JobHandle>(8, Allocator.Persistent);
             m_nCapacity = _capacity;
         }
         //--------------------------------------------------------
@@ -160,6 +160,19 @@ namespace Framework.HUD.Runtime
             JobHandle jobhadle = JobHandle.CombineDependencies(nativeSlice);
             Profiler.EndSample();
             return jobhadle;
+        }
+        //--------------------------------------------------------
+        public void Clear()
+        { 
+            foreach (var value in m_float4x4Values)
+            {
+                value.Value.renderData.Resize(m_nCapacity);
+                value.Value.renderdataHashMap.Clear();
+            }
+
+            m_pGpuData.Clear();
+            if (m_nInstanceCount != null)
+                *m_nInstanceCount = 0;
         }
         //--------------------------------------------------------
         public void Dispose()

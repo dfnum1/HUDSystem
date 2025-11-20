@@ -147,6 +147,11 @@ namespace Framework.HUD.Runtime
                 TypePool.Free(hud);
             }
             m_vHuds.Clear();
+
+            foreach (var db in m_vRenders)
+            {
+                db.Value.Clear();
+            }
         }
         //--------------------------------------------------------
         internal List<AWidget> GetRayTestCache()
