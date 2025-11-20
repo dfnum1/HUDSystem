@@ -136,7 +136,7 @@ Shader "Unlit/Hud_Image_TMP"
 
 			pixel_t VertShader(vertex_t input)
 			{
-				pixel_t output;
+				pixel_t output = (pixel_t)0;
 
 				UNITY_SETUP_INSTANCE_ID(input);
 				UNITY_TRANSFER_INSTANCE_ID(input, output);

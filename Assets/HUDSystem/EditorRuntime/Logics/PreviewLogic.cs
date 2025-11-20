@@ -300,10 +300,10 @@ namespace Framework.HUD.Editor
             Vector3 right = Vector3.right * size.x * 0.5f;
             Vector3 up = Vector3.up * size.y * 0.5f;
             Vector3[] corners = new Vector3[5];
-            corners[0] = GetHud().GetWorldMatrix()*(center - right - up);
-            corners[1] = GetHud().GetWorldMatrix()*(center + right - up);
-            corners[2] = GetHud().GetWorldMatrix()*(center + right + up);
-            corners[3] = GetHud().GetWorldMatrix() * (center - right + up);
+            corners[0] = GetHud().GetWorldMatrixJob()*(center - right - up);
+            corners[1] = GetHud().GetWorldMatrixJob()*(center + right - up);
+            corners[2] = GetHud().GetWorldMatrixJob()*(center + right + up);
+            corners[3] = GetHud().GetWorldMatrixJob() * (center - right + up);
             corners[4] = corners[0]; // 闭合
 
             Color color = Handles.color;

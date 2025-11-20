@@ -170,7 +170,7 @@ namespace Framework.HUD.Runtime
         //-----------------------------------------------------
         public void UpdateHudController(int id, HudController controller)
         {
-            m_Culling.UpdateTransform(id,controller.GetWorldMatrix());
+            m_Culling.UpdateTransform(id,controller);
         }
         //-----------------------------------------------------
         public void RemoveHudController(int id)

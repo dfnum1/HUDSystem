@@ -6,6 +6,7 @@
 *********************************************************************/
 using Unity.Burst;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Framework.HUD.Runtime
 {
@@ -41,8 +42,13 @@ namespace Framework.HUD.Runtime
         public byte culling;
         public byte disable;
         public byte root;
+        public byte transformJob;
         public float zTag;
         public float zvalue;
+        public byte allowRotation;
+        public byte allowScale;
+        public float3 offsetPosition;
+        public float3 offsetRotation;
     }
 
     public struct TransformSort

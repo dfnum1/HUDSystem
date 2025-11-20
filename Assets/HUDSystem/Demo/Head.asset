@@ -101,8 +101,8 @@ MonoBehaviour:
       x: 0
       y: 6
       width: 41.12
-      height: 6.1
-    sprite: {fileID: 21300000, guid: c9885145026030643a8ffbf38b971536, type: 3}
+      height: 4.6
+    sprite: {fileID: 21300000, guid: a7dc2128da1eed447a5f49ff36185a8b, type: 3}
     imageType: 0
     fillMethod: 0
     fillOrigin: 0
@@ -215,7 +215,7 @@ MonoBehaviour:
     visible: 1
     position: {x: 0, y: 0, z: 0}
     sizeDelta: {x: 100, y: 100}
-    angle: 129
+    angle: 0
     color: {r: 1, g: 1, b: 1, a: 1}
     mask: 0
     maskRegion:
@@ -225,8 +225,8 @@ MonoBehaviour:
       width: 0
       height: 0
     strParticle: Assets/HUDSystem/Demo/TestParticle.prefab
-    eulerAngle: {x: 0, y: 0}
-    scale: {x: 1, y: 1, z: 1}
+    scale: {x: 0.005, y: 0.005, z: 1}
+    renderOrder: 0
   vHierarchies:
   - id: 1
     parentId: 0

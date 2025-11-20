@@ -173,6 +173,8 @@ namespace Framework.HUD.Editor
                 {
                     m_vLogics[i].OnSave();
                 }
+                EditorUtility.SetDirty(m_pHudObject);
+                AssetDatabase.SaveAssetIfDirty(m_pHudObject);
             }
             GUILayout.EndHorizontal();
             GUILayout.EndArea();

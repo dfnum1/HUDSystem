@@ -47,15 +47,6 @@ namespace Framework.HUD.Runtime
             OnDirty();
         }
         //--------------------------------------------------------
-        public void SetScale(Vector3 scale)
-        {
-            bool bDirty = SetOverrideParam((byte)EOverrideType.Scale, scale);
-            if (bDirty)
-            {
-                OnDirty();
-            }
-        }
-        //--------------------------------------------------------
         public int GetSortingOrder()
         {
             if (GetOverrideParam((byte)EOverrideType.SortingOrder, out var temp))
@@ -67,6 +58,15 @@ namespace Framework.HUD.Runtime
         public void SetSortingOrder(int order)
         {
             bool bDirty = SetOverrideParam((byte)EOverrideType.SortingOrder, order);
+            if (bDirty)
+            {
+                OnDirty();
+            }
+        }
+        //--------------------------------------------------------
+        public void SetScale(Vector3 scale)
+        {
+            bool bDirty = SetOverrideParam((byte)EOverrideType.Scale, scale);
             if (bDirty)
             {
                 OnDirty();
@@ -101,7 +101,7 @@ namespace Framework.HUD.Runtime
                         m_pParticle = inst;
                         if(m_pParticle!=null)
                         {
-                            m_pParticle.transform.position = GetController().GetWorldMatrix() * GetPosition();
+                            m_pParticle.transform.position = GetController().GetWorldMatrixJob() * GetPosition();
                             m_pParticle.transform.eulerAngles = new Vector3(0, 0, GetAngle());
                             m_pParticle.transform.localScale = IsVisible() ? GetScale() : Vector3.zero;
 
@@ -121,7 +121,7 @@ namespace Framework.HUD.Runtime
             }
             if (m_pParticle)
             {
-                m_pParticle.transform.position = GetController().GetWorldMatrix() * GetPosition();
+                m_pParticle.transform.position = GetController().GetWorldMatrixJob() * GetPosition();
                 m_pParticle.transform.eulerAngles = new Vector3(0, 0, GetAngle());
                 m_pParticle.transform.localScale = IsVisible()? GetScale():Vector3.zero;
             }
@@ -137,7 +137,7 @@ namespace Framework.HUD.Runtime
         public new void SetPosition(Vector3 vPos)
         {
             if (m_pParticle)
-                m_pParticle.transform.position = GetController().GetWorldMatrix() * GetPosition();
+                m_pParticle.transform.position = GetController().GetWorldMatrixJob() * GetPosition();
         }
         //--------------------------------------------------------
         protected override void OnSyncData()

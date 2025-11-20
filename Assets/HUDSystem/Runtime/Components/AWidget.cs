@@ -367,7 +367,7 @@ namespace Framework.HUD.Runtime
                 }
                 else
                 {
-                    Vector3 worldPos = m_HudController.GetWorldMatrix()*GetPosition();
+                    Vector3 worldPos = m_HudController.GetWorldMatrixJob()*GetPosition();
                     region.position += new Vector2(worldPos.x, worldPos.y) - region.size/2;
                     if (m_pParent != null)
                     {

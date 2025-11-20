@@ -41,15 +41,26 @@ namespace Framework.HUD.Runtime
             TransformData data = transformData[index];
             if (data.disable == 0)
             {
-                if(transform.isValid)
+                if(data.transformJob!=0 && transform.isValid)
                 {
+                    Matrix4x4 localToWorldMatrix = transform.localToWorldMatrix;
+                    Vector3 offsetPos = data.offsetPosition;
                     //Vector3 up = transform.rotation * Vector3.up;
                     //quaternion rotation = quaternion.LookRotation(forward, Vector3.up);
-                    float angle = transform.rotation.eulerAngles.z;
-                    quaternion rotation = quaternion.AxisAngle(forward, angle * Mathf.Deg2Rad);
-                    Matrix4x4 localToWorldMatrix = transform.localToWorldMatrix;
-                    float4x4 localToWorld = float4x4.TRS(localToWorldMatrix.GetPosition(), rotation, localToWorldMatrix.lossyScale);
-                    data.localToWorld = localToWorld;
+                    quaternion rotation = quaternion.identity;
+                    if(data.allowRotation!=0)
+                    {
+                        float angle = transform.rotation.eulerAngles.z;
+                        rotation = quaternion.AxisAngle(forward, angle * Mathf.Deg2Rad);
+                        quaternion offsetQuat = quaternion.EulerXYZ(data.offsetRotation * Mathf.Deg2Rad);
+                        rotation = math.mul(rotation, offsetQuat);
+                    }
+                    float3 scale = Vector3.one;
+                    if (data.allowScale != 0)
+                    {
+                        scale = localToWorldMatrix.lossyScale;
+                    }
+                    data.localToWorld = float4x4.TRS(localToWorldMatrix.GetPosition() + offsetPos, rotation, scale);
                 }
 
                 if (data.root == 1)

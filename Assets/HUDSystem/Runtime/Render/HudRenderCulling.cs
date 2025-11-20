@@ -4,16 +4,12 @@
 作    者:	HappLI
 描    述:	渲染裁剪和排序
 *********************************************************************/
-using System;
-using System.Collections.Generic;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Jobs;
 using UnityEngine.Profiling;
-using static UnityEditor.Experimental.GraphView.Port;
 
 namespace Framework.HUD.Runtime
 {
@@ -64,13 +60,20 @@ namespace Framework.HUD.Runtime
         public int Add(HudController controller, bool root)
         {
             if (m_bDispose) return 0;
+
+            Transform pTransfrom = controller.GetFollowTargetJob();
             if (m_vRemaining.Count > 0)
             {
                 int remainingindex = m_vRemaining.Dequeue();
-                m_transformArray[remainingindex] = controller.GetFollowTarget();
+                m_transformArray[remainingindex] = pTransfrom;
                 TransformData data = new TransformData();
                 data.root = root ? (byte)1 : (byte)0;
-                data.localToWorld = controller.GetWorldMatrix();
+                data.transformJob = controller.HasFollowTransform() ? (byte)1 : (byte)0;
+                data.localToWorld = controller.GetWorldMatrixJob();
+                data.allowScale = controller.AllowScale ? (byte)1 : (byte)0;
+                data.allowRotation = controller.AllowRotation ? (byte)1 : (byte)0;
+                data.offsetRotation = controller.OffsetRotation;
+                data.offsetPosition = controller.OffsetPosition;
                 m_vTransformData[remainingindex] = data;
                 return remainingindex;
             }
@@ -78,10 +81,15 @@ namespace Framework.HUD.Runtime
             {
                 TryExpansion();
                 int index = m_nReadIndex;
-                m_transformArray.Add(controller.GetFollowTarget());
+                m_transformArray.Add(pTransfrom);
                 TransformData data = new TransformData();
                 data.root = root ? (byte)1 : (byte)0;
-                data.localToWorld = controller.GetWorldMatrix();
+                data.transformJob = controller.HasFollowTransform() ? (byte)1 : (byte)0;
+                data.localToWorld = controller.GetWorldMatrixJob(); 
+                data.allowScale = controller.AllowScale ? (byte)1 : (byte)0;
+                data.allowRotation = controller.AllowRotation ? (byte)1 : (byte)0;
+                data.offsetRotation = controller.OffsetRotation;
+                data.offsetPosition = controller.OffsetPosition;
                 m_vTransformData.Add(data);
                 m_nReadIndex++;
                 return index;
@@ -117,12 +125,20 @@ namespace Framework.HUD.Runtime
             m_vTransformData[index] = data;
         }
         //--------------------------------------------------------
-        public void UpdateTransform(int index, Matrix4x4 worldMatrix)
+        public void UpdateTransform(int index, HudController controller)
         {
             if (m_bDispose) return;
             if (index < 0 || index >= m_vTransformData.Length) return;
+
+            m_transformArray[index] = controller.GetFollowTargetJob();
             TransformData data = m_vTransformData[index];
-            data.localToWorld = worldMatrix;
+            data.localToWorld = controller.GetWorldMatrixJob();
+            data.allowScale = controller.AllowScale ? (byte)1 : (byte)0;
+            data.allowRotation = controller.AllowRotation ? (byte)1 : (byte)0;
+            data.offsetRotation = controller.OffsetRotation;
+            data.offsetPosition = controller.OffsetPosition;
+            data.transformJob = controller.HasFollowTransform() ? (byte)1 : (byte)0;
+
             m_vTransformData[index] = data;
         }
         //--------------------------------------------------------
@@ -160,6 +176,7 @@ namespace Framework.HUD.Runtime
         public void Dispose()
         {
             m_bDispose = true;
+            m_transformArray.Dispose();
             m_vRemaining.Dispose();
             m_vTransformData.Dispose();
             m_vTransformSort.Dispose();

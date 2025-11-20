@@ -860,13 +860,13 @@ namespace Framework.HUD.Editor
         }
         //-----------------------------------------------------
         private void CreatePreviewInstances()
-        {
-            return;
+        {/*
             if (m_Targets == null || m_Targets.Length <= 0) return;
             DestroyPreviewInstances();
 
             GameObject gameObject = UnityEngine.Object.Instantiate(target) as GameObject;
             SetPreviewInstance(gameObject);
+            */
         }
         //-----------------------------------------------------
         public void ClearInstanceTarget()

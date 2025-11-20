@@ -57,6 +57,40 @@ namespace Framework.HUD.Runtime
 #endif
         }
         //--------------------------------------------------------
+        public bool AllowRotation
+        {
+            get
+            {
+                if (m_pObject != null) return m_pObject.allowRotation;
+                return true;
+            }
+        }
+        //--------------------------------------------------------
+        public bool AllowScale
+        {
+            get
+            {
+                if (m_pObject != null) return m_pObject.allowScale;
+                return true;
+            }
+        }
+        //--------------------------------------------------------
+        public Vector3 OffsetPosition
+        {
+            get
+            {
+                return this.m_Offset;
+            }
+        }
+        //--------------------------------------------------------
+        public Vector3 OffsetRotation
+        {
+            get
+            {
+                return this.m_OffsetRotation;
+            }
+        }
+        //--------------------------------------------------------
         internal void SpawnInstance(AWidget pWidget, string file, System.Action<GameObject> callback)
         {
             m_pSystem.SpawnInstance(pWidget, file, callback);
@@ -67,9 +101,22 @@ namespace Framework.HUD.Runtime
             m_pSystem.DestroyInstance(pWidget, pGo);
         }
         //--------------------------------------------------------
+        public bool HasFollowTransform()
+        {
+            return m_pFollowTarget != null;
+        }
+        //--------------------------------------------------------
+        public Transform GetFollowTargetJob()
+        {
+            return m_pFollowTarget;
+        }
+        //--------------------------------------------------------
         public void SetFollowTarget(Transform target)
         {
+            if (m_pFollowTarget == target)
+                return;
             m_pFollowTarget = target;
+            UpdateTransform();
         }
         //--------------------------------------------------------
         public Transform GetFollowTarget()
@@ -81,25 +128,22 @@ namespace Framework.HUD.Runtime
         {
             m_pFollowTransform = transform;
             m_pFollowTarget = null;
+            UpdateTransform();
         }
         //--------------------------------------------------------
-        public Matrix4x4 GetWorldMatrix()
+        public Matrix4x4 GetWorldMatrixJob()
         {
-            if(m_pFollowTarget)
+            if (m_pFollowTarget)
             {
-                m_pFollowTransform = m_pFollowTarget.localToWorldMatrix;
+                return Matrix4x4.identity;
             }
-            if(m_pObject.allowRotation && m_pObject.allowScale)
-                return m_pFollowTransform*Matrix4x4.TRS(m_Offset, Quaternion.Euler(m_OffsetRotation), Vector3.one);
-            else if (m_pObject.allowRotation)
-            {
-                return Matrix4x4.TRS(m_pFollowTransform.GetPosition()+m_Offset, m_pFollowTransform.rotation*Quaternion.Euler(m_OffsetRotation), Vector3.one);
-            }
-            else if (m_pObject.allowScale)
-            {
-                return Matrix4x4.TRS(m_pFollowTransform.GetPosition() + m_Offset, Quaternion.identity, m_pFollowTransform.lossyScale);
-            }
-            return Matrix4x4.TRS(m_pFollowTransform.GetPosition() + m_Offset, Quaternion.identity, Vector3.one);
+            Vector3 position = m_pFollowTransform.GetPosition() + m_Offset;
+            Quaternion rotation = Quaternion.identity;
+            if(AllowRotation) rotation = m_pFollowTransform.rotation * Quaternion.Euler(m_OffsetRotation);
+            Vector3 scale = Vector3.one;
+            if (AllowScale) scale = m_pFollowTransform.lossyScale;
+
+            return Matrix4x4.TRS(position,rotation, scale);
         }
         //--------------------------------------------------------
         public void UpdateTransform()
@@ -357,7 +401,7 @@ namespace Framework.HUD.Runtime
             if (data == null ) return;
             if (!bIngoreRayTest && !data.rayTest)
                 return;
-            Vector3 worldPos = camera.WorldToScreenPoint(GetWorldMatrix()*widget.GetPosition());
+            Vector3 worldPos = camera.WorldToScreenPoint(GetWorldMatrixJob()*widget.GetPosition());
             Rect rect = new Rect(worldPos.x - data.sizeDelta.x * 0.5f, worldPos.y - data.sizeDelta.y * 0.5f, data.sizeDelta.x, data.sizeDelta.y);
             if (rect.Contains(screenPosition))
             {
