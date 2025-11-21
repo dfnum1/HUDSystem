@@ -204,12 +204,13 @@ namespace Framework.HUD.Runtime
             var material = m_HudController?.GetMaterial();
             if (fontAsset == null || material == null)
                 return;
+            TMP_FontAsset expandFontAssets = TMP_ExpandFontAssets.ToExpandFontAssets(fontAsset);
 
             float fontSize = GetFontSize();
             float lineSpacing = GetLineSpacing();
             float padding = TMPro.ShaderUtilities.GetPadding(material, false, false);
             float fontsizeScale = fontSize / 10.0f;
-            float adjustedScale = fontsizeScale / fontAsset.faceInfo.pointSize * fontAsset.faceInfo.scale * 0.1f;
+            float adjustedScale = fontsizeScale / expandFontAssets.faceInfo.pointSize * expandFontAssets.faceInfo.scale * 0.1f;
 
             int snippetIndex = 0;
             float curAdvance = 0;
@@ -251,7 +252,7 @@ namespace Framework.HUD.Runtime
                             continue;
                         }
                         bool isUsingAlternativeTypeface;
-                        TMP_Character character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(seg.content[j], fontAsset, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
+                        TMP_Character character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(seg.content[j], expandFontAssets, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
                         if (character == null)
                         {
                             character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(seg.content[j], TMP_Settings.defaultFontAsset, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
@@ -301,9 +302,9 @@ namespace Framework.HUD.Runtime
                         tr = math.max(top_right, tr);
                         snippet.SetSpritePositon(quadindex, bottom_left);
                         snippet.SetSpriteSize(quadindex, (top_right - bottom_left));
-                        float advance = (character.glyph.metrics.horizontalAdvance + lineSpacing) * currentElementScale + lineSpacing;
+                        float advance = (character.glyph.metrics.horizontalAdvance + lineSpacing) * currentElementScale + lineSpacing / HUDUtils.PIXEL_SIZE;
                         curAdvance += advance;
-                        fontCurAdvance += advance* HUDUtils.PIXEL_SIZE;
+                        fontCurAdvance += (advance+ (currentGlyphMetrics.horizontalBearingX + padding)* currentElementScale) * HUDUtils.PIXEL_SIZE;
                         maxWidth = Mathf.Max(maxWidth, fontCurAdvance);
                         quadindex++;
                         curcharCount++;
@@ -327,14 +328,14 @@ namespace Framework.HUD.Runtime
                         snippet.SetMutiColor(seg.color);
 
                         Vector2 size = seg.size == Vector2.zero ? new Vector2(spriteInfo.size.x, spriteInfo.size.y) : seg.size;
-                        Vector2 pos = new Vector2(fontCurAdvance + seg.offset.x - seg.size.x/2, seg.offset.y - curY);
+                        Vector2 pos = new Vector2(fontCurAdvance + seg.offset.x - seg.size.x/2+ lineSpacing, -seg.offset.y - curY);
                         snippet.SetSpriteId(quadindex, spriteInfo.index);
                         snippet.SetSpritePositon(quadindex, pos);
                         snippet.SetSpriteSize(quadindex, size);
                         snippet.SetAmount(1, 0, 0);
                         bl = math.min(pos, bl);
                         tr = math.max(pos + size, tr);
-                        curAdvance += size.x* 0.5f / HUDUtils.PIXEL_SIZE;
+                        curAdvance += (seg.offset.x +size.x+ lineSpacing) / HUDUtils.PIXEL_SIZE;
                         fontCurAdvance += size.x;
                         maxWidth = Mathf.Max(maxWidth, fontCurAdvance);
                         snippet.WriteParamData();

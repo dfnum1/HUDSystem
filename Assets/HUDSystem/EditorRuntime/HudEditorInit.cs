@@ -181,6 +181,8 @@ namespace Framework.HUD.Editor
         {
             if (tmp_fontAtlas == null)
                 return;
+            TMP_ExpandFontAssets.ClearExpandFontAssets();
+            ClearSubAssets(tmp_fontAtlas, "FontAtlasMapping");
             Texture2D fontmapping = GetFontMapping(tmp_fontAtlas);
             if (fontmapping != null)
             {
@@ -200,6 +202,53 @@ namespace Framework.HUD.Editor
                 AssetDatabase.SaveAssetIfDirty(tmp_fontAtlas);
                 AssetDatabase.Refresh();
             }
+        }
+        //--------------------------------------------------------
+        internal static void ClearAllSubAssets(UnityEngine.Object parentAsset)
+        {
+            if (parentAsset == null) return;
+
+            string assetPath = AssetDatabase.GetAssetPath(parentAsset);
+            var allAssets = AssetDatabase.LoadAllAssetsAtPath(assetPath);
+
+            foreach (var subAsset in allAssets)
+            {
+                // 跳过主资源本身
+                if (subAsset == parentAsset) continue;
+
+                AssetDatabase.RemoveObjectFromAsset(subAsset);
+                UnityEngine.Object.DestroyImmediate(subAsset, true);
+            }
+
+            EditorUtility.SetDirty(parentAsset);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+        //--------------------------------------------------------
+        internal static void ClearSubAssets(UnityEngine.Object parentAsset, string name)
+        {
+            if (parentAsset == null) return;
+
+            string assetPath = AssetDatabase.GetAssetPath(parentAsset);
+            var allAssets = AssetDatabase.LoadAllAssetsAtPath(assetPath);
+
+            bool bRemove = false;
+            foreach (var subAsset in allAssets)
+            {
+                // 跳过主资源本身
+                if (subAsset == parentAsset) continue;
+                if(subAsset.name.Equals(name, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    AssetDatabase.RemoveObjectFromAsset(subAsset);
+                    UnityEngine.Object.DestroyImmediate(subAsset, true);
+                    bRemove = true;
+                }
+            }
+            if (!bRemove)
+                return;
+            EditorUtility.SetDirty(parentAsset);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
     }
 }

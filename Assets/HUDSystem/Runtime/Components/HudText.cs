@@ -7,7 +7,6 @@
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.TextCore;
 
 namespace Framework.HUD.Runtime
 {
@@ -148,9 +147,11 @@ namespace Framework.HUD.Runtime
             if (m_HudController.GetMaterial() == null)
                 return;
 
-            var expandFontAssets = m_HudController.GetFontAsset();
-            if (expandFontAssets == null)
+            var fontAsset = m_HudController.GetFontAsset();
+            if (fontAsset == null)
                 return;
+
+            TMP_FontAsset expandFontAssets = TMP_ExpandFontAssets.ToExpandFontAssets(fontAsset);
             char[] chars = m_strText.ToCharArray();
             if (chars.Length == 0)
             {
@@ -217,7 +218,7 @@ namespace Framework.HUD.Runtime
                         snippet.SetTextOrImage(true);
                         quadIndex = 0;
                     }
-                    GlyphMetrics currentGlyphMetrics = character.glyph.metrics;
+                    UnityEngine.TextCore.GlyphMetrics currentGlyphMetrics = character.glyph.metrics;
                     snippet.SetSpriteId(quadIndex, character.index);
                     float currentElementScale = adjustedScale * character.glyph.scale;
                     float2 top_left;

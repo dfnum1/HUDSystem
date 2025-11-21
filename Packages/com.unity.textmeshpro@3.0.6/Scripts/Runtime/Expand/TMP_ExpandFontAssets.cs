@@ -19,6 +19,22 @@ namespace TMPro
     {
         private TMP_FontAsset parentFont;
         private TMP_FontAsset orginFont;
+        protected override TMP_FontAsset GetParent()
+        {
+            return parentFont;
+        }
+
+        public override void ClearFontAssetData(bool setAtlasSizeToZero = false)
+        {
+            base.ClearFontAssetData(setAtlasSizeToZero);
+            InitializeCharacterLookupDictionary();
+
+            if (parentFont != null)
+            {
+                parentFont.ClearFontAssetData();
+                parentFont.InitializeCharacterLookupDictionary();
+            }
+        }
 
         public override Texture2D[] atlasTextures
         {
@@ -178,10 +194,28 @@ namespace TMPro
         }
 
         private static Dictionary<TMP_FontAsset, TMP_ExpandFontAssets> toFontAssetCache;
+        public static void ClearExpandFontAssets()
+        {
+            if (toFontAssetCache == null) return;
+            foreach(var db in toFontAssetCache)
+            {
+                db.Value.ClearFontAssetData();
+#if UNITY_EDITOR
+                if (Application.isPlaying)
+                    UnityEngine.Object.Destroy(db.Value);
+                else
+                    UnityEngine.Object.DestroyImmediate(db.Value);
+#else
+
+                UnityEngine.Object.Destroy(db.Value);
+#endif
+            }
+            toFontAssetCache.Clear();
+        }
 
         public static TMP_FontAsset ToExpandFontAssets(TMP_FontAsset orginFontAsset)
         {
-            if (orginFontAsset == TMP_Settings.defaultFontAsset) return orginFontAsset;
+            if (orginFontAsset == TMP_Settings.defaultFontAsset && orginFontAsset is TMP_ExpandFontAssets) return orginFontAsset;
 
             if (toFontAssetCache == null) toFontAssetCache = new Dictionary<TMP_FontAsset, TMP_ExpandFontAssets>();
             TMP_ExpandFontAssets sysfontAsset = null;

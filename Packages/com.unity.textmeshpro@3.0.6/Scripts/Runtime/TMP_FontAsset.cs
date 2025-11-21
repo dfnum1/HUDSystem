@@ -148,6 +148,8 @@ namespace TMPro
         [SerializeField]
         internal List<TMP_Character> m_CharacterTable = new List<TMP_Character>();
 
+        public System.Action<TMP_FontAsset> OnResizeFontMappingTexture;
+
 
         [SerializeField]
         private Texture2D m_FontMappingTexture;
@@ -155,6 +157,11 @@ namespace TMPro
         public virtual Texture2D fontMappingTexture
         {
             get { return m_FontMappingTexture; }
+        }
+
+        protected virtual TMP_FontAsset GetParent()
+        {
+            return null;
         }
 
         public int fontMappingWidth 
@@ -229,6 +236,12 @@ namespace TMPro
             {
                 fontMappingTexture.Reinitialize(m_AtlasWidth, m_AtlasHeight);
                 ResetAtlasMapping();
+                if (OnResizeFontMappingTexture != null)
+                    OnResizeFontMappingTexture(this);
+                if (GetParent() != null && GetParent().OnResizeFontMappingTexture != null)
+                    GetParent().OnResizeFontMappingTexture(GetParent());
+
+
                 return;
             }
             GlyphRect glyphRect = character.glyph.glyphRect;
@@ -2824,7 +2837,7 @@ namespace TMPro
         /// Function might be changed to Internal and only used in tests.
         /// </summary>
         /// <param name="setAtlasSizeToZero">Will set the atlas texture size to zero width and height if true.</param>
-        public void ClearFontAssetData(bool setAtlasSizeToZero = false)
+        public virtual void ClearFontAssetData(bool setAtlasSizeToZero = false)
         {
             k_ClearFontAssetDataMarker.Begin();
 

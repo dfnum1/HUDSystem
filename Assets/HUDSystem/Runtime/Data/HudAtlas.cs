@@ -129,7 +129,7 @@ namespace Framework.HUD.Runtime
             m_isGenAtlasMapping = true;
 
             m_AtlasTex = null;
-            ClearAllSubAssets(this);
+            Editor.HUDEditorInit.ClearAllSubAssets(this);
             m_AtlasMappingTex = null;
             CollectRefresh();
             GenMappingTexture();
@@ -137,27 +137,6 @@ namespace Framework.HUD.Runtime
 #endif
         }
 #if UNITY_EDITOR
-        //--------------------------------------------------------
-        public static void ClearAllSubAssets(UnityEngine.Object parentAsset)
-        {
-            if (parentAsset == null) return;
-
-            string assetPath = AssetDatabase.GetAssetPath(parentAsset);
-            var allAssets = AssetDatabase.LoadAllAssetsAtPath(assetPath);
-
-            foreach (var subAsset in allAssets)
-            {
-                // 跳过主资源本身
-                if (subAsset == parentAsset) continue;
-
-                AssetDatabase.RemoveObjectFromAsset(subAsset);
-                UnityEngine.Object.DestroyImmediate(subAsset, true);
-            }
-
-            EditorUtility.SetDirty(parentAsset);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-        }
         //--------------------------------------------------------
         public static void RemoveSubAsset(UnityEngine.Object parentAsset, UnityEngine.Object subAsset)
         {

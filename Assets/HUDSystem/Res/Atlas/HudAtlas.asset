@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: HudAtlas
   m_EditorClassIdentifier: 
   m_SpriteAtlas: {fileID: 100100200, guid: b6a0f20e2bddffa4fa1086bd56517060, type: 3}
-  m_AtlasMappingTex: {fileID: 2164846835107611079}
+  m_AtlasMappingTex: {fileID: 7028258904026127185}
   m_Width: 1024
   m_Height: 512
   m_AtlasMappingWidth: 16
@@ -124,7 +124,7 @@ MonoBehaviour:
   - name: Pet_Img_Face_Monster02
     index: 34
     size: {x: 0, y: 0}
---- !u!28 &2164846835107611079
+--- !u!28 &7028258904026127185
 Texture2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

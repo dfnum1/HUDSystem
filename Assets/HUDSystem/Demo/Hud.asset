@@ -19,7 +19,7 @@ MonoBehaviour:
   mesh: {fileID: 4300000, guid: b5a4655ce0c3e744ca30a64ba06787db, type: 2}
   material: {fileID: 2100000, guid: 66f64d333b654b04aaa3b42b9d53a5fa, type: 2}
   atlasAset: {fileID: 11400000, guid: fb0cd23d79faeda4da7919340a0fca71, type: 2}
-  fontAsset: {fileID: 11400000, guid: 2dc009d528262a149998b416ec45c61a, type: 2}
+  fontAsset: {fileID: 11400000, guid: 556d3f20b02cc8a4793353c6c9422c7b, type: 2}
   vCanvas:
   - id: 0
     name: "\u5934\u50CFHud"
@@ -193,7 +193,7 @@ MonoBehaviour:
     rayTest: 1
     visible: 1
     position: {x: 0, y: -0.42088073, z: 0}
-    sizeDelta: {x: 1.33, y: 0.1779576}
+    sizeDelta: {x: 0.31515068, y: 0.14229912}
     angle: 0
     color: {r: 1, g: 1, b: 1, a: 1}
     mask: 0
@@ -203,34 +203,14 @@ MonoBehaviour:
       y: 0
       width: 0
       height: 0
-    text: 1231254
+    text: "\u4F60\u597D"
     fontSize: 15
     lineSpacing: 0
     lineHeight: 0.14
-    alignment: 0
+    alignment: 1
   vNumbers: []
   vParticles: []
-  vRichs:
-  - id: 6
-    name: HudRich
-    rayTest: 1
-    visible: 1
-    position: {x: 1.0813046, y: -0.29891044, z: -0.026197284}
-    sizeDelta: {x: 0.6891741, y: 0.16997768}
-    angle: 0
-    color: {r: 1, g: 1, b: 1, a: 1}
-    mask: 0
-    maskRegion:
-      serializedVersion: 2
-      x: 0
-      y: 0
-      width: 0
-      height: 0
-    richText: 123123
-    fontSize: 20
-    alignment: 0
-    lineSpacing: 0
-    lineHeight: 20
+  vRichs: []
   vHierarchies:
   - id: 1
     parentId: 0
@@ -259,9 +239,6 @@ MonoBehaviour:
   - id: 7
     parentId: 0
     children: 08000000090000000a000000
-  - id: 6
-    parentId: 0
-    children: 
   - id: 0
     parentId: -1
-    children: 0100000002000000030000000700000006000000
+    children: 01000000020000000300000007000000

@@ -78,15 +78,32 @@ namespace Framework.HUD.Runtime
                     UnityEditor.EditorUtility.SetDirty(fontAsset);
                     UnityEditor.AssetDatabase.SaveAssetIfDirty(fontAsset);
 #endif
-                    m_MaterialPropertyBlock.SetTexture(HUDUtils._MainTex, fontAsset.atlasTexture);
-                    m_MaterialPropertyBlock.SetInt(HUDUtils._TextureWidth, fontAsset.atlasWidth);
-                    m_MaterialPropertyBlock.SetInt(HUDUtils._TextureHeight, fontAsset.atlasHeight);
-
-                    m_MaterialPropertyBlock.SetTexture(HUDUtils._FontMappingTex, fontAsset.fontMappingTexture);
-                    m_MaterialPropertyBlock.SetInt(HUDUtils._FontMappingWidth, fontAsset.fontMappingWidth);
-                    m_MaterialPropertyBlock.SetInt(HUDUtils._FontMappingHeight, fontAsset.fontMappingHeight);
+                    fontAsset.OnResizeFontMappingTexture += OnResizeFontMappingTexture;
+                    UpdateFontMaterial(fontAsset);
                 }
             }
+        }
+        //-----------------------------------------------------
+        void UpdateFontMaterial(TMP_FontAsset fontAsset)
+        {
+            if (fontAsset.atlasTexture)
+                m_MaterialPropertyBlock.SetTexture(HUDUtils._MainTex, fontAsset.atlasTexture);
+            else
+                Debug.LogWarning(fontAsset.name + " atlasTexture is null!");
+            m_MaterialPropertyBlock.SetInt(HUDUtils._TextureWidth, fontAsset.atlasWidth);
+            m_MaterialPropertyBlock.SetInt(HUDUtils._TextureHeight, fontAsset.atlasHeight);
+
+            if (fontAsset.fontMappingTexture)
+                m_MaterialPropertyBlock.SetTexture(HUDUtils._FontMappingTex, fontAsset.fontMappingTexture);
+            else
+                Debug.LogWarning(fontAsset.name + " fontMappingTexture is null!");
+            m_MaterialPropertyBlock.SetInt(HUDUtils._FontMappingWidth, fontAsset.fontMappingWidth);
+            m_MaterialPropertyBlock.SetInt(HUDUtils._FontMappingHeight, fontAsset.fontMappingHeight);
+        }
+        //-----------------------------------------------------
+        void OnResizeFontMappingTexture(TMP_FontAsset fontAsset)
+        {
+            UpdateFontMaterial(fontAsset);
         }
         //-----------------------------------------------------
         internal void Clear()
