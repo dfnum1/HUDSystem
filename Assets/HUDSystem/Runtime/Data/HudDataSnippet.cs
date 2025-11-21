@@ -31,6 +31,7 @@ namespace Framework.HUD.Runtime
         private Float4x4Value m_Param1 = new Float4x4Value();
         private Float4x4Value m_Param2 = new Float4x4Value();
 
+        bool m_isText = false;
         private AWidget m_pComponet;
         public HudDataSnippet(AWidget _componet)
         {
@@ -48,6 +49,7 @@ namespace Framework.HUD.Runtime
 
         public void Init(bool show, int transId)
         {
+            m_isText = false;
             m_Show = show;
             m_Enable = true;
             m_Param1.value = new RenderDataState<float4x4>(new float4x4(), CanShow());
@@ -58,7 +60,6 @@ namespace Framework.HUD.Runtime
         private int rootId { get { return m_pComponet.GetRootId(); } }
         private float tagZ { get { return m_pComponet.GetTagZ(); } }
 
-        private bool isText { get { return m_pComponet.GetHudType() == EHudType.Text; } }
         private bool m_Show = true;
 
         public void SetShow(bool show)
@@ -166,6 +167,7 @@ namespace Framework.HUD.Runtime
 
         public void SetTextOrImage(bool text)
         {
+            m_isText = text;
             float4x4 f4x4 = m_Param2.value.data;
             float4 c3 = f4x4.c3;
             c3.y = HUDUtils.ToOneFloat(text ? 1 : 0, tagZ);// text ? 1 : 0;
@@ -177,7 +179,7 @@ namespace Framework.HUD.Runtime
         {
             float4x4 f4x4 = m_Param2.value.data;
             float4 c3 = f4x4.c3;
-            c3.y = HUDUtils.ToOneFloat(isText?1:0, tagZ);// text ? 1 : 0;
+            c3.y = HUDUtils.ToOneFloat(m_isText ? 1:0, tagZ);// text ? 1 : 0;
             f4x4.c3 = c3;
             m_Param2.value.data = f4x4;
         }

@@ -193,7 +193,7 @@ MonoBehaviour:
     rayTest: 1
     visible: 1
     position: {x: 0, y: -0.42088073, z: 0}
-    sizeDelta: {x: 0.5665179, y: 0.14229912}
+    sizeDelta: {x: 1.33, y: 0.1779576}
     angle: 0
     color: {r: 1, g: 1, b: 1, a: 1}
     mask: 0
@@ -203,12 +203,34 @@ MonoBehaviour:
       y: 0
       width: 0
       height: 0
-    text: "\u4F60\u597D123"
+    text: 1231254
     fontSize: 15
     lineSpacing: 0
-    alignment: 1
+    lineHeight: 0.14
+    alignment: 0
   vNumbers: []
   vParticles: []
+  vRichs:
+  - id: 6
+    name: HudRich
+    rayTest: 1
+    visible: 1
+    position: {x: 1.0813046, y: -0.29891044, z: -0.026197284}
+    sizeDelta: {x: 0.6891741, y: 0.16997768}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    mask: 0
+    maskRegion:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    richText: 123123
+    fontSize: 20
+    alignment: 0
+    lineSpacing: 0
+    lineHeight: 20
   vHierarchies:
   - id: 1
     parentId: 0
@@ -237,6 +259,9 @@ MonoBehaviour:
   - id: 7
     parentId: 0
     children: 08000000090000000a000000
+  - id: 6
+    parentId: 0
+    children: 
   - id: 0
     parentId: -1
-    children: 01000000020000000300000007000000
+    children: 0100000002000000030000000700000006000000

@@ -89,6 +89,7 @@
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudCanvas.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudText.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\HudSystem.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Components\HudRich.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\AWidget.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Utils\HudAttributes.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\HudController.cs" />

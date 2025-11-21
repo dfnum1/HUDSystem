@@ -36,6 +36,8 @@ namespace Framework.HUD.Runtime
         internal List<HudNumberData> vNumbers;
         [SerializeField, HideInInspector]
         internal List<HudParticleData> vParticles;
+        [SerializeField, HideInInspector]
+        internal List<HudRichData> vRichs;
 
         [System.Serializable]
         public class Hierarchy
@@ -62,6 +64,8 @@ namespace Framework.HUD.Runtime
             if (vImages != null) cnt += vImages.Count;
             if (vTexts != null) cnt += vTexts.Count;
             if (vNumbers != null) cnt += vNumbers.Count;
+            if (vParticles != null) cnt += vParticles.Count;
+            if (vRichs != null) cnt += vRichs.Count;
             if (m_vDatas == null)
             {
                 m_vDatas = new Dictionary<int, HudBaseData>(cnt);
@@ -98,6 +102,13 @@ namespace Framework.HUD.Runtime
             if (vParticles != null)
             {
                 foreach (var txt in vParticles)
+                {
+                    m_vDatas[txt.id] = txt;
+                }
+            }
+            if (vRichs != null)
+            {
+                foreach (var txt in vRichs)
                 {
                     m_vDatas[txt.id] = txt;
                 }
@@ -141,6 +152,7 @@ namespace Framework.HUD.Runtime
             if(hudObject.vCanvas!=null) EditorGUILayout.LabelField("Canvas个数:" + hudObject.vCanvas.Count);
             if (hudObject.vImages != null) EditorGUILayout.LabelField("Image个数:" + hudObject.vImages.Count);
             if (hudObject.vTexts != null) EditorGUILayout.LabelField("Text个数:" + hudObject.vTexts.Count);
+            if (hudObject.vRichs != null) EditorGUILayout.LabelField("富文本个数:" + hudObject.vRichs.Count);
             if (hudObject.vNumbers != null) EditorGUILayout.LabelField("Number个数:" + hudObject.vNumbers.Count);
             if (hudObject.vParticles != null) EditorGUILayout.LabelField("Particle个数:" + hudObject.vParticles.Count);
             if (GUILayout.Button("打开编辑器"))

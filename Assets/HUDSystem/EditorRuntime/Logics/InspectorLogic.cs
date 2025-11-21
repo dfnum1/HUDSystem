@@ -67,6 +67,10 @@ namespace Framework.HUD.Editor
             {
                 DrawNumber(m_pSelectComponent as HudNumber, hudBase as HudNumberData);
             }
+            else if (hudBase is HudRichData)
+            {
+                DrawRich(m_pSelectComponent as HudRich, hudBase as HudRichData);
+            }
             else if (hudBase is HudParticleData)
             {
                 DrawParticle(m_pSelectComponent as HudParticle, hudBase as HudParticleData);
@@ -126,10 +130,7 @@ namespace Framework.HUD.Editor
             }
             EditorGUI.BeginChangeCheck();
             data.position = EditorGUILayout.Vector3Field("位置", data.position);
-            if(!(pComonent is HudText))
-            {
-                data.sizeDelta = EditorGUILayout.Vector2Field("大小", data.sizeDelta);
-            }
+            data.sizeDelta = EditorGUILayout.Vector2Field("大小", data.sizeDelta);
             data.angle = EditorGUILayout.Slider("旋转角度", data.angle, 0, 360);
             data.color = EditorGUILayout.ColorField("颜色", data.color);
             data.mask = (EMaskType)EditorGUILayout.EnumPopup("蒙版", data.mask);
@@ -289,9 +290,10 @@ namespace Framework.HUD.Editor
         void DrawText(HudText hudText, HudTextData data)
         {
             EditorGUI.BeginChangeCheck();
-            data.text = EditorGUILayout.DelayedTextField("文本内容", data.text);
+            data.text = EditorGUILayout.DelayedTextField("文本内容", data.text, GUILayout.Height(100));
             data.fontSize = EditorGUILayout.FloatField("字体大小", data.fontSize);
             data.lineSpacing = EditorGUILayout.FloatField("间距", data.lineSpacing);
+            data.lineHeight = EditorGUILayout.FloatField("行高", data.lineHeight);
             data.alignment = (HorizontalAlignment)EditorGUILayout.EnumPopup("对齐方式", data.alignment);
             if (EditorGUI.EndChangeCheck())
             {
@@ -322,6 +324,21 @@ namespace Framework.HUD.Editor
 
 
             data.fontSize = EditorGUILayout.FloatField("字体大小", data.fontSize);
+            data.alignment = (HorizontalAlignment)EditorGUILayout.EnumPopup("对齐方式", data.alignment);
+            if (EditorGUI.EndChangeCheck())
+            {
+                hudText.SyncData();
+                GetHud().TriggerReorder();
+            }
+        }
+        //--------------------------------------------------------
+        void DrawRich(HudRich hudText, HudRichData data)
+        {
+            EditorGUI.BeginChangeCheck();
+            data.richText = EditorGUILayout.DelayedTextField("内容", data.richText, GUILayout.Height(100));
+            data.fontSize = EditorGUILayout.FloatField("字体大小", data.fontSize);
+            data.lineSpacing = EditorGUILayout.FloatField("间距", data.lineSpacing);
+            data.lineHeight = EditorGUILayout.FloatField("行高", data.lineHeight);
             data.alignment = (HorizontalAlignment)EditorGUILayout.EnumPopup("对齐方式", data.alignment);
             if (EditorGUI.EndChangeCheck())
             {

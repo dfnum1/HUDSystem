@@ -113,6 +113,45 @@ namespace Framework.HUD.Editor
             return Selection.activeObject is SpriteAtlas;
         }
         //-----------------------------------------------------
+        [MenuItem("Assets/Hud/HudObject", false, 350)]
+        static void CreateHudObject()
+        {
+            // 获取当前选中的目录
+            string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+            if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
+            {
+                path = "Assets";
+            }
+
+            // 如果选中的是文件，则取其所在目录
+            if (File.Exists(path))
+            {
+                path = Path.GetDirectoryName(path);
+            }
+
+            // 生成资源路径
+            string assetName = "NewHudObject.asset";
+            string assetPath = AssetDatabase.GenerateUniqueAssetPath(Path.Combine(path, assetName));
+
+            // 创建 HudObject 实例
+            var hudObject = ScriptableObject.CreateInstance<Framework.HUD.Runtime.HudObject>();
+
+            // 可选：初始化默认属性
+            hudObject.center = Vector2.zero;
+            hudObject.size = new Vector2(100, 100);
+            hudObject.allowScale = true;
+            hudObject.allowRotation = true;
+            if(s_CustomIcon) EditorGUIUtility.SetIconForObject(hudObject, s_CustomIcon);
+
+            // 创建资源
+            AssetDatabase.CreateAsset(hudObject, assetPath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            // 选中新建的资源
+            Selection.activeObject = hudObject;
+        }
+        //-----------------------------------------------------
         static Texture2D GetFontMapping(TMP_FontAsset tmp_fontAtlas)
         {
             string path = AssetDatabase.GetAssetPath(tmp_fontAtlas);

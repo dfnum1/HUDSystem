@@ -18,6 +18,7 @@ namespace Framework.HUD.Runtime
         public string text;
         public float fontSize = 20;
         public float lineSpacing = 0;
+        public float lineHeight = 20;
         public HorizontalAlignment alignment = HorizontalAlignment.Middle;
         //    public TMPro.TMP_FontAsset fontAsset;
         public override AWidget CreateWidget(HudSystem pSystem)
@@ -36,6 +37,7 @@ namespace Framework.HUD.Runtime
             FontSize = EParamOverrideType.Count,
             LineSpacing,
             Alignment,
+            LineHeight,
             Count,
         }
 
@@ -115,6 +117,20 @@ namespace Framework.HUD.Runtime
                 return temp.floatVal0;
             HudTextData data = m_pHudData as HudTextData;
             return data.lineSpacing;
+        }     
+        //--------------------------------------------------------
+        public void SetLineHeight(float spacing)
+        {
+            bool bDirty = SetOverrideParam((byte)EOverrideType.LineHeight, spacing);
+            if (bDirty) SetDirty();
+        }
+        //--------------------------------------------------------
+        public float GetLineHeight()
+        {
+            if (GetOverrideParam((byte)EOverrideType.LineHeight, out var temp))
+                return temp.floatVal0;
+            HudTextData data = m_pHudData as HudTextData;
+            return data.lineHeight;
         }
         //--------------------------------------------------------
         protected override void OnDirty()
@@ -153,6 +169,7 @@ namespace Framework.HUD.Runtime
             float fontsize = GetFontSize()/10.0f;
             float adjustedScale = fontsize / expandFontAssets.faceInfo.pointSize * expandFontAssets.faceInfo.scale * 0.1f;
             float curAdvance = 0;
+            float lineHeight = 0;
             int curcharCount = 0;
             int snippetIndex = 0;
             int quadIndex = 0;
@@ -163,6 +180,23 @@ namespace Framework.HUD.Runtime
             float2 tr = new float2(float.MinValue, float.MinValue);
             for (int i = 0; i < charCount; i++)
             {
+                if (i + 1 < chars.Length && chars[i] == '\\' && chars[i + 1] == 'n')
+                {
+                    i++;
+                    curAdvance = 0;
+                    bl.x = float.MaxValue;
+                    lineHeight += GetLineHeight() / HUDUtils.PIXEL_SIZE;
+                    continue;
+                }
+                if (i+ 3 < chars.Length && chars[i] == '\\' && chars[i + 1] == 'r' && chars[i + 2] == '\\' && chars[i + 3] == 'n')
+                {
+                    i += 3;
+                    curAdvance = 0;
+                    bl.x = float.MaxValue;
+                    lineHeight += GetLineHeight() / HUDUtils.PIXEL_SIZE;
+                    continue;
+                }
+
                 TMP_Character character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(chars[i], expandFontAssets, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
                 if (character == null)
                 {
@@ -188,7 +222,7 @@ namespace Framework.HUD.Runtime
                     float currentElementScale = adjustedScale * character.glyph.scale;
                     float2 top_left;
                     top_left.x = (currentGlyphMetrics.horizontalBearingX - padding) * currentElementScale;
-                    top_left.y = (currentGlyphMetrics.horizontalBearingY + padding) * currentElementScale;
+                    top_left.y = (currentGlyphMetrics.horizontalBearingY + padding) * currentElementScale - lineHeight;
                     float2 bottom_left;
                     bottom_left.x = top_left.x + curAdvance;
                     bottom_left.y = top_left.y - (currentGlyphMetrics.height + padding * 2) * currentElementScale;
@@ -200,6 +234,8 @@ namespace Framework.HUD.Runtime
                     bottom_right.y = bottom_left.y;
                     bl = math.min(bottom_left, bl);
                     tr = math.max(top_right, tr);
+                    m_Size.x = Mathf.Max(tr.x - bl.x, m_Size.x);
+                    m_Size.y = Mathf.Max(tr.y - bl.y, m_Size.y);
                     snippet.SetSpritePositon(quadIndex, bottom_left);
                     snippet.SetSpriteSize(quadIndex, (top_right - bottom_left));
                     float advance = (character.glyph.metrics.horizontalAdvance + lineSpace) * currentElementScale + lineSpace;
@@ -223,7 +259,6 @@ namespace Framework.HUD.Runtime
                 datasnippet.WriteParamData();
             }
             m_Size = new Vector2(tr.x - bl.x, tr.y - bl.y);
-
             if (IsEditor())
             {
                 HudTextData data = m_pHudData as HudTextData;

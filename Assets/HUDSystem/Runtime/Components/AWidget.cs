@@ -14,6 +14,7 @@ namespace Framework.HUD.Runtime
         None =0,
         Canvas,
         Text,
+        Rich,
         Image,
         Number,
         Particle,
@@ -403,7 +404,7 @@ namespace Framework.HUD.Runtime
                 {
                     m_vDataSnippets[i].SetColor(GetColor());
                     m_vDataSnippets[i].SetPosition(GetPosition());
-                    m_vDataSnippets[i].SetTextOrImage(GetHudType() == EHudType.Text);
+                    m_vDataSnippets[i].SetTagZ(GetTagZ());
                     m_vDataSnippets[i].SetAngle(GetAngle());
                     m_vDataSnippets[i].SetMaskRegion(GetMaskRegion());
                     m_vDataSnippets[i].WriteData();
@@ -604,7 +605,7 @@ namespace Framework.HUD.Runtime
                     snippet.Init(IsVisible(), GetTransId());
                     snippet.SetColor(GetColor());
                     snippet.SetPosition(GetPosition());
-                    snippet.SetTextOrImage(GetHudType() == EHudType.Text);
+                    snippet.SetTagZ(GetTagZ());
                     snippet.SetAngle(GetAngle());
                     snippet.SetMaskRegion(GetMaskRegion());
 
