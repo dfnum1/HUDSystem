@@ -290,7 +290,10 @@ namespace Framework.HUD.Editor
         void DrawText(HudText hudText, HudTextData data)
         {
             EditorGUI.BeginChangeCheck();
-            data.text = EditorGUILayout.DelayedTextField("文本内容", data.text, GUILayout.Height(100));
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("文本内容");
+            data.text = EditorGUILayout.TextArea(data.text, GUILayout.Width(viewRect.width - 80), GUILayout.Height(200));
+            EditorGUILayout.EndHorizontal();
             data.fontSize = EditorGUILayout.FloatField("字体大小", data.fontSize);
             data.lineSpacing = EditorGUILayout.FloatField("间距", data.lineSpacing);
             data.lineHeight = EditorGUILayout.FloatField("行高", data.lineHeight);
@@ -335,7 +338,10 @@ namespace Framework.HUD.Editor
         void DrawRich(HudRich hudText, HudRichData data)
         {
             EditorGUI.BeginChangeCheck();
-            data.richText = EditorGUILayout.DelayedTextField("内容", data.richText, GUILayout.Height(100));
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label(new GUIContent("文本内容", "例如：111<img=Pet_Icon_Star_Normal_02,w=20,h=20,x=1,y=20/>222<color=0xff0000ff>333</color>"));
+            data.richText = EditorGUILayout.TextArea(data.richText, GUILayout.Width(viewRect.width-80), GUILayout.Height(200));
+            EditorGUILayout.EndHorizontal();
             data.fontSize = EditorGUILayout.FloatField("字体大小", data.fontSize);
             data.lineSpacing = EditorGUILayout.FloatField("间距", data.lineSpacing);
             data.lineHeight = EditorGUILayout.FloatField("行高", data.lineHeight);

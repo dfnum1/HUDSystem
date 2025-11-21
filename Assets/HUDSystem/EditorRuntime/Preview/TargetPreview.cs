@@ -1265,6 +1265,15 @@ namespace Framework.HUD.Editor
                 if (bBreakEvent) evt.Use();
             }
 
+            if(EditorGUIUtility.editingTextField)
+            {
+                m_bKeyMovePress[0] = false;
+                m_bKeyMovePress[1] = false;
+                m_bKeyMovePress[2] = false;
+                m_bKeyMovePress[3] = false;
+                m_bKeyMovePress[4] = false;
+                return;
+            }
 
             if (CanKeyMoveCamera)
             {

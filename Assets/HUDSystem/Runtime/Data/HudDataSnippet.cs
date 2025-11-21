@@ -32,6 +32,7 @@ namespace Framework.HUD.Runtime
         private Float4x4Value m_Param2 = new Float4x4Value();
 
         bool m_isText = false;
+        Color m_MutiColor = Color.white;
         private AWidget m_pComponet;
         public HudDataSnippet(AWidget _componet)
         {
@@ -49,6 +50,7 @@ namespace Framework.HUD.Runtime
 
         public void Init(bool show, int transId)
         {
+            m_MutiColor = Color.white;
             m_isText = false;
             m_Show = show;
             m_Enable = true;
@@ -60,7 +62,13 @@ namespace Framework.HUD.Runtime
         private int rootId { get { return m_pComponet.GetRootId(); } }
         private float tagZ { get { return m_pComponet.GetTagZ(); } }
 
+        public bool isText { get { return m_isText; } }
         private bool m_Show = true;
+
+        public void SetMutiColor(Color color)
+        {
+            m_MutiColor = color;
+        }
 
         public void SetShow(bool show)
         {
@@ -130,7 +138,7 @@ namespace Framework.HUD.Runtime
         public void SetColor(Color32 color)
         {
             float4x4 f4x4 = m_Param2.value.data;
-            float2 color2 = HUDUtils.ColorToFloat(color);
+            float2 color2 = HUDUtils.ColorToFloat(color* m_MutiColor);
             float4 c3 = f4x4.c3;
             c3.zw = color2;
             f4x4.c3 = c3;

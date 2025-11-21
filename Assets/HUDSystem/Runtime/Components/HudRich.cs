@@ -45,19 +45,22 @@ namespace Framework.HUD.Runtime
             public string content;
             public Vector2 size;
             public Vector2 offset;
-            public RichSegment(string text)
+            public Color color;
+            public RichSegment(string text, Color color)
             {
                 isText = true;
                 content = text;
                 size = Vector2.zero;
                 offset = Vector2.zero;
+                this.color = color;
             }
-            public RichSegment(string sprite,Vector2 size, Vector2 offset)
+            public RichSegment(string sprite,Vector2 size, Vector2 offset, Color color)
             {
                 isText = false;
                 content = sprite;
                 this.size = size;
                 this.offset = offset;
+                this.color = color;
             }
         }
         //--------------------------------------------------------
@@ -169,6 +172,7 @@ namespace Framework.HUD.Runtime
             return data.lineHeight;
         }
         //--------------------------------------------------------
+        static List<RichSegment> ms_vSegments = null;
         void Refresh()
         {
             m_Size = Vector2.zero;
@@ -180,31 +184,17 @@ namespace Framework.HUD.Runtime
                 return;
             }
 
-            List<RichSegment> segments = new List<RichSegment>();
             string text = m_richText;
-            var regex = new Regex(@"\[img=([^\]]+)\]");
-            var matches = regex.Matches(text);
-
-            int lastPos = 0;
-            foreach (Match match in matches)
-            {
-                if (match.Index > lastPos)
-                    segments.Add(new RichSegment(text.Substring(lastPos, match.Index - lastPos)));
-                var tag = ParseImageTag(match.Groups[1].Value);
-                segments.Add(tag);
-                lastPos = match.Index + match.Length;
-            }
-            if (lastPos < text.Length)
-                segments.Add(new RichSegment(text.Substring(lastPos)));
-
+            if (ms_vSegments == null) ms_vSegments = new List<RichSegment>(2);
+            ms_vSegments.Clear();
+            ParseSimpleHtmlRichText(text,ref ms_vSegments);
             // 计算需要多少个 HudDataSnippet
             int snippetCount =0;
-            foreach(var seg in segments)
+            foreach(var seg in ms_vSegments)
             {
                 if (seg.isText)
                 {
-                    int charCount = math.min(4 * HUDUtils.QUAD_COUNT, seg.content.Length);
-                    snippetCount += (charCount - 1) / HUDUtils.QUAD_COUNT+1;
+                    snippetCount += (seg.content.Length - 1) / HUDUtils.QUAD_COUNT+1;
                 }
                 else snippetCount++;
             }
@@ -224,13 +214,14 @@ namespace Framework.HUD.Runtime
             int snippetIndex = 0;
             float curAdvance = 0;
             float fontCurAdvance = 0;
+            float maxWidth = 0;
             float curY = 0;
             float currentElementScale = 0;
             float2 bl = new float2(float.MaxValue, float.MaxValue);
             float2 tr = new float2(float.MinValue, float.MinValue);
-            for (int i = 0; i < segments.Count; i++)
+            for (int i = 0; i < ms_vSegments.Count; i++)
             {
-                var seg = segments[i];
+                var seg = ms_vSegments[i];
 
                 if (seg.isText)
                 {
@@ -260,15 +251,22 @@ namespace Framework.HUD.Runtime
                             continue;
                         }
                         bool isUsingAlternativeTypeface;
-                        var character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(c, fontAsset, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface)
-                            ?? TMP_FontAssetUtilities.GetCharacterFromFontAsset(c, TMP_Settings.defaultFontAsset, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
-
+                        TMP_Character character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(seg.content[j], fontAsset, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
+                        if (character == null)
+                        {
+                            character = TMP_FontAssetUtilities.GetCharacterFromFontAsset(seg.content[j], TMP_Settings.defaultFontAsset, true, FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
+                        }
+                        if (character == null)
+                        {
+                            character = TMP_FontAssetUtilities.GetCharacterFormSysFont(seg.content[j], FontStyles.Normal, FontWeight.Regular, out isUsingAlternativeTypeface);
+                        }
                         if (character == null) continue;
                         if (snippet == null)
                         {
                             snippet = GetDataSnippet(snippetIndex);
                             snippet.ResetNineParam();
                             snippet.SetTextOrImage(true);
+                            snippet.SetMutiColor(seg.color);
                             snippetIndex++;
                             quadindex = 0;
                         }
@@ -280,6 +278,7 @@ namespace Framework.HUD.Runtime
                             snippet = GetDataSnippet(snippetIndex);
                             snippet.ResetNineParam();
                             snippet.SetTextOrImage(true);
+                            snippet.SetMutiColor(seg.color);
                             snippetIndex++;
                             quadindex = 0;
                         }
@@ -304,12 +303,16 @@ namespace Framework.HUD.Runtime
                         snippet.SetSpriteSize(quadindex, (top_right - bottom_left));
                         float advance = (character.glyph.metrics.horizontalAdvance + lineSpacing) * currentElementScale + lineSpacing;
                         curAdvance += advance;
-                        fontCurAdvance += character.glyph.metrics.horizontalAdvance + lineSpacing;
+                        fontCurAdvance += advance* HUDUtils.PIXEL_SIZE;
+                        maxWidth = Mathf.Max(maxWidth, fontCurAdvance);
                         quadindex++;
                         curcharCount++;
                     }
-                    snippet.SetTmpParam(padding, adjustedScale);
-                    snippet.WriteParamData();
+                    if(snippet!=null)
+                    {
+                        snippet.SetTmpParam(padding, adjustedScale);
+                        snippet.WriteParamData();
+                    }
                 }
                 else
                 {
@@ -321,6 +324,7 @@ namespace Framework.HUD.Runtime
                         int quadindex = 0;
                         snippet.ResetNineParam();
                         snippet.SetTextOrImage(false);
+                        snippet.SetMutiColor(seg.color);
 
                         Vector2 size = seg.size == Vector2.zero ? new Vector2(spriteInfo.size.x, spriteInfo.size.y) : seg.size;
                         Vector2 pos = new Vector2(fontCurAdvance + seg.offset.x - seg.size.x/2, seg.offset.y - curY);
@@ -329,21 +333,92 @@ namespace Framework.HUD.Runtime
                         snippet.SetSpriteSize(quadindex, size);
                         snippet.SetAmount(1, 0, 0);
                         bl = math.min(pos, bl);
-                        tr = math.max(pos + size * 0.5f /HUDUtils.PIXEL_SIZE, tr);
+                        tr = math.max(pos + size, tr);
                         curAdvance += size.x* 0.5f / HUDUtils.PIXEL_SIZE;
-                        fontCurAdvance += size.x*0.5f;
+                        fontCurAdvance += size.x;
+                        maxWidth = Mathf.Max(maxWidth, fontCurAdvance);
                         snippet.WriteParamData();
                     }
                 }
             }
             bl = math.max(bl, new float2(0, 0));
+            tr.x = bl.x + maxWidth;
+            tr.y = bl.y + Mathf.Max(curY,GetLineHeight());
             float2 movePos = SetAlignment(bl, tr);
-
+            for (int i = 0; i < snippetIndex; i++)
+            {
+                HudDataSnippet datasnippet = GetDataSnippet(i);
+                for (int spriteIndex = 0; spriteIndex < 9; spriteIndex++)
+                {
+                    float2 pos = datasnippet.GetSpritePosition(spriteIndex);
+                    if (datasnippet.isText)
+                    {
+                        pos += movePos / HUDUtils.PIXEL_SIZE;
+                    }
+                    else
+                        pos += movePos;
+                    datasnippet.SetSpritePositon(spriteIndex, pos);
+                }
+                datasnippet.WriteParamData();
+            }
             m_Size = new Vector2(tr.x - bl.x, tr.y - bl.y);
             if (IsEditor())
             {
                 HudRichData data = m_pHudData as HudRichData;
                 data.sizeDelta = m_Size;
+            }
+        }
+        //--------------------------------------------------------
+        private void ParseSimpleHtmlRichText(string text, ref List<RichSegment> segments)
+        {
+            Color curColor = Color.white;
+            int pos = 0;
+            while (pos < text.Length)
+            {
+                // <img=xxx,w=xx,h=xx,x=11,y=222/>
+                var imgMatch = Regex.Match(
+                    text,
+                    @"<img=([^\s,/>]+)(?:,w=(\d+))?(?:,h=(\d+))?(?:,x=(-?\d+))?(?:,y=(-?\d+))?/>",
+                    RegexOptions.None,
+                    TimeSpan.FromMilliseconds(100)
+                );
+                if (imgMatch.Success && imgMatch.Index == pos)
+                {
+                    string imgName = imgMatch.Groups[1].Value;
+                    float w = imgMatch.Groups[2].Success ? float.Parse(imgMatch.Groups[2].Value) : 0;
+                    float h = imgMatch.Groups[3].Success ? float.Parse(imgMatch.Groups[3].Value) : 0;
+                    float x = imgMatch.Groups[4].Success ? float.Parse(imgMatch.Groups[4].Value) : 0;
+                    float y = imgMatch.Groups[5].Success ? float.Parse(imgMatch.Groups[5].Value) : 0;
+                    segments.Add(new RichSegment(imgName, new Vector2(w, h), new Vector2(x, y), curColor));
+                    pos += imgMatch.Length;
+                    continue;
+                }
+
+                // <color=0xff0000ff>内容</color>
+                var colorMatch = Regex.Match(text, @"<color=0x([0-9a-fA-F]{8})>(.*?)</color>", RegexOptions.Singleline, TimeSpan.FromMilliseconds(100));
+                if (colorMatch.Success && colorMatch.Index == pos)
+                {
+                    string hex = colorMatch.Groups[1].Value;
+                    string innerText = colorMatch.Groups[2].Value;
+                    uint val = Convert.ToUInt32(hex, 16);
+                    Color color = new Color32(
+                        (byte)((val >> 24) & 0xFF),
+                        (byte)((val >> 16) & 0xFF),
+                        (byte)((val >> 8) & 0xFF),
+                        (byte)(val & 0xFF)
+                    );
+                    segments.Add(new RichSegment(innerText, color));
+                    pos += colorMatch.Length;
+                    continue;
+                }
+
+                // 普通文本，直到下一个标签
+                int nextTag = text.IndexOf('<', pos);
+                if (nextTag == -1) nextTag = text.Length;
+                string content = text.Substring(pos, nextTag - pos);
+                if (!string.IsNullOrEmpty(content))
+                    segments.Add(new RichSegment(content, curColor));
+                pos = nextTag;
             }
         }
         //--------------------------------------------------------
@@ -359,7 +434,7 @@ namespace Framework.HUD.Runtime
                 case HorizontalAlignment.Left:
                     {
                         float2 movePos = -(tr + bl) / 2;
-                        return new float2(-bl.x, movePos.y);
+                        return new float2(-tr.x, movePos.y);
                     }
                 case HorizontalAlignment.Middle:
                     {
@@ -369,7 +444,7 @@ namespace Framework.HUD.Runtime
                 case HorizontalAlignment.Right:
                     {
                         float2 movePos = -(tr + bl) / 2;
-                        return new float2(-tr.x, movePos.y);
+                        return new float2(-bl.x, movePos.y);
                     }
             }
             return bl;

@@ -278,7 +278,7 @@ namespace Framework.HUD.Runtime
                 case HorizontalAlignment.Left:
                     {
                         float2 movePos = -(tr + bl) / 2;
-                        return new float2(-bl.x, movePos.y);
+                        return new float2(-tr.x, movePos.y);
                     }
                 case HorizontalAlignment.Middle:
                     {
@@ -288,7 +288,7 @@ namespace Framework.HUD.Runtime
                 case HorizontalAlignment.Right:
                     {
                         float2 movePos = -(tr + bl) / 2;
-                        return new float2(-tr.x, movePos.y);
+                        return new float2(-bl.x, movePos.y);
                     }
             }
             return bl;
