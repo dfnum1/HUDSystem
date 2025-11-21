@@ -6,7 +6,6 @@
 *********************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using TMPro;
 using Unity.Mathematics;
@@ -18,9 +17,6 @@ namespace Framework.HUD.Runtime
     [System.Serializable]
     public class HudRichData : HudBaseData
     {
-        /// <summary>
-        /// 富文本内容，支持 [img=content,w=宽,h=高,ox=偏移x,oy=偏移y] 标签
-        /// </summary>
         public string richText;
         public float fontSize = 20;
         public HorizontalAlignment alignment = HorizontalAlignment.Middle;
@@ -46,6 +42,7 @@ namespace Framework.HUD.Runtime
             public Vector2 size;
             public Vector2 offset;
             public Color color;
+            //--------------------------------------------------------
             public RichSegment(string text, Color color)
             {
                 isText = true;
@@ -54,6 +51,7 @@ namespace Framework.HUD.Runtime
                 offset = Vector2.zero;
                 this.color = color;
             }
+            //--------------------------------------------------------
             public RichSegment(string sprite,Vector2 size, Vector2 offset, Color color)
             {
                 isText = false;

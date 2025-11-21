@@ -185,6 +185,7 @@ namespace TMPro
         public virtual void ClearCharacter()
         {
             characterTable?.Clear();
+            m_CharacterLookupDictionary?.Clear();
             ClearFontAtlasMapping();
         }
 
@@ -686,7 +687,7 @@ namespace TMPro
 
         protected virtual void OnEnable()
         {
-            ClearFontAssetData(false);
+      //      ClearFontAssetData(false);
         }
 
 #if UNITY_EDITOR

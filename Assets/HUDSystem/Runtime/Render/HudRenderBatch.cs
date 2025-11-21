@@ -43,7 +43,6 @@ namespace Framework.HUD.Runtime
 
             m_Culling = new HudRenderCulling(pSystem,HUDUtils.capacity);
             m_pCollector = new HudInstanceCollector(HUDUtils.capacity);
-
             m_pJobHandle = new JobHandle();
         }
         //-----------------------------------------------------
