@@ -9,6 +9,7 @@ using Framework.HUD.Runtime;
 using PlasticGui.WorkspaceWindow.QueryViews;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
@@ -33,6 +34,7 @@ namespace Framework.HUD.Editor
         bool m_bItemRightClick = false;
         bool m_bTreeCallSelectChange = false;
 
+        AWidget m_pCopyItem = null;
         WidgetItem m_pDeleteItem = null;
 
         List<System.Type> m_vHudTypes = new List<Type>();
@@ -293,9 +295,37 @@ namespace Framework.HUD.Editor
             GenericMenu menu = new GenericMenu();
             menu.AddItem(new GUIContent("Delete"), false, () =>
             {
-                m_pDeleteItem = itemData as WidgetItem;
+                if(EditorUtility.DisplayDialog("提示", "确认是否要删除该组件？", "删除", "取消"))
+                {
+                    m_pDeleteItem = itemData as WidgetItem;
+                }
             });
-            foreach(var tp in m_vHudTypes)
+            menu.AddItem(new GUIContent("Copy"), false, () =>
+            {
+                m_pCopyItem = widget.graphicItem;
+            });
+            if (m_pCopyItem!=null && m_pCopyItem != widget.graphicItem && m_pCopyItem.GetHudType() == widget.graphicItem.GetHudType())
+            {
+                menu.AddItem(new GUIContent("Parse"), false, () =>
+                {
+                    string json = JsonUtility.ToJson(m_pCopyItem.GetData());
+                    JsonUtility.FromJsonOverwrite(json, widget.graphicItem.GetData());
+                    widget.graphicItem.SyncData();
+                    GetHud().TriggerReorder();
+                });
+            }
+            if (m_pCopyItem != null)
+            {
+                menu.AddItem(new GUIContent("ParseNew"), false, () =>
+                {
+                    string json = JsonUtility.ToJson(m_pCopyItem.GetData());
+                    var hudData = (HudBaseData)JsonUtility.FromJson(json, m_pCopyItem.GetData().GetType());
+
+                    CreateWidget(hudData, m_pCopyItem.GetParent());
+                });
+            }
+
+            foreach (var tp in m_vHudTypes)
             {
                 menu.AddItem(new GUIContent("Widget/" + tp.Name), false, () =>
                 {
@@ -311,6 +341,11 @@ namespace Framework.HUD.Editor
             if (hudAttr == null)
                 return null;
             HudBaseData hudData = (HudBaseData)Activator.CreateInstance(hudAttr.dataType);
+            return CreateWidget(hudData, item != null ? item.graphicItem : null);
+        }
+        //--------------------------------------------------------
+        AWidget CreateWidget(HudBaseData hudData, AWidget pParent = null)
+        {
             var grapicItem = hudData.CreateWidget(m_pEditor.GetHudSystem());
             if (grapicItem == null)
                 return null;
@@ -319,11 +354,11 @@ namespace Framework.HUD.Editor
                 return null;
             grapicItem.SetHudData(hudData);
             grapic.SetId(GeneratorID());
-            grapic.SetName(type.Name);
+            grapic.SetName(grapicItem.GetType().Name);
             grapic.SetHudController(GetHud());
-            if (item!=null)
+            if (pParent != null)
             {
-                item.graphicItem.Attach(grapic);
+                pParent.Attach(grapic);
             }
             else
             {
