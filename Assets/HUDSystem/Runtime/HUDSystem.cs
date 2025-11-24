@@ -179,6 +179,8 @@ namespace Framework.HUD.Runtime
                 });
             }
             AWidget widget = m_vRayTest[0];
+            if(widget!=null)
+                widget.TriggerRayHit();
             m_vRayTest.Clear();
             return widget;
         }

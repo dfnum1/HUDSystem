@@ -81,6 +81,7 @@ namespace Framework.HUD.Runtime
         AWidget m_pParent = null;
         protected List<HudDataSnippet> m_vDataSnippets;
 
+        private System.Action<AWidget> m_onRayHit = null;
         private Dictionary<byte, ParamOverrideInfo> m_vOverrideParams = null;
         //--------------------------------------------------------
         public AWidget()
@@ -131,6 +132,24 @@ namespace Framework.HUD.Runtime
         internal int GetRootId()
         {
             return m_HudController.GetTransId();
+        }
+        //--------------------------------------------------------
+        public void AddRayHitCallback(System.Action<AWidget> onHit)
+        {
+            m_onRayHit += onHit;
+        }
+        //--------------------------------------------------------
+        public void RemoveRayHitCallback(System.Action<AWidget> onHit)
+        {
+            m_onRayHit -= onHit;
+        }
+        //--------------------------------------------------------
+        internal void TriggerRayHit()
+        {
+            if (m_onRayHit != null)
+            {
+                m_onRayHit(this);
+            }
         }
         //--------------------------------------------------------
         protected bool SetOverrideParam(byte type, bool bValue)
