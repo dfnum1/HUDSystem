@@ -23,9 +23,14 @@ namespace Framework.HUD.Editor
         class WidgetItem : TreeAssetView.ItemData
         {
             public AWidget graphicItem;
+            public Texture2D icon;
             public override Color itemColor()
             {
                 return Color.white;
+            }
+            public override Texture2D itemIcon()
+            {
+                return icon;
             }
         }
 
@@ -142,6 +147,13 @@ namespace Framework.HUD.Editor
             item.id = grapic.GetId();
             item.name = grapic.GetName();
             item.graphicItem = grapic;
+            string icon = null;
+            if(grapic.GetType().IsDefined(typeof(HudIconAttribute)))
+            {
+                HudIconAttribute hudIcon = grapic.GetType().GetCustomAttribute<HudIconAttribute>();
+                icon = hudIcon.icon;
+            }
+            if(!string.IsNullOrEmpty(icon))item.icon = HUDEditorInit.LoadTexture(icon);
             m_pTree.AddData(item);
             var childs = grapic.GetChilds();
             if (childs == null || childs.Count <= 0)
@@ -377,7 +389,11 @@ namespace Framework.HUD.Editor
             var rowRect = argvData.rowRect;
             if (widget.depth > 0)
                 rowRect.x += widget.depth * m_pTree.DepthIndentWidth;
-            EditorGUI.LabelField(rowRect, widget.graphicItem.GetName());
+            if(widget.icon!=null)
+            EditorGUI.LabelField(rowRect, new GUIContent(widget.graphicItem.GetName(), widget.icon));
+            else
+                EditorGUI.LabelField(rowRect, widget.graphicItem.GetName());
+
             return true;
         }
         //--------------------------------------------------------

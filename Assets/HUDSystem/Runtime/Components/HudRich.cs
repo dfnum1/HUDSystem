@@ -31,7 +31,7 @@ namespace Framework.HUD.Runtime
     //--------------------------------------------------------
     //! HudRich
     //--------------------------------------------------------
-    [HudData(typeof(HudRichData))]
+    [HudData(typeof(HudRichData)), HudIcon("rich")]
     public class HudRich : AWidget
     {
         //--------------------------------------------------------

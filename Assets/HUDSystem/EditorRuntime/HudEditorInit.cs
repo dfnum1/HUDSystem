@@ -37,6 +37,9 @@ namespace Framework.HUD.Editor
                     }
                 }
             }
+            string extension = System.IO.Path.GetExtension(path);
+            if (string.IsNullOrEmpty(extension))
+                path += ".png";
             return AssetDatabase.LoadAssetAtPath<Texture2D>(System.IO.Path.Combine(m_strInstallPath, path));
         }
         //-----------------------------------------------------

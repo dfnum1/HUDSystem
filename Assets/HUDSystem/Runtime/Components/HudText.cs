@@ -2,7 +2,7 @@
 生成日期:	11:11:2025
 类    名: 	HudText
 作    者:	HappLI
-描    述:	文字
+描    述:	文字 方案来源https://gitee.com/pies/hud
 *********************************************************************/
 using TMPro;
 using Unity.Mathematics;
@@ -28,7 +28,7 @@ namespace Framework.HUD.Runtime
     //--------------------------------------------------------
     // ! HudText
     //--------------------------------------------------------
-    [HudData(typeof(HudTextData))]
+    [HudData(typeof(HudTextData)), HudIcon("text")]
     public class HudText : AWidget
     {
         enum EOverrideType : byte

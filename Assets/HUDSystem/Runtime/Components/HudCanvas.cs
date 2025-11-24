@@ -21,7 +21,7 @@ namespace Framework.HUD.Runtime
     //--------------------------------------------------------
     //! HudCanvas
     //--------------------------------------------------------
-    [HudData(typeof(HudCanvasData))]
+    [HudData(typeof(HudCanvasData)), HudIcon("canvas")]
     public class HudCanvas : AWidget
     {
         public HudCanvas() : base()

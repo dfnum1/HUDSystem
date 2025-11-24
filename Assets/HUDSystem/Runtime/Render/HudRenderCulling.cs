@@ -2,7 +2,8 @@
 生成日期:	11:11:2025
 类    名: 	HudRenderCulling
 作    者:	HappLI
-描    述:	渲染裁剪和排序
+描    述:	渲染裁剪和排序 
+            方案来源https://gitee.com/pies/hud
 *********************************************************************/
 using System;
 using Unity.Collections;

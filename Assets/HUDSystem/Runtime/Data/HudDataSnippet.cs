@@ -1,9 +1,12 @@
+/********************************************************************
+生成日期:	11:11:2025
+类    名: 	HudDataSnippet
+作    者:	HappLI
+描    述:	HUD 数据片段
+            方案来源https://gitee.com/pies/hud
+*********************************************************************/
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Diagnostics;
-using UnityEngine.Rendering;
-using UnityEngine.UIElements;
-using static UnityEngine.UI.Image;
 namespace Framework.HUD.Runtime
 {
 

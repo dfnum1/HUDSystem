@@ -3,6 +3,7 @@
 类    名: 	HudGpuRenderData
 作    者:	HappLI
 描    述:	Gpu 渲染数据
+            方案来源https://gitee.com/pies/hud
 *********************************************************************/
 using System;
 using System.Collections.Generic;

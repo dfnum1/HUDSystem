@@ -2,7 +2,7 @@
 生成日期:	11:11:2025
 类    名: 	HudNumber
 作    者:	HappLI
-描    述:	数字
+描    述:	数字  方案来源https://gitee.com/pies/hud
 *********************************************************************/
 using System;
 using TMPro;
@@ -26,7 +26,7 @@ namespace Framework.HUD.Runtime
     //--------------------------------------------------------
     //! HudNumber
     //--------------------------------------------------------
-    [HudData(typeof(HudNumberData))]
+    [HudData(typeof(HudNumberData)),HudIcon("number")]
     public class HudNumber : AWidget
     {
         enum EOverrideType : byte

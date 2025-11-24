@@ -2,7 +2,7 @@
 生成日期:	11:11:2025
 类    名: 	HudJobData
 作    者:	HappLI
-描    述:	
+描    述:	方案来源https://gitee.com/pies/hud
 *********************************************************************/
 using Unity.Burst;
 using Unity.Mathematics;

@@ -3,6 +3,7 @@
 类    名: 	HUDObject
 作    者:	HappLI
 描    述:	HUD 数据对象层
+            方案来源https://gitee.com/pies/hud
 *********************************************************************/
 using System;
 using System.Collections.Generic;

@@ -2,7 +2,7 @@
 生成日期:	11:11:2025
 类    名: 	HudImage
 作    者:	HappLI
-描    述:	图片
+描    述:	图片，方案来源https://gitee.com/pies/hud
 *********************************************************************/
 
 using TMPro;
@@ -52,7 +52,7 @@ namespace Framework.HUD.Runtime
     //--------------------------------------------------------
     // ! HudImage
     //--------------------------------------------------------
-    [HudData(typeof(HudImageData))]
+    [HudData(typeof(HudImageData)), HudIcon("image")]
     public class HudImage : AWidget
     {
         enum EOverrideType : byte

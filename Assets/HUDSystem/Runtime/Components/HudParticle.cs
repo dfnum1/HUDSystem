@@ -24,7 +24,7 @@ namespace Framework.HUD.Runtime
     //--------------------------------------------------------
     //! HudParticle
     //--------------------------------------------------------
-    [HudData(typeof(HudParticleData))]
+    [HudData(typeof(HudParticleData)), HudIcon("particle")]
     public class HudParticle : AWidget
     {
         enum EOverrideType : byte
