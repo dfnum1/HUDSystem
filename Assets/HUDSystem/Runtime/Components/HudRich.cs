@@ -404,10 +404,15 @@ namespace Framework.HUD.Runtime
                     var colorMatch = Regex.Match(match.Groups[2].Value, @"<color=0x([0-9a-fA-F]{8})>(.*?)</color>", RegexOptions.Singleline);
                     if (colorMatch.Success)
                     {
-                        string colorValue = "color=0x" + colorMatch.Groups[1].Value;
+                        uint val = Convert.ToUInt32(colorMatch.Groups[1].Value, 16);
+                        Color color = new Color32(
+                            (byte)((val >> 24) & 0xFF),
+                            (byte)((val >> 16) & 0xFF),
+                            (byte)((val >> 8) & 0xFF),
+                            (byte)(val & 0xFF)
+                        );
                         string innerText = colorMatch.Groups[2].Value;
-                        segments.Add(new RichSegment(colorValue, Color.white));
-                        segments.Add(new RichSegment(innerText, Color.white));
+                        segments.Add(new RichSegment(innerText, color));
                     }
                 }
                 lastIndex = match.Index + match.Length;
