@@ -34,6 +34,10 @@ namespace Framework.HUD.Runtime
     [HudData(typeof(HudRichData)), HudIcon("rich")]
     public class HudRich : AWidget
     {
+        static Regex ms_regex = new Regex(
+            @"(<img=[^<>]+?/>)" +                                 // img 标签
+            @"|(<color=0x[0-9a-fA-F]{8}>.*?</color>)",            // color 标签
+            RegexOptions.Singleline);
         //--------------------------------------------------------
         public struct RichSegment
         {
@@ -370,54 +374,50 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         private void ParseSimpleHtmlRichText(string text, ref List<RichSegment> segments)
         {
-            Color curColor = Color.white;
-            int pos = 0;
-            while (pos < text.Length)
+            int lastIndex = 0;
+            foreach (Match match in ms_regex.Matches(text))
             {
-                // <img=xxx,w=xx,h=xx,x=11,y=222/>
-                var imgMatch = Regex.Match(
-                    text,
-                    @"<img=([^\s,/>]+)(?:,w=(\d+))?(?:,h=(\d+))?(?:,x=(-?\d+))?(?:,y=(-?\d+))?/>",
-                    RegexOptions.None,
-                    TimeSpan.FromMilliseconds(100)
-                );
-                if (imgMatch.Success && imgMatch.Index == pos)
+                // 处理前面的普通文本（包括换行符）
+                if (match.Index > lastIndex)
                 {
-                    string imgName = imgMatch.Groups[1].Value;
-                    float w = imgMatch.Groups[2].Success ? float.Parse(imgMatch.Groups[2].Value) : 0;
-                    float h = imgMatch.Groups[3].Success ? float.Parse(imgMatch.Groups[3].Value) : 0;
-                    float x = imgMatch.Groups[4].Success ? float.Parse(imgMatch.Groups[4].Value) : 0;
-                    float y = imgMatch.Groups[5].Success ? float.Parse(imgMatch.Groups[5].Value) : 0;
-                    segments.Add(new RichSegment(imgName, new Vector2(w, h), new Vector2(x, y), curColor));
-                    pos += imgMatch.Length;
-                    continue;
+                    string normalText = text.Substring(lastIndex, match.Index - lastIndex);
+                    if (!string.IsNullOrEmpty(normalText))
+                        segments.Add(new RichSegment(normalText, Color.white));
                 }
 
-                // <color=0xff0000ff>内容</color>
-                var colorMatch = Regex.Match(text, @"<color=0x([0-9a-fA-F]{8})>(.*?)</color>", RegexOptions.Singleline, TimeSpan.FromMilliseconds(100));
-                if (colorMatch.Success && colorMatch.Index == pos)
+                if (match.Groups[1].Success) // img 标签
                 {
-                    string hex = colorMatch.Groups[1].Value;
-                    string innerText = colorMatch.Groups[2].Value;
-                    uint val = Convert.ToUInt32(hex, 16);
-                    Color color = new Color32(
-                        (byte)((val >> 24) & 0xFF),
-                        (byte)((val >> 16) & 0xFF),
-                        (byte)((val >> 8) & 0xFF),
-                        (byte)(val & 0xFF)
-                    );
-                    segments.Add(new RichSegment(innerText, color));
-                    pos += colorMatch.Length;
-                    continue;
+                    string imgTag = match.Groups[1].Value;
+                    var imgMatch = Regex.Match(imgTag, @"img=([^\s,/>]+)(?:,w=(\d+))?(?:,h=(\d+))?(?:,x=(-?\d+))?(?:,y=(-?\d+))?");
+                    if (imgMatch.Success)
+                    {
+                        string name = imgMatch.Groups[1].Value;
+                        float w = imgMatch.Groups[2].Success ? float.Parse(imgMatch.Groups[2].Value) : 0;
+                        float h = imgMatch.Groups[3].Success ? float.Parse(imgMatch.Groups[3].Value) : 0;
+                        float x = imgMatch.Groups[4].Success ? float.Parse(imgMatch.Groups[4].Value) : 0;
+                        float y = imgMatch.Groups[5].Success ? float.Parse(imgMatch.Groups[5].Value) : 0;
+                        segments.Add(new RichSegment(name, new Vector2(w, h), new Vector2(x, y), Color.white));
+                    }
                 }
-
-                // 普通文本，直到下一个标签
-                int nextTag = text.IndexOf('<', pos);
-                if (nextTag <=0) nextTag = text.Length;
-                string content = text.Substring(pos, nextTag - pos);
-                if (!string.IsNullOrEmpty(content))
-                    segments.Add(new RichSegment(content, curColor));
-                pos = nextTag;
+                else if (match.Groups[2].Success) // color 标签
+                {
+                    var colorMatch = Regex.Match(match.Groups[2].Value, @"<color=0x([0-9a-fA-F]{8})>(.*?)</color>", RegexOptions.Singleline);
+                    if (colorMatch.Success)
+                    {
+                        string colorValue = "color=0x" + colorMatch.Groups[1].Value;
+                        string innerText = colorMatch.Groups[2].Value;
+                        segments.Add(new RichSegment(colorValue, Color.white));
+                        segments.Add(new RichSegment(innerText, Color.white));
+                    }
+                }
+                lastIndex = match.Index + match.Length;
+            }
+            // 处理最后一段普通文本（包括换行符）
+            if (lastIndex < text.Length)
+            {
+                string normalText = text.Substring(lastIndex);
+                if (!string.IsNullOrEmpty(normalText))
+                    segments.Add(new RichSegment(normalText, Color.white));
             }
         }
         //--------------------------------------------------------
