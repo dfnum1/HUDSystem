@@ -342,6 +342,24 @@ namespace Framework.HUD.Editor
             GUILayout.Label(new GUIContent("文本内容", "例如：111<img=Pet_Icon_Star_Normal_02,w=20,h=20,x=1,y=20/>222<color=0xff0000ff>333</color>"));
             data.richText = EditorGUILayout.TextArea(data.richText, GUILayout.Width(viewRect.width-80), GUILayout.Height(200));
             EditorGUILayout.EndHorizontal();
+            if (GUILayout.Button("插入图片"))
+            {
+                var atlas = hudText.GetHudAtlas();
+                var provider = ScriptableObject.CreateInstance<HudAtlasSpriteSearchProvider>();
+                provider.atlas = atlas;
+                provider.onSelect = (info) =>
+                {
+                    // 弹出参数输入窗口
+                    InsertImageWindow.Show(info.name, (tag) =>
+                    {
+                        data.richText += tag;
+                        hudText.SyncData();
+                        GetHud().TriggerReorder();
+                    });
+                };
+                SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
+                Event.current.Use();
+            }
             data.fontSize = EditorGUILayout.FloatField("字体大小", data.fontSize);
             data.lineSpacing = EditorGUILayout.FloatField("间距", data.lineSpacing);
             data.lineHeight = EditorGUILayout.FloatField("行高", data.lineHeight);
@@ -364,6 +382,51 @@ namespace Framework.HUD.Editor
                 hudText.SyncData();
                 GetHud().TriggerReorder();
             }
+        }
+    }
+    //--------------------------------------------------------
+    //! InsertImageWindow
+    //--------------------------------------------------------
+    public class InsertImageWindow : EditorWindow
+    {
+        public string imageName;
+        public int width = 20;
+        public int height = 20;
+        public int offsetX = 0;
+        public int offsetY = 0;
+        private Action<string> onConfirm;
+
+        public static void Show(string imageName, Action<string> onConfirm)
+        {
+            var window = ScriptableObject.CreateInstance<InsertImageWindow>();
+            window.titleContent = new GUIContent("插入图片参数");
+            window.imageName = imageName;
+            window.onConfirm = onConfirm;
+            window.position = new Rect(Screen.width / 2, Screen.height / 2, 250, 120);
+            window.ShowModalUtility();
+        }
+
+        void OnGUI()
+        {
+            GUILayout.Label("图片名: " + imageName);
+            width = EditorGUILayout.IntField("宽度", width);
+            height = EditorGUILayout.IntField("高度", height);
+            offsetX = EditorGUILayout.IntField("偏移X", offsetX);
+            offsetY = EditorGUILayout.IntField("偏移Y", offsetY);
+
+            GUILayout.Space(10);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("确定"))
+            {
+                string tag = $"<img={imageName},w={width},h={height},x={offsetX},y={offsetY}/>";
+                onConfirm?.Invoke(tag);
+                Close();
+            }
+            if (GUILayout.Button("取消"))
+            {
+                Close();
+            }
+            GUILayout.EndHorizontal();
         }
     }
 }

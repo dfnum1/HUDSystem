@@ -705,6 +705,7 @@ namespace Framework.HUD.Runtime
         internal override void Destroy()
         {
             OnDestroy();
+            m_onRayHit = null;
             if (m_pParent != null) m_pParent.Detach(this);
             if (m_HudController != null) m_HudController.OnWidgetDestroy(this);
             m_bVisible = true;

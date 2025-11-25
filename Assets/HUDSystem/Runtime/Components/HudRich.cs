@@ -413,7 +413,7 @@ namespace Framework.HUD.Runtime
 
                 // 普通文本，直到下一个标签
                 int nextTag = text.IndexOf('<', pos);
-                if (nextTag == -1) nextTag = text.Length;
+                if (nextTag <=0) nextTag = text.Length;
                 string content = text.Substring(pos, nextTag - pos);
                 if (!string.IsNullOrEmpty(content))
                     segments.Add(new RichSegment(content, curColor));
