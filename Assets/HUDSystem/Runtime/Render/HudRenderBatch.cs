@@ -19,7 +19,7 @@ namespace Framework.HUD.Runtime
         HudSystem m_pSystem;
         private Material m_pMaterial;
         private Mesh m_pMesh;
-        private HudAtlas m_pAtlasMapping;
+        private IHudAtlas m_pAtlasMapping;
         private TMP_FontAsset m_pFontAsset;
 
         int m_nInstanceCount = 0;
@@ -30,7 +30,7 @@ namespace Framework.HUD.Runtime
         private HashSet<HudController> m_vHudControllers;
         JobHandle m_pJobHandle;
         CommandBuffer m_CommandBuffer = null;
-        public HudRenderBatch(HudSystem pSystem, Material material, Mesh mesh, HudAtlas atlasMapping, TMP_FontAsset fontAsset)
+        public HudRenderBatch(HudSystem pSystem, Material material, Mesh mesh, IHudAtlas atlasMapping, TMP_FontAsset fontAsset)
         {
             m_pSystem = pSystem;
             m_nInstanceCount = 0;
@@ -46,7 +46,7 @@ namespace Framework.HUD.Runtime
             m_pJobHandle = new JobHandle();
         }
         //-----------------------------------------------------
-        internal void SetAltas(HudAtlas atlas)
+        internal void SetAltas(IHudAtlas atlas)
         {
             m_pAtlasMapping = atlas;
             if (atlas != null)
@@ -54,13 +54,13 @@ namespace Framework.HUD.Runtime
                 m_pAtlasMapping.GenAtlasMappingInfo();
                 if (m_pMaterial&& m_pMaterial.HasProperty(HUDUtils._AtlasTex))
                 {
-                    m_MaterialPropertyBlock.SetTexture(HUDUtils._AtlasTex, m_pAtlasMapping.atlasTex);
-                    m_MaterialPropertyBlock.SetInt(HUDUtils._AtlasWidth, m_pAtlasMapping.width);
-                    m_MaterialPropertyBlock.SetInt(HUDUtils._AtlasHeight, m_pAtlasMapping.height);
+                    m_MaterialPropertyBlock.SetTexture(HUDUtils._AtlasTex, m_pAtlasMapping.GetAtlasTexture());
+                    m_MaterialPropertyBlock.SetInt(HUDUtils._AtlasWidth, m_pAtlasMapping.GetAtlasWidth());
+                    m_MaterialPropertyBlock.SetInt(HUDUtils._AtlasHeight, m_pAtlasMapping.GetAtlasHeight());
 
-                    m_MaterialPropertyBlock.SetTexture(HUDUtils._AtlasMappingTex, m_pAtlasMapping.atlasMappingTex);
-                    m_MaterialPropertyBlock.SetInt(HUDUtils._AtlasMappingWidth, m_pAtlasMapping.atlasMappingWidth);
-                    m_MaterialPropertyBlock.SetInt(HUDUtils._AtlasMappingHeight, m_pAtlasMapping.atlasMappingHeight);
+                    m_MaterialPropertyBlock.SetTexture(HUDUtils._AtlasMappingTex, m_pAtlasMapping.GetAtlasMappingTex());
+                    m_MaterialPropertyBlock.SetInt(HUDUtils._AtlasMappingWidth, m_pAtlasMapping.GetAtlasMappingWidth());
+                    m_MaterialPropertyBlock.SetInt(HUDUtils._AtlasMappingHeight, m_pAtlasMapping.GetAtlasMappingHeight());
                 }
             }
         }

@@ -21,77 +21,73 @@ using UnityEditor.U2D;
 namespace Framework.HUD.Runtime
 {
     [CreateAssetMenu]
-    public class HudAtlas : ScriptableObject
+    public class HudAtlas : ScriptableObject, IHudAtlas
     {
         [SerializeField, Header("图集资源")]
         private SpriteAtlas m_SpriteAtlas;
 
         [SerializeField, Header("精灵映射纹理")]
         private Texture2D m_AtlasMappingTex;
-        public Texture2D atlasMappingTex { get { return m_AtlasMappingTex; } }
+        public Texture2D GetAtlasMappingTex() { return m_AtlasMappingTex; }
 
         [SerializeField, Header("图集大小")]
         private int m_Width;
-        public int width { get { return m_Width; } }
+        public int GetAtlasWidth() { return m_Width; }
+
 
         [SerializeField]
         private int m_Height;
-        public int height { get { return m_Height; } }
+        public int GetAtlasHeight() { return m_Height; }
 
         [SerializeField, Header("映射纹理大小")]
         private int m_AtlasMappingWidth;
-        public int atlasMappingWidth { get { return m_AtlasMappingWidth; } }
+        public int GetAtlasMappingWidth() { return m_AtlasMappingWidth; }
 
         [SerializeField]
         private int m_AtlasMappingHeight;
-        public int atlasMappingHeight { get { return m_AtlasMappingHeight; } }
+        public int GetAtlasMappingHeight() { return m_AtlasMappingHeight; }
 
         private bool m_bInied = false;
         private bool m_isGenAtlasMapping = false;
 
-        [System.Serializable]
-        public class SpriteInfo
-        {
-            public string name;
-            public int index;
-            public Vector2Int size;
-        }
         [SerializeField, HideInInspector]
         private List<SpriteInfo> m_vSprites;
         private Dictionary<string, SpriteInfo> m_vNameToSpriteInfo = new Dictionary<string, SpriteInfo>();
 
         Texture m_AtlasTex;
-        public Texture atlasTex
+        public Texture GetAtlasTexture()
         {
-            get
-            {
-                Init();
+            Init();
 #if UNITY_EDITOR
-                GetAtlasTexture();
+            GetPakAtlasTexture();
 #endif
-                if (m_AtlasTex != null) return m_AtlasTex;
-                foreach (var item in m_vNameToSpriteInfo)
+            if (m_AtlasTex != null) return m_AtlasTex;
+            foreach (var item in m_vNameToSpriteInfo)
+            {
+                Sprite sprite = m_SpriteAtlas.GetSprite(item.Key);
+                if (sprite != null)
                 {
-                    Sprite sprite = m_SpriteAtlas.GetSprite(item.Key);
-                    if (sprite != null)
-                    {
-                        m_AtlasTex = sprite.texture;
-                        return m_AtlasTex;
-                    }
+                    m_AtlasTex = sprite.texture;
+                    return m_AtlasTex;
                 }
-                return null;
             }
+            return null;
         }
         //--------------------------------------------------------
         public SpriteInfo GetSpriteInfo(string name)
         {
             Init();
-            SpriteInfo spriteInfo = null;
-            m_vNameToSpriteInfo.TryGetValue(name, out spriteInfo);
-            return spriteInfo;
+            SpriteInfo spriteInfo;
+            if(m_vNameToSpriteInfo.TryGetValue(name, out spriteInfo))
+                return spriteInfo;
+            return SpriteInfo.DEF;
         }
         //--------------------------------------------------------
-        void Init()
+        public void CheckPackSprite(Sprite sprite, bool bForceProcessPack = false)
+        {
+        }
+        //--------------------------------------------------------
+        public void Init()
         {
             if (m_vSprites == null)
                 return;
@@ -156,7 +152,7 @@ namespace Framework.HUD.Runtime
             AssetDatabase.Refresh();
         }
         //--------------------------------------------------------
-        Texture GetAtlasTexture()
+        Texture GetPakAtlasTexture()
         {
             if (!Application.isPlaying)
             {
@@ -269,7 +265,7 @@ namespace Framework.HUD.Runtime
             else
             {
                 Rect rect = sprite.rect;
-                Texture2D tex = GetAtlasTexture() as Texture2D;
+                Texture2D tex = GetPakAtlasTexture() as Texture2D;
                 Vector4 padding = UnityEngine.Sprites.DataUtility.GetPadding(sprite);
 
                 float atlasWidth = tex.width;
@@ -291,7 +287,7 @@ namespace Framework.HUD.Runtime
             else
             {
                 Rect rect = sprite.rect;
-                Texture2D tex = GetAtlasTexture() as Texture2D;
+                Texture2D tex = GetPakAtlasTexture() as Texture2D;
 
                 float atlasWidth = tex.width;
                 float atlasHeight = tex.height;
@@ -310,7 +306,7 @@ namespace Framework.HUD.Runtime
             if (m_SpriteAtlas == null || m_SpriteAtlas.spriteCount == 0 || m_vNameToSpriteInfo == null) return;
             Sprite[] sprits = new Sprite[m_SpriteAtlas.spriteCount];
             m_SpriteAtlas.GetSprites(sprits);
-            Texture atlasTex = GetAtlasTexture();
+            Texture atlasTex = GetPakAtlasTexture();
             int atlasWidth = atlasTex.width;
             int atlasHeight = atlasTex.height;
             int mappingWidth = m_AtlasMappingTex.width;
@@ -324,7 +320,8 @@ namespace Framework.HUD.Runtime
                 if (m_vNameToSpriteInfo.TryGetValue(name, out spriteInfo))
                 {
                     var uv = GetOuterUV(sprite);
-                    SetSpriteUV(spriteInfo, new Vector2(uv.x, uv.y), new Vector2(uv.z, uv.w));
+                    SetSpriteUV(ref spriteInfo, new Vector2(uv.x, uv.y), new Vector2(uv.z, uv.w));
+                    m_vNameToSpriteInfo[name] = spriteInfo;
                 }
                 if (sprite.border.SqrMagnitude() > 0)
                 {
@@ -348,7 +345,8 @@ namespace Framework.HUD.Runtime
                             SpriteInfo info;
                             if (m_vNameToSpriteInfo.TryGetValue(name + "_" + spritesliceId, out info))
                             {
-                                SetSpriteUV(info, new Vector2(s_UVScratch[x].x, s_UVScratch[y].y), new Vector2(s_UVScratch[x2].x, s_UVScratch[y2].y));
+                                SetSpriteUV(ref info, new Vector2(s_UVScratch[x].x, s_UVScratch[y].y), new Vector2(s_UVScratch[x2].x, s_UVScratch[y2].y));
+                                m_vNameToSpriteInfo[name + "_" + spritesliceId] = spriteInfo;
                                 spritesliceId++;
                             }
                         }
@@ -358,10 +356,10 @@ namespace Framework.HUD.Runtime
             m_AtlasMappingTex.Apply();
         }
         //--------------------------------------------------------
-        private void SetSpriteUV(SpriteInfo spriteInfo, Vector2 min, Vector2 max)
+        private void SetSpriteUV(ref SpriteInfo spriteInfo, Vector2 min, Vector2 max)
         {
-            int atlasWidth = atlasTex.width;
-            int atlasHeight = atlasTex.height;
+            int atlasWidth = m_AtlasTex.width;
+            int atlasHeight = m_AtlasTex.height;
             int mappingWidth = m_AtlasMappingTex.width;
             ushort spriteWidth = (ushort)((max.x - min.x) * atlasWidth);
             ushort spriteHeight = (ushort)((max.y - min.y) * atlasHeight);

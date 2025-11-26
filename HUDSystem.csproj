@@ -60,9 +60,12 @@
     <Analyzer Include="D:\Program Files\Unity 2022.3.62f2\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\HUDSystem\Runtime\DynamicAtlas\DynamicTextureData.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Data\HudDatas.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\DynamicAtlas\RectanglePacking\IntegerRectangle.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Render\HudInstanceCollector.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Render\HudRenderBatch.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\DynamicAtlas\DynamicAtlas.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\PreviewLogic.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Job\HudJobBuffer.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\HierarchyLogic.cs" />
@@ -77,8 +80,11 @@
     <Compile Include="Assets\HUDSystem\Runtime\Data\HudAtlas.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\HudEditor.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\HudEditorInit.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\DynamicAtlas\RectanglePacking\SortableSize.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\DynamicAtlas\DynamicSprite.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\HudAtlasSpriteProvider.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Data\HudObject.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\DynamicAtlas\DynamicAtlasManager.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Logics\InspectorLogic.cs" />
     <Compile Include="Assets\HUDSystem\EditorRuntime\Preview\TreeAssetView.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudParticle.cs" />
@@ -86,11 +92,13 @@
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudNumber.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Utils\HudUtils.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Utils\TypePool.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\Data\IHudAtlas.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudCanvas.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudText.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\HudSystem.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\HudRich.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Components\AWidget.cs" />
+    <Compile Include="Assets\HUDSystem\Runtime\DynamicAtlas\RectanglePacking\RectanglePacker.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\Utils\HudAttributes.cs" />
     <Compile Include="Assets\HUDSystem\Runtime\HudController.cs" />
   </ItemGroup>

@@ -161,52 +161,85 @@ namespace Framework.HUD.Editor
             EditorGUI.BeginChangeCheck();
             GUILayout.BeginHorizontal();
             {
-                GUILayout.Label("图片资源");
-                GUILayout.BeginHorizontal();
-
-                // 精确绘制Sprite区域
-                Rect previewRect = GUILayoutUtility.GetRect(96, 96, GUILayout.Width(96), GUILayout.Height(96));
-                if (data.sprite != null)
+                var hudAtlas = hudImage.GetHudAtlas();
+                if(hudAtlas is DynamicAtlas.DynamicAtlas)
                 {
-                    Texture2D tex = data.sprite.texture;
-                    Rect texRect = data.sprite.textureRect;
-                    // 归一化UV
-                    Rect uv = new Rect(
-                        texRect.x / tex.width,
-                        texRect.y / tex.height,
-                        texRect.width / tex.width,
-                        texRect.height / tex.height
-                    );
-                    GUI.DrawTextureWithTexCoords(previewRect, tex, uv);
-
-                    // 点击弹窗
-                    if (Event.current.type == EventType.MouseDown && previewRect.Contains(Event.current.mousePosition))
-                    {
-                        var atlas = hudImage.GetHudAtlas();
-                        var provider = ScriptableObject.CreateInstance<HudAtlasSpriteSearchProvider>();
-                        provider.atlas = atlas;
-                        provider.onSelect = (info) =>
-                        {
-                            if (data.sprite != info)
-                            {
-                                data.sprite = info;
-                                if (data.sprite.border.SqrMagnitude() > 0)
-                                {
-                                    data.imageType = HudImageData.ImageType.Sliced;
-                                }
-                                hudImage.SyncData();
-                                GetHud().TriggerReorder();
-                            }
-                        };
-                        SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
-                        Event.current.Use();
-                    }
+                    data.sprite = EditorGUILayout.ObjectField(data.sprite, typeof(UnityEngine.Sprite), false) as UnityEngine.Sprite;
                 }
                 else
                 {
-                    if (GUI.Button(previewRect, "None"))
+                    GUILayout.Label("图片资源");
+                    GUILayout.BeginHorizontal();
+                    HudAtlas atlas = null;
+                    if(hudAtlas!=null)
                     {
-                        var atlas = hudImage.GetHudAtlas();
+                        atlas = hudAtlas as HudAtlas;
+                    }
+
+                    // 精确绘制Sprite区域
+                    Rect previewRect = GUILayoutUtility.GetRect(96, 96, GUILayout.Width(96), GUILayout.Height(96));
+                    if (data.sprite != null)
+                    {
+                        Texture2D tex = data.sprite.texture;
+                        Rect texRect = data.sprite.textureRect;
+                        // 归一化UV
+                        Rect uv = new Rect(
+                            texRect.x / tex.width,
+                            texRect.y / tex.height,
+                            texRect.width / tex.width,
+                            texRect.height / tex.height
+                        );
+                        GUI.DrawTextureWithTexCoords(previewRect, tex, uv);
+
+                        // 点击弹窗
+                        if (Event.current.type == EventType.MouseDown && previewRect.Contains(Event.current.mousePosition))
+                        {
+                            var provider = ScriptableObject.CreateInstance<HudAtlasSpriteSearchProvider>();
+                            provider.atlas = atlas;
+                            provider.onSelect = (info) =>
+                            {
+                                if (data.sprite != info)
+                                {
+                                    data.sprite = info;
+                                    if (data.sprite.border.SqrMagnitude() > 0)
+                                    {
+                                        data.imageType = HudImageData.ImageType.Sliced;
+                                    }
+                                    hudImage.SyncData();
+                                    GetHud().TriggerReorder();
+                                }
+                            };
+                            SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
+                            Event.current.Use();
+                        }
+                    }
+                    else
+                    {
+                        if (GUI.Button(previewRect, "None"))
+                        {
+                            var provider = ScriptableObject.CreateInstance<HudAtlasSpriteSearchProvider>();
+                            provider.atlas = atlas;
+                            provider.onSelect = (info) =>
+                            {
+                                if (data.sprite != info)
+                                {
+                                    data.sprite = info;
+                                    if (data.sprite.border.SqrMagnitude() > 0)
+                                    {
+                                        data.imageType = HudImageData.ImageType.Sliced;
+                                    }
+                                    hudImage.SyncData();
+                                    GetHud().TriggerReorder();
+                                }
+                            };
+                            SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
+                        }
+                    }
+
+                    GUILayout.BeginVertical();
+                    GUILayout.Label(data.sprite ? data.sprite.name : "None", EditorStyles.miniLabel);
+                    if (GUILayout.Button("Select", GUILayout.Width(60)))
+                    {
                         var provider = ScriptableObject.CreateInstance<HudAtlasSpriteSearchProvider>();
                         provider.atlas = atlas;
                         provider.onSelect = (info) =>
@@ -224,32 +257,9 @@ namespace Framework.HUD.Editor
                         };
                         SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
                     }
+                    GUILayout.EndVertical();
+                    GUILayout.EndHorizontal();
                 }
-
-                GUILayout.BeginVertical();
-                GUILayout.Label(data.sprite ? data.sprite.name : "None", EditorStyles.miniLabel);
-                if (GUILayout.Button("Select", GUILayout.Width(60)))
-                {
-                    var atlas = hudImage.GetHudAtlas();
-                    var provider = ScriptableObject.CreateInstance<HudAtlasSpriteSearchProvider>();
-                    provider.atlas = atlas;
-                    provider.onSelect = (info) =>
-                    {
-                        if (data.sprite != info)
-                        {
-                            data.sprite = info;
-                            if(data.sprite.border.SqrMagnitude()>0)
-                            {
-                                data.imageType = HudImageData.ImageType.Sliced;
-                            }
-                            hudImage.SyncData();
-                            GetHud().TriggerReorder();
-                        }
-                    };
-                    SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
-                }
-                GUILayout.EndVertical();
-                GUILayout.EndHorizontal();
             }
             GUILayout.EndHorizontal();
             data.imageType = (HudImageData.ImageType)EditorGUILayout.EnumPopup("绘制类型", data.imageType);
@@ -345,20 +355,44 @@ namespace Framework.HUD.Editor
             if (GUILayout.Button("插入图片"))
             {
                 var atlas = hudText.GetHudAtlas();
-                var provider = ScriptableObject.CreateInstance<HudAtlasSpriteSearchProvider>();
-                provider.atlas = atlas;
-                provider.onSelect = (info) =>
+                if(atlas !=null)
                 {
-                    // 弹出参数输入窗口
-                    InsertImageWindow.Show(info.name, (tag) =>
+                    if(atlas is HudAtlas)
                     {
-                        data.richText += tag;
-                        hudText.SyncData();
-                        GetHud().TriggerReorder();
-                    });
-                };
-                SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
-                Event.current.Use();
+                        var provider = ScriptableObject.CreateInstance<HudAtlasSpriteSearchProvider>();
+                        provider.atlas = atlas as HudAtlas;
+                        provider.onSelect = (info) =>
+                        {
+                            // 弹出参数输入窗口
+                            InsertImageWindow.Show(info.name, (tag) =>
+                            {
+                                data.richText += tag;
+                                hudText.SyncData();
+                                GetHud().TriggerReorder();
+                            });
+                        };
+                        SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
+                        Event.current.Use();
+                    }
+                    else
+                    {
+                        var provider = ScriptableObject.CreateInstance<HudAtlasSpriteSearchProvider>();
+                        provider.atlas = null;
+                        provider.onSelect = (info) =>
+                        {
+                            // 弹出参数输入窗口
+                            InsertImageWindow.Show(info.name, (tag) =>
+                            {
+                                data.richText += tag;
+                                hudText.SyncData();
+                                GetHud().TriggerReorder();
+                            });
+                        };
+                        SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
+                        Event.current.Use();
+                    }
+                }
+
             }
             data.fontSize = EditorGUILayout.FloatField("字体大小", data.fontSize);
             data.lineSpacing = EditorGUILayout.FloatField("间距", data.lineSpacing);

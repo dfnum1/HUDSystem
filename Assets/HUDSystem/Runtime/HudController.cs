@@ -4,6 +4,7 @@
 作    者:	HappLI
 描    述:	HUD 控制器
 *********************************************************************/
+using DynamicAtlas;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -29,6 +30,7 @@ namespace Framework.HUD.Runtime
 #if UNITY_EDITOR
         internal bool m_bEditorMode = false;
 #endif
+        IHudAtlas m_pCurrentAtlas = null;
         //--------------------------------------------------------
         public HudController()
         {
@@ -198,10 +200,9 @@ namespace Framework.HUD.Runtime
             get { return m_RenderBatch; }
         }
         //--------------------------------------------------------
-        public HudAtlas GetAtlas()
+        public IHudAtlas GetAtlas()
         {
-            if (m_pObject == null) return null;
-            return m_pObject.atlasAset;
+            return m_pCurrentAtlas;
         }
         //--------------------------------------------------------
         public TMP_FontAsset GetFontAsset()
@@ -241,7 +242,13 @@ namespace Framework.HUD.Runtime
             m_pObject.Init();
 
             if (m_RenderBatch == null)
-                m_RenderBatch = m_pSystem.GetRenderBatch(hudObject.material, hudObject.mesh, hudObject.atlasAset, hudObject.fontAsset);
+            {
+                IHudAtlas hudAtlas = hudObject.atlasAset;
+                if(m_pObject.useDynamicAtlas)
+                    hudAtlas = DynamicAtlasManager.Instance.GetDynamicAtlas();
+                m_pCurrentAtlas = hudAtlas;
+                m_RenderBatch = m_pSystem.GetRenderBatch(hudObject.material, hudObject.mesh, hudAtlas, hudObject.fontAsset);
+            }
 
             if (m_RenderBatch != null)
             {
@@ -396,6 +403,7 @@ namespace Framework.HUD.Runtime
             m_OffsetRotation = Vector3.zero;
             m_nTransId = -1;
 
+            m_pCurrentAtlas = null;
 #if UNITY_EDITOR
             m_bEditorMode = false;
 #endif

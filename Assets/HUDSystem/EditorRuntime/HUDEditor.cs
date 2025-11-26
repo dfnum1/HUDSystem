@@ -267,6 +267,19 @@ namespace Framework.HUD.Editor
 
             return true;
         }
+
+        //--------------------------------------------------------
+        public bool OnLoadAsset(AWidget pWidget, string strAsset, Action<UnityEngine.Object> onCallback)
+        {
+            var assetObj = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(strAsset);
+            if (onCallback != null) onCallback(assetObj);
+            return true;
+        }
+        //--------------------------------------------------------
+        public bool OnUnloadAsset(AWidget pWidget, UnityEngine.Object pObject)
+        {
+            return false;
+        }
     }
 }
 #endif

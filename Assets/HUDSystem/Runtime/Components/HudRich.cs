@@ -178,7 +178,7 @@ namespace Framework.HUD.Runtime
         void Refresh()
         {
             m_Size = Vector2.zero;
-            HudAtlas hudAtlas = GetHudAtlas();
+            IHudAtlas hudAtlas = GetHudAtlas();
             if (hudAtlas == null) return;
             if (string.IsNullOrEmpty(m_richText))
             {
@@ -319,8 +319,8 @@ namespace Framework.HUD.Runtime
                 }
                 else
                 {
-                    HudAtlas.SpriteInfo spriteInfo = hudAtlas.GetSpriteInfo(seg.content);
-                    if (spriteInfo != null)
+                    SpriteInfo spriteInfo = hudAtlas.GetSpriteInfo(seg.content);
+                    if (spriteInfo.IsValid())
                     {
                         HudDataSnippet snippet = GetDataSnippet(snippetIndex);
                         snippetIndex++;

@@ -107,7 +107,7 @@ namespace Framework.HUD.Runtime
         void Refresh()
         {
             m_Size = Vector2.zero;
-            HudAtlas hudAtlas = GetHudAtlas();
+            IHudAtlas hudAtlas = GetHudAtlas();
             if (hudAtlas == null)
                 return;
             if(string.IsNullOrEmpty(m_strNumber))
@@ -127,8 +127,8 @@ namespace Framework.HUD.Runtime
             float fontSize = GetFontSize()/10.0f;
             for (int i = 0; i < count; i++)
             {
-                HudAtlas.SpriteInfo spriteInfo = hudAtlas.GetSpriteInfo(chars[i].ToString());
-                if (spriteInfo != null)
+                SpriteInfo spriteInfo = hudAtlas.GetSpriteInfo(chars[i].ToString());
+                if (spriteInfo.IsValid())
                 {
                     float2 size = new float2(spriteInfo.size.x, spriteInfo.size.y);
                     size = size * fontSize;

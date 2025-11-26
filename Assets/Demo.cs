@@ -1,6 +1,7 @@
 using Framework.HUD.Runtime;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class Demo : MonoBehaviour, IHudSystemCallback
@@ -64,21 +65,6 @@ public class Demo : MonoBehaviour, IHudSystemCallback
     private void OnDestroy()
     {
         m_pHudSystem.Destroy();
-    }
-
-    public bool OnSpawnInstance(AWidget pWidget, string strParticle, System.Action<GameObject> onCallback)
-    {
-#if UNITY_EDITOR
-        onCallback(GameObject.Instantiate(UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(strParticle)));
-#endif
-        return true;
-    }
-
-    public bool OnDestroyInstance(AWidget pWidget, GameObject pGameObject)
-    {
-        if (Application.isPlaying) UnityEngine.GameObject.Destroy(pGameObject);
-        else UnityEngine.GameObject.DestroyImmediate(pGameObject);
-        return true;
     }
 
     void ClearHuds()
@@ -155,5 +141,33 @@ public class Demo : MonoBehaviour, IHudSystemCallback
     void OnGUI()
     {
         GUI.Label(new Rect(0, 60, 200, 100), "Count: " + spawnCnt + "  ·½°¸:" + m_eType.ToString(), m_style);
+    }
+
+    public bool OnSpawnInstance(AWidget pWidget, string strParticle, System.Action<GameObject> onCallback)
+    {
+#if UNITY_EDITOR
+        onCallback(GameObject.Instantiate(UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(strParticle)));
+#endif
+        return true;
+    }
+
+    public bool OnDestroyInstance(AWidget pWidget, GameObject pGameObject)
+    {
+        if (Application.isPlaying) UnityEngine.GameObject.Destroy(pGameObject);
+        else UnityEngine.GameObject.DestroyImmediate(pGameObject);
+        return true;
+    }
+
+    public bool OnLoadAsset(AWidget pWidget, string strAsset, System.Action<Object> onCallback)
+    {
+#if UNITY_EDITOR
+        if(onCallback!=null) onCallback(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(strAsset));
+#endif
+        return true;
+    }
+
+    public bool OnUnloadAsset(AWidget pWidget, Object pObject)
+    {
+        return true;
     }
 }

@@ -18,10 +18,31 @@ MonoBehaviour:
   allowRotation: 1
   mesh: {fileID: 4300000, guid: b5a4655ce0c3e744ca30a64ba06787db, type: 2}
   material: {fileID: 2100000, guid: 66f64d333b654b04aaa3b42b9d53a5fa, type: 2}
+  useDynamicAtlas: 0
   atlasAset: {fileID: 11400000, guid: fb0cd23d79faeda4da7919340a0fca71, type: 2}
   fontAsset: {fileID: 11400000, guid: 556d3f20b02cc8a4793353c6c9422c7b, type: 2}
   vCanvas: []
-  vImages: []
+  vImages:
+  - id: 1
+    name: HudImage
+    rayTest: 1
+    visible: 1
+    position: {x: 0, y: 0, z: 0}
+    sizeDelta: {x: 100, y: 100}
+    angle: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    mask: 0
+    maskRegion:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    sprite: {fileID: 21300000, guid: babc2d06da89740408f3a9a86a1422ea, type: 3}
+    imageType: 0
+    fillMethod: 0
+    fillOrigin: 0
+    fillAmount: 1
   vTexts: []
   vNumbers: []
   vParticles: []
@@ -47,6 +68,9 @@ MonoBehaviour:
     lineSpacing: 0
     lineHeight: 20
   vHierarchies:
+  - id: 1
+    parentId: -1
+    children: 
   - id: 0
     parentId: -1
     children: 

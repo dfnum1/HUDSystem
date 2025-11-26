@@ -4,6 +4,7 @@
 作    者:	HappLI
 描    述:	HUD 组件
 *********************************************************************/
+using DynamicAtlas;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -65,7 +66,7 @@ namespace Framework.HUD.Runtime
         };
     }
     //--------------------------------------------------------
-    public abstract class AWidget : TypeObject
+    public abstract class AWidget : TypeObject, IDynamicAtlasHandle
     {
         protected EHudType m_eHudType = EHudType.None;
 
@@ -272,7 +273,7 @@ namespace Framework.HUD.Runtime
             return m_HudController.GetTransId();
         }
         //--------------------------------------------------------
-        public HudAtlas GetHudAtlas()
+        public IHudAtlas GetHudAtlas()
         {
             if (m_HudController == null) return null;
             return m_HudController.GetAtlas();
@@ -722,5 +723,11 @@ namespace Framework.HUD.Runtime
         }
         //--------------------------------------------------------
         protected virtual void OnDestroy() { }
+
+        //--------------------------------------------------------
+        public virtual void OnDynamicAtlasDone(string name, Sprite sprite)
+        {
+
+        }
     }
 }

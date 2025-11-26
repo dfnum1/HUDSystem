@@ -166,7 +166,7 @@ namespace Framework.HUD.Runtime
             if (hudImageData == null)
                 return;
 
-            HudAtlas hudAtlas = GetHudAtlas();
+            IHudAtlas hudAtlas = GetHudAtlas();
             if (hudAtlas == null)
                 return;
 
@@ -193,11 +193,12 @@ namespace Framework.HUD.Runtime
         private void Simple(Sprite sprite)
         {
             int spriteIndex = -1;
-            HudAtlas.SpriteInfo spriteInfo = null;
+            SpriteInfo spriteInfo = SpriteInfo.DEF;
             if(sprite !=null)
             {
+                GetHudAtlas().CheckPackSprite(sprite,true);
                 spriteInfo = GetHudAtlas().GetSpriteInfo(sprite.name);
-                if (spriteInfo != null) spriteIndex = spriteInfo.index;
+                if (spriteInfo.IsValid()) spriteIndex = spriteInfo.index;
             }
             ResizeDataSnippet(1);
             HudDataSnippet snippet = GetDataSnippet(0);
@@ -216,11 +217,12 @@ namespace Framework.HUD.Runtime
         private void Filled(Sprite sprite)
         {
             int spriteIndex = -1;
-            HudAtlas.SpriteInfo spriteInfo = null;
+            SpriteInfo spriteInfo = SpriteInfo.DEF;
             if (sprite != null)
             {
+                GetHudAtlas().CheckPackSprite(sprite);
                 spriteInfo = GetHudAtlas().GetSpriteInfo(sprite.name);
-                if (spriteInfo != null) spriteIndex = spriteInfo.index;
+                if (spriteInfo.IsValid()) spriteIndex = spriteInfo.index;
             }
 
             Vector2 size = GetSize();
@@ -302,7 +304,7 @@ namespace Framework.HUD.Runtime
                         int y2 = y + 1;
                         string spriteName = sprite.name + "_" + slicedIndex;
                         var spriteInfo = GetHudAtlas().GetSpriteInfo(spriteName);
-                        if (spriteInfo != null)
+                        if (spriteInfo.IsValid())
                         {
                             snippet.SetSpriteId(slicedIndex, spriteInfo.index);
                             float2 pos = new float2(s_VertScratch[x].x, s_VertScratch[y].y);

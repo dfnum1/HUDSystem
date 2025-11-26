@@ -22,6 +22,7 @@ namespace Framework.HUD.Runtime
 
         public Mesh mesh;
         public Material material;
+        public bool useDynamicAtlas = false;
         public HudAtlas atlasAset;
         public TMP_FontAsset fontAsset;
 
@@ -147,8 +148,19 @@ namespace Framework.HUD.Runtime
     {
         public override void OnInspectorGUI()
         {
+            serializedObject.Update();
             HudObject hudObject = (HudObject)target;
-            DrawDefaultInspector();
+            hudObject.center = EditorGUILayout.Vector2Field("中心点偏移", hudObject.center);
+            hudObject.size = EditorGUILayout.Vector2Field("设计分辨率", hudObject.size);
+            hudObject.allowScale = EditorGUILayout.Toggle("允许缩放", hudObject.allowScale);
+            hudObject.allowRotation = EditorGUILayout.Toggle("允许旋转", hudObject.allowRotation);
+            hudObject.mesh = (UnityEngine.Mesh)EditorGUILayout.ObjectField("Mesh", hudObject.mesh, typeof(UnityEngine.Mesh), false);
+            hudObject.material = (UnityEngine.Material)EditorGUILayout.ObjectField("Material", hudObject.material, typeof(UnityEngine.Material), false);
+            hudObject.useDynamicAtlas = EditorGUILayout.Toggle("使用动态图集", hudObject.useDynamicAtlas);
+            if(!hudObject.useDynamicAtlas)
+                hudObject.atlasAset = (HudAtlas)EditorGUILayout.ObjectField("图集资源", hudObject.atlasAset, typeof(HudAtlas), false);
+            hudObject.fontAsset = (TMP_FontAsset)EditorGUILayout.ObjectField("字体资源", hudObject.fontAsset, typeof(TMP_FontAsset), false);
+
             if(hudObject.vCanvas!=null) EditorGUILayout.LabelField("Canvas个数:" + hudObject.vCanvas.Count);
             if (hudObject.vImages != null) EditorGUILayout.LabelField("Image个数:" + hudObject.vImages.Count);
             if (hudObject.vTexts != null) EditorGUILayout.LabelField("Text个数:" + hudObject.vTexts.Count);
@@ -169,6 +181,7 @@ namespace Framework.HUD.Runtime
             {
                 Editor.HUDEditorInit.GenFontAtlasMapping(hudObject.fontAsset);
             }
+            serializedObject.ApplyModifiedProperties();
         }
         //--------------------------------------------------------
         [UnityEditor.Callbacks.OnOpenAsset(0)]

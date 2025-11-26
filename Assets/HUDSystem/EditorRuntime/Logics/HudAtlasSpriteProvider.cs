@@ -23,6 +23,8 @@ public class HudAtlasSpriteSearchProvider : ScriptableObject, ISearchWindowProvi
     {
         m_vSprites = new List<Sprite>();
         m_vSprites.Clear();
+        if (atlas == null)
+            return;
         var filed = atlas.GetType().GetField("m_SpriteAtlas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         if (filed == null)
             return;

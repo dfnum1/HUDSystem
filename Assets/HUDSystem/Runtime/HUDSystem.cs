@@ -4,7 +4,9 @@
 作    者:	HappLI
 描    述:	HUD 系统
 *********************************************************************/
+using DynamicAtlas;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
@@ -14,8 +16,12 @@ namespace Framework.HUD.Runtime
 {
     public interface IHudSystemCallback
     {
+        bool OnLoadAsset(AWidget pWidget, string strAsset, System.Action<UnityEngine.Object> onCallback);
+        bool OnUnloadAsset(AWidget pWidget, UnityEngine.Object pObject);
+
         bool OnSpawnInstance(AWidget pWidget, string strParticle, System.Action<GameObject> onCallback);
         bool OnDestroyInstance(AWidget pWidget, GameObject pGameObject);
+
     }
     public class HudSystem
     {
@@ -28,6 +34,23 @@ namespace Framework.HUD.Runtime
         //--------------------------------------------------------
         public HudSystem()
         {
+            DynamicAtlas.DynamicAtlasManager.Setting setting = new DynamicAtlas.DynamicAtlasManager.Setting();
+            setting.ATLAS_SIZE = 4096;
+            setting.SINGLE_TEXTURE_MAX_SIZE = 512;
+            setting.LoadSpriteFunc = OnLoadAtlasSprite;
+            setting.AtlasAppendDone = OnAtlasAppendDone;
+#if UNITY_STANDALONE && !UNITY_EDITOR
+            setting.AtlasFormat = TextureFormat.BC7;
+#elif UNITY_ANDROID && !UNITY_EDITOR
+            setting.AtlasFormat = TextureFormat.ASTC_4x4;
+#elif UNITY_IOS && !UNITY_EDITOR
+            setting.AtlasFormat = TextureFormat.ASTC_4x4;
+#elif UNITY_PS5 && !UNITY_EDITOR
+            setting.AtlasFormat = TextureFormat.DXT5;
+#else
+            setting.AtlasFormat = TextureFormat.ASTC_6x6;
+#endif
+            DynamicAtlas.DynamicAtlasManager.Init(setting);
         }
         //--------------------------------------------------------
         public float4x4 CameraVP
@@ -49,6 +72,42 @@ namespace Framework.HUD.Runtime
             }
         }
         //--------------------------------------------------------
+        public bool BuildDynamicAtlas(IDynamicAtlasHandle handle, Sprite sprite)
+        {
+            if (sprite == null) return false;
+            var dynamicAtlas = DynamicAtlasManager.Instance.GetDynamicAtlas();
+            return dynamicAtlas.AppendSprite(sprite, handle);
+        }
+        //--------------------------------------------------------
+        private async Task<Sprite> OnLoadAtlasSprite(string sprite)
+        {
+            if(m_vCallbacks == null)
+            {
+                return null;
+            }
+            foreach(var db in m_vCallbacks)
+            {
+                Sprite result = null;
+                if (db.OnLoadAsset(null, sprite, (obj) =>
+                {
+                    result = obj as Sprite;
+                }))
+                {
+                    while (result == null)
+                    {
+                        await Task.Yield();
+                    }
+                    return result;
+                }
+            }
+            return null;
+        }
+        //--------------------------------------------------------
+        private void OnAtlasAppendDone(string sprite, DynamicAtlasManager.eLoadResult result)
+        {
+            // Handle the logic of releasing references to individual textures according to your own resource loading framework
+        }
+        //--------------------------------------------------------
         public void SetRenderCamera(Camera camera)
         {
             if (m_pRenderCamera == camera)
@@ -60,7 +119,7 @@ namespace Framework.HUD.Runtime
             else m_pRenderCameraTransform = null;
         }
         //--------------------------------------------------------
-        public HudRenderBatch GetRenderBatch(Material material, Mesh mesh, HudAtlas atlas, TMP_FontAsset fontAsset)
+        public HudRenderBatch GetRenderBatch(Material material, Mesh mesh, IHudAtlas atlas, TMP_FontAsset fontAsset)
         {
             int hashCode = GetHashCode(material, mesh, atlas);
             if (hashCode == 0) return null;
@@ -195,6 +254,7 @@ namespace Framework.HUD.Runtime
             {
                 db.Value.LateUpdate();
             }
+            DynamicAtlas.DynamicAtlasManager.Update();
         }
         //--------------------------------------------------------
         public void Render()
@@ -215,9 +275,10 @@ namespace Framework.HUD.Runtime
                 db.Value.Destroy();
             }
             m_vRenders.Clear();
+            DynamicAtlas.DynamicAtlasManager.Shudown();
         }
         //--------------------------------------------------------
-        public int GetHashCode(Material _material, Mesh _mesh, HudAtlas _atlasMapping)
+        public int GetHashCode(Material _material, Mesh _mesh, IHudAtlas _atlasMapping)
         {
             if (_material == null || _mesh == null) return 0;
             int hashCode = _material.GetHashCode() ^ _mesh.GetHashCode();
